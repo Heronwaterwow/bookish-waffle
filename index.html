@@ -1,882 +1,434 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phantom Wallet + WalletConnect</title>
+    <title>WalletConnect v2 Integration</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-            padding: 20px;
-        }
-
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
         }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(45deg, #ab9ff2, #667eea);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .content {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .wallet-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-        }
-
-        .connection-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .method-card {
+        
+        .container {
             background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            cursor: pointer;
-            border: 2px solid transparent;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .method-card:hover {
-            transform: translateY(-5px);
-            border-color: #ab9ff2;
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
         }
-
-        .method-card.active {
-            border-color: #667eea;
-            background: #f0f4ff;
+        
+        .connect-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
         }
-
-        .method-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
+        
+        .wallet-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
         }
-
-        .method-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ab9ff2, #667eea);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            margin-right: 15px;
-            font-size: 20px;
+        
+        .wallet-info.active {
+            display: block;
         }
-
-        .btn {
-            background: linear-gradient(45deg, #ab9ff2, #667eea);
+        
+        button {
+            background: #3b99fc;
             color: white;
             border: none;
             padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 16px;
             margin: 5px;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
+            transition: background 0.3s;
         }
-
-        .btn:hover {
-            transform: translateY(-2px);
+        
+        button:hover {
+            background: #2980b9;
         }
-
-        .btn:disabled {
-            opacity: 0.6;
+        
+        button:disabled {
+            background: #bdc3c7;
             cursor: not-allowed;
-            transform: none;
         }
-
-        .btn-secondary {
-            background: #6c757d;
+        
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
         }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
+        
         .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: 500;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            text-align: center;
         }
-
-        .status.disconnected {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-        }
-
-        .status.connecting {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-        }
-
-        .status.connected {
+        
+        .status.success {
             background: #d4edda;
-            border: 1px solid #c3e6cb;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
-
+        
         .status.error {
             background: #f8d7da;
-            border: 1px solid #f5c6cb;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-
-        .wallet-info {
-            background: white;
-            border-radius: 10px;
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .transaction-section {
+            margin-top: 30px;
             padding: 20px;
-            margin: 20px 0;
-            border-left: 4px solid #ab9ff2;
-        }
-
-        .qr-code {
-            text-align: center;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .qr-code canvas {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-        }
-
-        .deep-link-section {
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .deep-link-url {
-            background: #f1f3f4;
-            padding: 10px;
+            background: #f8f9fa;
             border-radius: 8px;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
-            word-break: break-all;
+            font-size: 14px;
+            overflow-x: auto;
             margin: 10px 0;
-            border-left: 3px solid #ab9ff2;
         }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #ab9ff2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 15px;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-
-            .connection-methods {
-                grid-template-columns: 1fr;
-            }
+        
+        .implementation-guide {
+            margin-top: 40px;
+            padding: 20px;
+            background: #fff;
+            border-left: 4px solid #3b99fc;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <h1>👻 Phantom + WalletConnect</h1>
-            <p>Подключение Phantom кошелька через WalletConnect протокол</p>
+            <h1>🔗 WalletConnect v2.0 Integration</h1>
+            <p>Official implementation guide for secure wallet connectivity</p>
         </div>
 
-        <!-- Connection Status -->
-        <div class="content">
-            <h2>Статус подключения</h2>
-            <div id="connection-status" class="status disconnected">
-                🔴 Кошелек не подключен
+        <div class="connect-section">
+            <h3>Wallet Connection</h3>
+            <button id="connectBtn">Connect Wallet</button>
+            <button id="disconnectBtn" disabled>Disconnect</button>
+            
+            <div id="qrContainer" class="qr-container" style="display: none;">
+                <div id="qrCode"></div>
             </div>
             
-            <div id="wallet-info" class="wallet-info" style="display: none;">
-                <h3>Информация о кошельке</h3>
-                <p><strong>Адрес:</strong> <span id="wallet-address">-</span></p>
-                <p><strong>Баланс:</strong> <span id="wallet-balance">-</span> SOL</p>
-                <p><strong>Сеть:</strong> <span id="wallet-network">-</span></p>
-            </div>
+            <div id="status" class="status" style="display: none;"></div>
         </div>
 
-        <!-- Connection Methods -->
-        <div class="content">
-            <h2>Методы подключения</h2>
+        <div id="walletInfo" class="wallet-info">
+            <h4>Connected Wallet Information</h4>
+            <p><strong>Address:</strong> <span id="walletAddress"></span></p>
+            <p><strong>Chain:</strong> <span id="chainId"></span></p>
+            <p><strong>Session Topic:</strong> <span id="sessionTopic"></span></p>
+        </div>
+
+        <div class="transaction-section">
+            <h3>Transaction Testing</h3>
+            <button id="signMessageBtn" disabled>Sign Message</button>
+            <button id="sendTransactionBtn" disabled>Send Test Transaction</button>
+            <div id="transactionResult" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="implementation-guide">
+            <h2>📚 Implementation Guide</h2>
             
-            <div class="connection-methods">
-                <!-- WalletConnect Method -->
-                <div class="method-card" id="walletconnect-card">
-                    <div class="method-header">
-                        <div class="method-icon">🔗</div>
-                        <div>
-                            <h3>WalletConnect</h3>
-                            <p>Универсальный протокол подключения</p>
-                        </div>
-                    </div>
-                    <p>Подключение через QR-код или deep link</p>
-                    <button class="btn" onclick="connectWalletConnect()">
-                        <span id="wc-btn-text">Подключить WalletConnect</span>
-                        <span id="wc-loading" class="loading" style="display: none;"></span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="disconnectWalletConnect()" style="display: none;" id="wc-disconnect-btn">
-                        Отключить
-                    </button>
-                </div>
-
-                <!-- Direct Phantom Method -->
-                <div class="method-card" id="phantom-card">
-                    <div class="method-header">
-                        <div class="method-icon">👻</div>
-                        <div>
-                            <h3>Прямое подключение</h3>
-                            <p>Если Phantom уже установлен</p>
-                        </div>
-                    </div>
-                    <p>Подключение через window.phantom API</p>
-                    <button class="btn" onclick="connectPhantomDirect()">
-                        <span id="phantom-btn-text">Подключить Phantom</span>
-                        <span id="phantom-loading" class="loading" style="display: none;"></span>
-                    </button>
-                    <button class="btn btn-secondary" onclick="disconnectPhantom()" style="display: none;" id="phantom-disconnect-btn">
-                        Отключить
-                    </button>
-                </div>
-
-                <!-- Deep Link Method -->
-                <div class="method-card" id="deeplink-card">
-                    <div class="method-header">
-                        <div class="method-icon">📱</div>
-                        <div>
-                            <h3>Deep Links</h3>
-                            <p>Для мобильных устройств</p>
-                        </div>
-                    </div>
-                    <p>Открытие через схемы приложений</p>
-                    <button class="btn" onclick="openPhantomDeepLink()">Открыть Phantom</button>
-                    <button class="btn btn-secondary" onclick="openPhantomBrowser()">Phantom Browser</button>
-                </div>
+            <h3>1. Installation</h3>
+            <div class="code-block">
+npm install @walletconnect/sign-client @walletconnect/qrcode-modal
+# or
+yarn add @walletconnect/sign-client @walletconnect/qrcode-modal
             </div>
-        </div>
 
-        <!-- QR Code Section -->
-        <div class="content" id="qr-section" style="display: none;">
-            <h2>QR-код для подключения</h2>
-            <div class="qr-code">
-                <div id="qr-code-container">
-                    <!-- QR код будет сгенерирован здесь -->
-                </div>
-                <p>Отсканируйте QR-код в мобильном приложении Phantom</p>
+            <h3>2. Basic Setup</h3>
+            <div class="code-block">
+import { SignClient } from '@walletconnect/sign-client'
+import QRCodeModal from '@walletconnect/qrcode-modal'
+
+// Initialize WalletConnect client
+const signClient = await SignClient.init({
+  projectId: 'YOUR_PROJECT_ID', // Get from WalletConnect Cloud
+  metadata: {
+    name: 'Your dApp Name',
+    description: 'Your dApp Description',
+    url: 'https://yourdapp.com',
+    icons: ['https://yourdapp.com/icon.png']
+  }
+})
             </div>
-        </div>
 
-        <!-- Deep Links Section -->
-        <div class="content">
-            <h2>Тестирование Deep Links</h2>
-            
-            <div class="deep-link-section">
-                <h3>🔗 Доступные deep links</h3>
-                
-                <div style="margin: 15px 0;">
-                    <h4>Phantom схема:</h4>
-                    <div class="deep-link-url" id="phantom-deeplink">
-                        phantom://open?url=https://v0-mobile-wallet-detection.vercel.app/
-                    </div>
-                    <button class="btn" onclick="testDeepLink('phantom')">Тестировать</button>
-                    <button class="btn btn-secondary" onclick="copyDeepLink('phantom-deeplink')">Копировать</button>
-                </div>
+            <h3>3. Connection Flow</h3>
+            <div class="code-block">
+// Create connection proposal
+const { uri, approval } = await signClient.connect({
+  requiredNamespaces: {
+    eip155: {
+      methods: ['eth_sendTransaction', 'personal_sign'],
+      chains: ['eip155:1'], // Ethereum mainnet
+      events: ['accountsChanged', 'chainChanged']
+    }
+  }
+})
 
-                <div style="margin: 15px 0;">
-                    <h4>Phantom универсальная ссылка:</h4>
-                    <div class="deep-link-url" id="phantom-universal">
-                        https://phantom.app/ul/v0-mobile-wallet-detection.vercel.app
-                    </div>
-                    <button class="btn" onclick="testDeepLink('universal')">Тестировать</button>
-                    <button class="btn btn-secondary" onclick="copyDeepLink('phantom-universal')">Копировать</button>
-                </div>
+// Show QR code to user
+if (uri) {
+  QRCodeModal.open(uri, () => {
+    console.log('QR Code Modal closed')
+  })
+}
 
-                <div style="margin: 15px 0;">
-                    <h4>WalletConnect deep link:</h4>
-                    <div class="deep-link-url" id="walletconnect-deeplink">
-                        wc:// (будет сгенерирован при подключении)
-                    </div>
-                    <button class="btn" onclick="generateWCDeepLink()">Генерировать WC ссылку</button>
-                </div>
+// Wait for wallet approval
+const session = await approval()
+QRCodeModal.close()
             </div>
-        </div>
 
-        <!-- Actions Section -->
-        <div class="content" id="actions-section" style="display: none;">
-            <h2>Действия с кошельком</h2>
-            
-            <div class="wallet-section">
-                <h3>Доступные операции</h3>
-                <button class="btn" onclick="getBalance()">💰 Получить баланс</button>
-                <button class="btn" onclick="signMessage()">✍️ Подписать сообщение</button>
-                <button class="btn" onclick="sendTransaction()">📤 Отправить транзакцию</button>
-                <button class="btn btn-secondary" onclick="switchNetwork()">🔄 Сменить сеть</button>
+            <h3>4. Sending Requests</h3>
+            <div class="code-block">
+// Sign a message
+const result = await signClient.request({
+  topic: session.topic,
+  chainId: 'eip155:1',
+  request: {
+    method: 'personal_sign',
+    params: ['Hello WalletConnect!', account]
+  }
+})
+
+// Send transaction
+const txResult = await signClient.request({
+  topic: session.topic,
+  chainId: 'eip155:1',
+  request: {
+    method: 'eth_sendTransaction',
+    params: [{
+      from: account,
+      to: '0x...',
+      value: '0x...',
+      gasLimit: '0x5208',
+      gasPrice: '0x...'
+    }]
+  }
+})
+            </div>
+
+            <h3>5. Event Handling</h3>
+            <div class="code-block">
+// Listen for session events
+signClient.on('session_event', ({ event, chainId }) => {
+  console.log('Session event:', event, chainId)
+})
+
+// Listen for session updates
+signClient.on('session_update', ({ topic, params }) => {
+  console.log('Session updated:', topic, params)
+})
+
+// Listen for session deletion
+signClient.on('session_delete', ({ topic }) => {
+  console.log('Session deleted:', topic)
+})
+            </div>
+
+            <h3>6. Security Best Practices</h3>
+            <ul>
+                <li><strong>Project ID:</strong> Always use your own Project ID from WalletConnect Cloud</li>
+                <li><strong>Metadata:</strong> Provide accurate dApp metadata for user trust</li>
+                <li><strong>Namespace Validation:</strong> Only request necessary methods and chains</li>
+                <li><strong>Session Management:</strong> Properly handle session lifecycle</li>
+                <li><strong>Error Handling:</strong> Implement comprehensive error handling</li>
+                <li><strong>User Consent:</strong> Always show clear transaction details to users</li>
+            </ul>
+
+            <h3>7. Supported Chains</h3>
+            <div class="code-block">
+// Ethereum
+eip155:1 (Mainnet)
+eip155:5 (Goerli)
+eip155:137 (Polygon)
+
+// Solana
+solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp (Mainnet)
+solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1 (Devnet)
+
+// Cosmos
+cosmos:cosmoshub-4 (Cosmos Hub)
+
+// Near
+near:mainnet
+near:testnet
+            </div>
+
+            <h3>8. Error Handling</h3>
+            <div class="code-block">
+try {
+  const session = await approval()
+  // Handle successful connection
+} catch (error) {
+  if (error.message.includes('User rejected')) {
+    // User rejected the connection
+  } else if (error.message.includes('timeout')) {
+    // Connection timeout
+  } else {
+    // Other errors
+    console.error('Connection error:', error)
+  }
+}
             </div>
         </div>
     </div>
 
-    <!-- Modal for QR Code -->
-    <div id="qrModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('qrModal')">&times;</span>
-            <h2>Подключение через QR-код</h2>
-            <div id="modal-qr-container" style="text-align: center; padding: 20px;">
-                <!-- QR код будет здесь -->
-            </div>
-            <p style="text-align: center; color: #666;">
-                Отсканируйте этот QR-код в приложении Phantom
-            </p>
-        </div>
-    </div>
-
-    <!-- WalletConnect SDK -->
-    <script src="https://unpkg.com/@walletconnect/client@1.8.0/dist/index.min.js"></script>
-    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
-
+    <!-- WalletConnect SDK (for demonstration - in production use npm packages) -->
     <script>
-        // Конфигурация
-        const CONFIG = {
-            dappUrl: 'https://v0-mobile-wallet-detection.vercel.app/',
-            dappName: 'Mobile Wallet Detection',
-            dappDescription: 'Test dApp for mobile wallet detection',
-            dappIcon: 'https://v0-mobile-wallet-detection.vercel.app/favicon.ico',
-            walletConnectProjectId: 'your-project-id', // Замените на ваш Project ID
-        };
-
-        // Глобальные переменные
-        let walletConnector = null;
-        let phantomWallet = null;
-        let currentConnection = null;
-
-        // Класс для работы с WalletConnect
-        class WalletConnectManager {
+        // This is a simplified demonstration
+        // In production, use the actual WalletConnect SDK via npm/yarn
+        
+        class WalletConnectDemo {
             constructor() {
-                this.connector = null;
-                this.isConnecting = false;
+                this.isConnected = false;
+                this.session = null;
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+                document.getElementById('signMessageBtn').addEventListener('click', () => this.signMessage());
+                document.getElementById('sendTransactionBtn').addEventListener('click', () => this.sendTransaction());
+            }
+
+            showStatus(message, type = 'info') {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+                status.style.display = 'block';
             }
 
             async connect() {
-                try {
-                    this.isConnecting = true;
-                    this.updateStatus('connecting', '🟡 Подключение через WalletConnect...');
-                    this.showLoading('wc-loading', 'wc-btn-text', 'Подключение...');
+                this.showStatus('Initializing WalletConnect...', 'info');
+                
+                // Simulate connection process
+                setTimeout(() => {
+                    this.showStatus('Generating QR Code...', 'info');
+                    document.getElementById('qrContainer').style.display = 'block';
+                    document.getElementById('qrCode').innerHTML = `
+                        <div style="width: 200px; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 2px dashed #ccc;">
+                            <p style="text-align: center; color: #666;">QR Code<br/>Scan with wallet app</p>
+                        </div>
+                    `;
+                }, 1000);
 
-                    // Создаем WalletConnect connector
-                    this.connector = new WalletConnect({
-                        bridge: "https://bridge.walletconnect.org",
-                        qrcodeModal: {
-                            open: (uri, cb) => {
-                                this.showQRCode(uri);
-                            },
-                            close: () => {
-                                this.hideQRCode();
-                            }
-                        }
-                    });
+                // Simulate successful connection
+                setTimeout(() => {
+                    this.isConnected = true;
+                    this.session = {
+                        topic: 'demo-topic-' + Math.random().toString(36).substr(2, 9),
+                        accounts: ['0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6'],
+                        chainId: 'eip155:1'
+                    };
 
-                    // Подписываемся на события
-                    this.connector.on("connect", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-                        this.onConnect(payload);
-                    });
+                    document.getElementById('qrContainer').style.display = 'none';
+                    this.showStatus('Wallet connected successfully!', 'success');
+                    this.updateUI();
+                }, 3000);
+            }
 
-                    this.connector.on("session_update", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-                        this.onSessionUpdate(payload);
-                    });
+            disconnect() {
+                this.isConnected = false;
+                this.session = null;
+                this.showStatus('Wallet disconnected', 'info');
+                this.updateUI();
+            }
 
-                    this.connector.on("disconnect", (error, payload) => {
-                        if (error) {
-                            throw error;
-                        }
-                        this.onDisconnect();
-                    });
+            updateUI() {
+                const connectBtn = document.getElementById('connectBtn');
+                const disconnectBtn = document.getElementById('disconnectBtn');
+                const signMessageBtn = document.getElementById('signMessageBtn');
+                const sendTransactionBtn = document.getElementById('sendTransactionBtn');
+                const walletInfo = document.getElementById('walletInfo');
 
-                    // Создаем сессию
-                    if (!this.connector.connected) {
-                        await this.connector.createSession();
-                    }
+                if (this.isConnected) {
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    signMessageBtn.disabled = false;
+                    sendTransactionBtn.disabled = false;
+                    walletInfo.classList.add('active');
 
-                } catch (error) {
-                    console.error('WalletConnect connection error:', error);
-                    this.updateStatus('error', `❌ Ошибка подключения: ${error.message}`);
-                    this.hideLoading('wc-loading', 'wc-btn-text', 'Подключить WalletConnect');
-                    this.isConnecting = false;
+                    document.getElementById('walletAddress').textContent = this.session.accounts[0];
+                    document.getElementById('chainId').textContent = this.session.chainId;
+                    document.getElementById('sessionTopic').textContent = this.session.topic;
+                } else {
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    signMessageBtn.disabled = true;
+                    sendTransactionBtn.disabled = true;
+                    walletInfo.classList.remove('active');
                 }
             }
 
-            onConnect(payload) {
-                console.log('WalletConnect connected:', payload);
-                const { accounts, chainId } = payload.params[0];
+            async signMessage() {
+                if (!this.isConnected) return;
+
+                this.showStatus('Requesting message signature...', 'info');
                 
-                this.updateStatus('connected', '🟢 Подключено через WalletConnect');
-                this.showWalletInfo(accounts[0], chainId);
-                this.hideLoading('wc-loading', 'wc-btn-text', 'Подключено');
+                // Simulate signing process
+                setTimeout(() => {
+                    const signature = '0x' + Math.random().toString(16).substr(2, 64);
+                    document.getElementById('transactionResult').innerHTML = `
+                        <div class="status success">
+                            <strong>Message Signed!</strong><br/>
+                            Signature: ${signature}
+                        </div>
+                    `;
+                }, 2000);
+            }
+
+            async sendTransaction() {
+                if (!this.isConnected) return;
+
+                this.showStatus('Requesting transaction...', 'info');
                 
-                document.getElementById('wc-disconnect-btn').style.display = 'inline-block';
-                document.getElementById('actions-section').style.display = 'block';
-                
-                currentConnection = 'walletconnect';
-                this.isConnecting = false;
-            }
-
-            onSessionUpdate(payload) {
-                console.log('WalletConnect session updated:', payload);
-                const { accounts, chainId } = payload.params[0];
-                this.showWalletInfo(accounts[0], chainId);
-            }
-
-            onDisconnect() {
-                console.log('WalletConnect disconnected');
-                this.updateStatus('disconnected', '🔴 Кошелек отключен');
-                this.hideWalletInfo();
-                this.hideLoading('wc-loading', 'wc-btn-text', 'Подключить WalletConnect');
-                
-                document.getElementById('wc-disconnect-btn').style.display = 'none';
-                document.getElementById('actions-section').style.display = 'none';
-                
-                currentConnection = null;
-                this.isConnecting = false;
-            }
-
-            async disconnect() {
-                if (this.connector) {
-                    await this.connector.killSession();
-                    this.connector = null;
-                }
-            }
-
-            showQRCode(uri) {
-                // Генерируем QR код
-                const qrContainer = document.getElementById('modal-qr-container');
-                qrContainer.innerHTML = '';
-                
-                QRCode.toCanvas(qrContainer, uri, {
-                    width: 256,
-                    margin: 2,
-                    color: {
-                        dark: '#000000',
-                        light: '#FFFFFF'
-                    }
-                }, (error) => {
-                    if (error) {
-                        console.error('QR Code generation error:', error);
-                        qrContainer.innerHTML = '<p>Ошибка генерации QR-кода</p>';
-                    }
-                });
-
-                // Показываем модальное окно
-                document.getElementById('qrModal').style.display = 'block';
-
-                // Генерируем deep link для мобильных устройств
-                this.generateMobileDeepLink(uri);
-            }
-
-            hideQRCode() {
-                document.getElementById('qrModal').style.display = 'none';
-            }
-
-            generateMobileDeepLink(uri) {
-                const phantomDeepLink = `phantom://wc?uri=${encodeURIComponent(uri)}`;
-                document.getElementById('walletconnect-deeplink').textContent = phantomDeepLink;
-                
-                // Автоматически пытаемся открыть на мобильных устройствах
-                if (this.isMobile()) {
-                    setTimeout(() => {
-                        window.location.href = phantomDeepLink;
-                    }, 1000);
-                }
-            }
-
-            isMobile() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            }
-
-            updateStatus(type, message) {
-                const statusEl = document.getElementById('connection-status');
-                statusEl.className = `status ${type}`;
-                statusEl.textContent = message;
-            }
-
-            showWalletInfo(address, chainId) {
-                document.getElementById('wallet-address').textContent = address;
-                document.getElementById('wallet-network').textContent = chainId === 1 ? 'Mainnet' : `Chain ${chainId}`;
-                document.getElementById('wallet-info').style.display = 'block';
-                
-                // Получаем баланс
-                this.getBalance(address);
-            }
-
-            hideWalletInfo() {
-                document.getElementById('wallet-info').style.display = 'none';
-            }
-
-            async getBalance(address) {
-                try {
-                    // Здесь должен быть запрос к Solana RPC для получения баланса
-                    // Для демонстрации используем заглушку
-                    document.getElementById('wallet-balance').textContent = '0.00';
-                } catch (error) {
-                    console.error('Error getting balance:', error);
-                    document.getElementById('wallet-balance').textContent = 'Ошибка';
-                }
-            }
-
-            showLoading(loadingId, textId, loadingText) {
-                document.getElementById(loadingId).style.display = 'inline-block';
-                document.getElementById(textId).textContent = loadingText;
-            }
-
-            hideLoading(loadingId, textId, defaultText) {
-                document.getElementById(loadingId).style.display = 'none';
-                document.getElementById(textId).textContent = defaultText;
+                // Simulate transaction process
+                setTimeout(() => {
+                    const txHash = '0x' + Math.random().toString(16).substr(2, 64);
+                    document.getElementById('transactionResult').innerHTML = `
+                        <div class="status success">
+                            <strong>Transaction Sent!</strong><br/>
+                            Hash: ${txHash}
+                        </div>
+                    `;
+                }, 3000);
             }
         }
 
-        // Класс для работы с Phantom напрямую
-        class PhantomManager {
-            constructor() {
-                this.wallet = null;
-            }
-
-            async connect() {
-                try {
-                    this.showLoading('phantom-loading', 'phantom-btn-text', 'Подключение...');
-                    this.updateStatus('connecting', '🟡 Подключение к Phantom...');
-
-                    // Проверяем наличие Phantom
-                    if (!window.phantom?.solana) {
-                        throw new Error('Phantom кошелек не установлен');
-                    }
-
-                    this.wallet = window.phantom.solana;
-
-                    // Подключаемся
-                    const response = await this.wallet.connect();
-                    console.log('Phantom connected:', response);
-
-                    this.updateStatus('connected', '🟢 Подключено к Phantom');
-                    this.showWalletInfo(response.publicKey.toString());
-                    this.hideLoading('phantom-loading', 'phantom-btn-text', 'Подключено');
-                    
-                    document.getElementById('phantom-disconnect-btn').style.display = 'inline-block';
-                    document.getElementById('actions-section').style.display = 'block';
-                    
-                    currentConnection = 'phantom';
-
-                } catch (error) {
-                    console.error('Phantom connection error:', error);
-                    this.updateStatus('error', `❌ Ошибка подключения: ${error.message}`);
-                    this.hideLoading('phantom-loading', 'phantom-btn-text', 'Подключить Phantom');
-                }
-            }
-
-            async disconnect() {
-                if (this.wallet) {
-                    try {
-                        await this.wallet.disconnect();
-                    } catch (error) {
-                        console.error('Phantom disconnect error:', error);
-                    }
-                    this.wallet = null;
-                }
-                
-                this.updateStatus('disconnected', '🔴 Кошелек отключен');
-                this.hideWalletInfo();
-                this.hideLoading('phantom-loading', 'phantom-btn-text', 'Подключить Phantom');
-                
-                document.getElementById('phantom-disconnect-btn').style.display = 'none';
-                document.getElementById('actions-section').style.display = 'none';
-                
-                currentConnection = null;
-            }
-
-            updateStatus(type, message) {
-                const statusEl = document.getElementById('connection-status');
-                statusEl.className = `status ${type}`;
-                statusEl.textContent = message;
-            }
-
-            showWalletInfo(address) {
-                document.getElementById('wallet-address').textContent = address;
-                document.getElementById('wallet-network').textContent = 'Solana Mainnet';
-                document.getElementById('wallet-info').style.display = 'block';
-                
-                this.getBalance(address);
-            }
-
-            hideWalletInfo() {
-                document.getElementById('wallet-info').style.display = 'none';
-            }
-
-            async getBalance(address) {
-                try {
-                    if (this.wallet) {
-                        const balance = await this.wallet.getBalance();
-                        document.getElementById('wallet-balance').textContent = (balance / 1e9).toFixed(4);
-                    }
-                } catch (error) {
-                    console.error('Error getting balance:', error);
-                    document.getElementById('wallet-balance').textContent = 'Ошибка';
-                }
-            }
-
-            showLoading(loadingId, textId, loadingText) {
-                document.getElementById(loadingId).style.display = 'inline-block';
-                document.getElementById(textId).textContent = loadingText;
-            }
-
-            hideLoading(loadingId, textId, defaultText) {
-                document.getElementById(loadingId).style.display = 'none';
-                document.getElementById(textId).textContent = defaultText;
-            }
-        }
-
-        // Инициализация менеджеров
-        const walletConnectManager = new WalletConnectManager();
-        const phantomManager = new PhantomManager();
-
-        // Глобальные функции
-        async function connectWalletConnect() {
-            await walletConnectManager.connect();
-        }
-
-        async function disconnectWalletConnect() {
-            await walletConnectManager.disconnect();
-        }
-
-        async function connectPhantomDirect() {
-            await phantomManager.connect();
-        }
-
-        async function disconnectPhantom() {
-            await phantomManager.disconnect();
-        }
-
-        function openPhantomDeepLink() {
-            const deepLink = `phantom://open?url=${encodeURIComponent(CONFIG.dappUrl)}`;
-            window.location.href = deepLink;
-            
-            // Показываем инструкции через 2 секунды, если приложение не открылось
-            setTimeout(() => {
-                alert('Если Phantom не открылся, убедитесь что приложение установлено');
-            }, 2000);
-        }
-
-        function openPhantomBrowser() {
-            const universalLink = `https://phantom.app/ul/${CONFIG.dappUrl.replace('https://', '')}`;
-            window.open(universalLink, '_blank');
-        }
-
-        function testDeepLink(type) {
-            let url;
-            if (type === 'phantom') {
-                url = document.getElementById('phantom-deeplink').textContent;
-            } else if (type === 'universal') {
-                url = document.getElementById('phantom-universal').textContent;
-            }
-            
-            window.location.href = url;
-        }
-
-        function copyDeepLink(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Ссылка скопирована в буфер обмена!');
-            });
-        }
-
-        function generateWCDeepLink() {
-            if (walletConnectManager.connector && walletConnectManager.connector.uri) {
-                const wcUri = walletConnectManager.connector.uri;
-                const phantomWCLink = `phantom://wc?uri=${encodeURIComponent(wcUri)}`;
-                document.getElementById('walletconnect-deeplink').textContent = phantomWCLink;
-                alert('WalletConnect deep link сгенерирован!');
-            } else {
-                alert('Сначала инициируйте подключение WalletConnect');
-            }
-        }
-
-        // Действия с кошельком
-        async function getBalance() {
-            if (currentConnection === 'phantom' && phantomManager.wallet) {
-                try {
-                    const balance = await phantomManager.wallet.getBalance();
-                    alert(`Баланс: ${(balance / 1e9).toFixed(4)} SOL`);
-                } catch (error) {
-                    alert(`Ошибка получения баланса: ${error.message}`);
-                }
-            } else if (currentConnection === 'walletconnect') {
-                alert('Получение баланса через WalletConnect (требует реализации)');
-            } else {
-                alert('Кошелек не подключен');
-            }
-        }
-
-        async function signMessage() {
-            const message = 'Тестовое сообщение для подписи';
-            
-            if (currentConnection === 'phantom' && phantomManager.wallet) {
-                try {
-                    const encodedMessage = new TextEncoder().encode(message);
-                    const signature = await phantomManager.wallet.signMessage(encodedMessage);
-                    alert(`Сообщение подписано! Подпись: ${signature.signature}`);
-                } catch (error) {
-                    alert(`Ошибка подписи: ${error.message}`);
-                }
-            } else if (currentConnection === 'walletconnect') {
-                alert('Подпись сообщения через WalletConnect (требует реализации)');
-            } else {
-                alert('Кошелек не подключен');
-            }
-        }
-
-        async function sendTransaction() {
-            alert('Отправка транзакции (демо функция)');
-        }
-
-        function switchNetwork() {
-            alert('Смена сети (демо функция)');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Обработка кликов вне модальных окон
-        window.onclick = function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Phantom WalletConnect dApp загружен');
-            
-            // Проверяем наличие Phantom
-            if (window.phantom?.solana) {
-                console.log('Phantom кошелек обнаружен');
-            } else {
-                console.log('Phantom кошелек не обнаружен');
-            }
+        // Initialize demo when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new WalletConnectDemo();
         });
     </script>
 </body>
