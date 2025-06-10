@@ -165,6 +165,31 @@
             padding-left: 10px;
         }
 
+        .store-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .store-button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .app-store {
+            background: #0066cc;
+        }
+
+        .play-store {
+            background: #01875f;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -183,6 +208,20 @@
             h1 {
                 font-size: 24px;
             }
+        }
+
+        #debug-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 9999;
+            display: none;
         }
     </style>
 </head>
@@ -260,18 +299,98 @@
                 <li>Введите адрес нашего сайта: <strong>https://heronwaterwow.github.io/bookish-waffle/</strong></li>
                 <li>Подключите кошелёк на нашем сайте</li>
             </ol>
-            <button class="connect-btn" onclick="closeModal('instructionModal')">
-                Понятно
+            
+            <div id="store-buttons" class="store-buttons">
+                <!-- Кнопки будут добавлены динамически -->
+            </div>
+            
+            <button class="connect-btn" id="try-again-btn">
+                Попробовать снова
             </button>
         </div>
     </div>
 
+    <!-- Отладочная информация -->
+    <div id="debug-info"></div>
+
     <script>
+        // Включить отладку (true/false)
+        const DEBUG_MODE = true;
+        
+        // Целевой URL для диплинков
+        const TARGET_URL = 'https://heronwaterwow.github.io/bookish-waffle/';
+        
+        // Конфигурация кошельков
+        const WALLET_CONFIG = {
+            phantom: {
+                name: "Phantom",
+                // Несколько вариантов диплинков для Phantom
+                deepLinks: [
+                    `phantom://open?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://phantom.app/ul/browse/${encodeURIComponent(TARGET_URL)}`,
+                    `https://phantom.app/ul/v1/browse?url=${encodeURIComponent(TARGET_URL)}`
+                ],
+                userAgentPattern: /phantom/i,
+                downloadUrls: {
+                    ios: "https://apps.apple.com/app/phantom-solana-wallet/id1598432977",
+                    android: "https://play.google.com/store/apps/details?id=app.phantom"
+                }
+            },
+            safepal: {
+                name: "SafePal",
+                deepLinks: [
+                    `safepal://open?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://link.safepal.io/dapp?url=${encodeURIComponent(TARGET_URL)}`
+                ],
+                userAgentPattern: /safepal/i,
+                downloadUrls: {
+                    ios: "https://apps.apple.com/app/safepal-wallet/id1548297139",
+                    android: "https://play.google.com/store/apps/details?id=io.safepal.wallet"
+                }
+            },
+            trust: {
+                name: "Trust Wallet",
+                deepLinks: [
+                    `trust://open_url?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://link.trustwallet.com/open_url?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://link.trustwallet.com/dapp?url=${encodeURIComponent(TARGET_URL)}`
+                ],
+                userAgentPattern: /trust/i,
+                downloadUrls: {
+                    ios: "https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409",
+                    android: "https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp"
+                }
+            },
+            coinbase: {
+                name: "Coinbase Wallet",
+                deepLinks: [
+                    `cbwallet://open_url?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(TARGET_URL)}`
+                ],
+                userAgentPattern: /coinbasewallet|coinbase/i,
+                downloadUrls: {
+                    ios: "https://apps.apple.com/app/coinbase-wallet-nfts-crypto/id1278383455",
+                    android: "https://play.google.com/store/apps/details?id=org.toshi"
+                }
+            },
+            metamask: {
+                name: "MetaMask",
+                deepLinks: [
+                    `metamask://open?url=${encodeURIComponent(TARGET_URL)}`,
+                    `https://metamask.app.link/dapp/${encodeURIComponent(TARGET_URL.replace('https://', ''))}`
+                ],
+                userAgentPattern: /metamask/i,
+                downloadUrls: {
+                    ios: "https://apps.apple.com/app/metamask/id1438144202",
+                    android: "https://play.google.com/store/apps/details?id=io.metamask"
+                }
+            }
+        };
+
         // Класс для определения устройства и браузера
         class DeviceDetector {
             constructor() {
                 this.userAgent = navigator.userAgent.toLowerCase();
-                this.currentUrl = window.location.href;
             }
 
             // Определение мобильного устройства
@@ -352,50 +471,171 @@
         // Класс для работы с диплинками
         class DeepLinkHandler {
             constructor() {
-                // Используем конкретный URL для диплинков
-                const targetUrl = 'https://heronwaterwow.github.io/bookish-waffle/';
-                
-                this.deepLinks = {
-                    phantom: `phantom://open?url=${encodeURIComponent(targetUrl)}`,
-                    safepal: `safepal://open?url=${encodeURIComponent(targetUrl)}`,
-                    trust: `trust://open_url?url=${encodeURIComponent(targetUrl)}`,
-                    coinbase: `cbwallet://open_url?url=${encodeURIComponent(targetUrl)}`,
-                    metamask: `metamask://open?url=${encodeURIComponent(targetUrl)}`
-                };
-                
-                this.targetUrl = targetUrl;
+                this.currentWallet = null;
+                this.timeoutId = null;
+                this.isRedirecting = false;
             }
 
             // Открытие диплинка с обработкой ошибок
             openDeepLink(walletType) {
-                const deepLink = this.deepLinks[walletType];
-                if (!deepLink) {
-                    console.error('Неизвестный тип кошелька:', walletType);
+                const wallet = WALLET_CONFIG[walletType];
+                if (!wallet) {
+                    debug(`Неизвестный тип кошелька: ${walletType}`);
                     return;
                 }
 
-                console.log(`Открываем диплинк для ${walletType}:`, deepLink);
+                this.currentWallet = walletType;
+                this.isRedirecting = true;
 
-                // Создаем невидимый iframe для открытия диплинка
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = deepLink;
-                document.body.appendChild(iframe);
+                debug(`Открываем диплинк для ${wallet.name}`);
 
-                // Удаляем iframe через небольшое время
+                // Устанавливаем таймаут для показа инструкций
+                this.timeoutId = setTimeout(() => {
+                    debug(`Таймаут диплинка для ${wallet.name}, показываем инструкции`);
+                    this.showInstructionModal(walletType);
+                }, 2500);
+
+                // Обработчик для определения успешного перехода
+                const handleVisibilityChange = () => {
+                    if (document.hidden) {
+                        debug("Страница скрыта, диплинк сработал");
+                        clearTimeout(this.timeoutId);
+                        document.removeEventListener("visibilitychange", handleVisibilityChange);
+                        this.isRedirecting = false;
+                    }
+                };
+
+                document.addEventListener("visibilitychange", handleVisibilityChange);
+
+                // Пробуем все варианты диплинков
+                this.tryAllDeepLinks(wallet.deepLinks);
+            }
+
+            // Пробуем все варианты диплинков последовательно
+            tryAllDeepLinks(deepLinks) {
+                if (!deepLinks || deepLinks.length === 0) {
+                    debug("Нет доступных диплинков");
+                    return;
+                }
+
+                // Метод 1: window.location
+                try {
+                    debug(`Пробуем метод window.location: ${deepLinks[0]}`);
+                    window.location.href = deepLinks[0];
+                } catch (e) {
+                    debug(`Ошибка метода window.location: ${e.message}`);
+                }
+
+                // Метод 2: window.open
                 setTimeout(() => {
-                    document.body.removeChild(iframe);
+                    if (this.isRedirecting) {
+                        try {
+                            debug(`Пробуем метод window.open: ${deepLinks[0]}`);
+                            window.open(deepLinks[0], '_self');
+                        } catch (e) {
+                            debug(`Ошибка метода window.open: ${e.message}`);
+                        }
+                    }
+                }, 500);
+
+                // Метод 3: создание и клик по ссылке
+                setTimeout(() => {
+                    if (this.isRedirecting) {
+                        try {
+                            debug(`Пробуем метод a.click(): ${deepLinks[0]}`);
+                            const a = document.createElement('a');
+                            a.href = deepLinks[0];
+                            a.style.display = 'none';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        } catch (e) {
+                            debug(`Ошибка метода a.click(): ${e.message}`);
+                        }
+                    }
                 }, 1000);
 
-                // Показываем инструкцию через 3 секунды, если диплинк не сработал
+                // Метод 4: iframe (для некоторых браузеров)
                 setTimeout(() => {
-                    this.showInstructionModal();
-                }, 3000);
+                    if (this.isRedirecting) {
+                        try {
+                            debug(`Пробуем метод iframe: ${deepLinks[0]}`);
+                            const iframe = document.createElement('iframe');
+                            iframe.style.display = 'none';
+                            iframe.src = deepLinks[0];
+                            document.body.appendChild(iframe);
+                            setTimeout(() => {
+                                document.body.removeChild(iframe);
+                            }, 500);
+                        } catch (e) {
+                            debug(`Ошибка метода iframe: ${e.message}`);
+                        }
+                    }
+                }, 1500);
+
+                // Если есть альтернативные диплинки, пробуем их
+                if (deepLinks.length > 1) {
+                    setTimeout(() => {
+                        if (this.isRedirecting) {
+                            debug(`Пробуем альтернативный диплинк: ${deepLinks[1]}`);
+                            window.location.href = deepLinks[1];
+                        }
+                    }, 2000);
+                }
             }
 
             // Показ модального окна с инструкциями
-            showInstructionModal() {
-                document.getElementById('currentUrl').textContent = this.targetUrl;
+            showInstructionModal(walletType) {
+                this.isRedirecting = false;
+                clearTimeout(this.timeoutId);
+                
+                const wallet = WALLET_CONFIG[walletType];
+                if (!wallet) return;
+                
+                // Добавляем кнопки для скачивания приложения
+                const storeButtons = document.getElementById('store-buttons');
+                storeButtons.innerHTML = '';
+                
+                const deviceDetector = new DeviceDetector();
+                
+                if (deviceDetector.isIOS()) {
+                    const appStoreBtn = document.createElement('a');
+                    appStoreBtn.href = wallet.downloadUrls.ios;
+                    appStoreBtn.target = '_blank';
+                    appStoreBtn.className = 'store-button app-store';
+                    appStoreBtn.textContent = `Скачать ${wallet.name} в App Store`;
+                    storeButtons.appendChild(appStoreBtn);
+                } else if (deviceDetector.isAndroid()) {
+                    const playStoreBtn = document.createElement('a');
+                    playStoreBtn.href = wallet.downloadUrls.android;
+                    playStoreBtn.target = '_blank';
+                    playStoreBtn.className = 'store-button play-store';
+                    playStoreBtn.textContent = `Скачать ${wallet.name} в Google Play`;
+                    storeButtons.appendChild(playStoreBtn);
+                } else {
+                    // Добавляем обе кнопки для десктопа
+                    const appStoreBtn = document.createElement('a');
+                    appStoreBtn.href = wallet.downloadUrls.ios;
+                    appStoreBtn.target = '_blank';
+                    appStoreBtn.className = 'store-button app-store';
+                    appStoreBtn.textContent = 'App Store';
+                    storeButtons.appendChild(appStoreBtn);
+                    
+                    const playStoreBtn = document.createElement('a');
+                    playStoreBtn.href = wallet.downloadUrls.android;
+                    playStoreBtn.target = '_blank';
+                    playStoreBtn.className = 'store-button play-store';
+                    playStoreBtn.textContent = 'Google Play';
+                    storeButtons.appendChild(playStoreBtn);
+                }
+                
+                // Настраиваем кнопку "Попробовать снова"
+                const tryAgainBtn = document.getElementById('try-again-btn');
+                tryAgainBtn.onclick = () => {
+                    closeModal('instructionModal');
+                    this.openDeepLink(walletType);
+                };
+                
                 showModal('instructionModal');
             }
         }
@@ -417,28 +657,28 @@
 
         // Основная логика подключения кошелька
         function handleWalletConnection() {
-            console.log('Начинаем процесс подключения кошелька...');
+            debug('Начинаем процесс подключения кошелька...');
             
             const isMobile = deviceDetector.isMobile();
             const walletBrowser = deviceDetector.getWalletBrowser();
             
-            console.log('Мобильное устройство:', isMobile);
-            console.log('Кошелёк браузер:', walletBrowser);
+            debug('Мобильное устройство: ' + isMobile);
+            debug('Кошелёк браузер: ' + walletBrowser);
 
             // Если пользователь в мобильном браузере кошелька
             if (isMobile && walletBrowser) {
-                console.log('Пользователь в мобильном браузере кошелька, показываем модальное окно');
+                debug('Пользователь в мобильном браузере кошелька, показываем модальное окно');
                 showWalletModal();
                 return;
             }
 
             // Если пользователь на мобильном устройстве, но не в кошельковом браузере
             if (isMobile && !walletBrowser) {
-                console.log('Пользователь на мобильном устройстве, но не в кошельковом браузере');
+                debug('Пользователь на мобильном устройстве, но не в кошельковом браузере');
                 
                 // Определяем предпочтительный кошелёк для устройства
                 const preferredWallet = deviceDetector.isIOS() ? 'phantom' : 'trust';
-                console.log('Перенаправляем на:', preferredWallet);
+                debug('Перенаправляем на: ' + preferredWallet);
                 
                 deepLinkHandler.openDeepLink(preferredWallet);
                 return;
@@ -446,7 +686,7 @@
 
             // Если пользователь на десктопе
             if (!isMobile) {
-                console.log('Пользователь на десктопе, показываем модальное окно');
+                debug('Пользователь на десктопе, показываем модальное окно');
                 showWalletModal();
                 return;
             }
@@ -454,31 +694,31 @@
 
         // Показ модального окна с кошельками
         function showWalletModal() {
-            console.log('Показываем модальное окно с выбором кошельков');
+            debug('Показываем модальное окно с выбором кошельков');
             showModal('walletModal');
         }
 
         // Подключение конкретного кошелька
         function connectWallet(walletType) {
-            console.log('Подключаем кошелёк:', walletType);
+            debug('Подключаем кошелёк: ' + walletType);
             
             const isMobile = deviceDetector.isMobile();
             const walletBrowser = deviceDetector.getWalletBrowser();
 
             // Если мы в браузере кошелька, пытаемся подключиться напрямую
             if (walletBrowser === walletType) {
-                console.log('Подключаемся к кошельку напрямую');
+                debug('Подключаемся к кошельку напрямую');
                 connectWalletDirectly(walletType);
             } 
             // Если на мобильном устройстве, открываем диплинк
             else if (isMobile) {
-                console.log('Открываем диплинк для кошелька:', walletType);
+                debug('Открываем диплинк для кошелька: ' + walletType);
                 closeModal('walletModal');
                 deepLinkHandler.openDeepLink(walletType);
             }
             // На десктопе пытаемся подключиться через расширение
             else {
-                console.log('Подключаемся через расширение браузера');
+                debug('Подключаемся через расширение браузера');
                 connectWalletDirectly(walletType);
             }
         }
@@ -507,18 +747,18 @@
                 }
 
                 if (provider) {
-                    console.log(`Кошелёк ${walletType} найден, подключаемся...`);
+                    debug(`Кошелёк ${walletType} найден, подключаемся...`);
                     
                     // Здесь должна быть логика подключения к конкретному кошельку
                     // Для примера просто показываем сообщение
                     alert(`Подключение к ${walletType} успешно!`);
                     closeModal('walletModal');
                 } else {
-                    console.log(`Кошелёк ${walletType} не найден`);
+                    debug(`Кошелёк ${walletType} не найден`);
                     alert(`Кошелёк ${walletType} не установлен или недоступен`);
                 }
             } catch (error) {
-                console.error('Ошибка подключения кошелька:', error);
+                debug('Ошибка подключения кошелька: ' + error.message);
                 alert('Ошибка подключения кошелька');
             }
         }
@@ -542,40 +782,46 @@
             });
         }
 
+        // Функция для отладки
+        function debug(message) {
+            console.log(message);
+            
+            if (DEBUG_MODE) {
+                const debugInfo = document.getElementById('debug-info');
+                debugInfo.style.display = 'block';
+                
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                
+                debugInfo.appendChild(logEntry);
+                
+                // Ограничиваем количество сообщений
+                while (debugInfo.children.length > 10) {
+                    debugInfo.removeChild(debugInfo.firstChild);
+                }
+                
+                // Прокручиваем вниз
+                debugInfo.scrollTop = debugInfo.scrollHeight;
+            }
+        }
+
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Страница загружена, инициализируем детектор устройств');
+            debug('Страница загружена, инициализируем детектор устройств');
             updateDeviceInfo();
             
-            // Автоматическое определение и действие при загрузке (опционально)
-            // handleWalletConnection();
+            // Отображаем информацию об устройстве
+            debug(`Устройство: ${deviceDetector.getDeviceInfo()}`);
+            debug(`Браузер: ${deviceDetector.getBrowserInfo()}`);
+            debug(`Кошелёк: ${deviceDetector.getWalletBrowser() || 'Не обнаружен'}`);
+            debug(`User Agent: ${navigator.userAgent}`);
         });
 
         // Обработка изменения ориентации устройства
         window.addEventListener('orientationchange', function() {
             setTimeout(updateDeviceInfo, 500);
         });
-
-        // Дополнительные утилиты для отладки
-        function logDeviceInfo() {
-            console.log('=== Информация об устройстве ===');
-            console.log('User Agent:', navigator.userAgent);
-            console.log('Мобильное устройство:', deviceDetector.isMobile());
-            console.log('iOS:', deviceDetector.isIOS());
-            console.log('Android:', deviceDetector.isAndroid());
-            console.log('Safari:', deviceDetector.isSafari());
-            console.log('Chrome:', deviceDetector.isChrome());
-            console.log('Кошелёк браузер:', deviceDetector.getWalletBrowser());
-            console.log('Доступные объекты кошельков:');
-            console.log('- window.phantom:', !!window.phantom);
-            console.log('- window.ethereum:', !!window.ethereum);
-            console.log('- window.trustwallet:', !!window.trustwallet);
-            console.log('- window.coinbaseWalletExtension:', !!window.coinbaseWalletExtension);
-            console.log('- window.safepal:', !!window.safepal);
-        }
-
-        // Вызываем функцию отладки
-        logDeviceInfo();
     </script>
 </body>
 </html>
