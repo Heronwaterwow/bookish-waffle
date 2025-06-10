@@ -1,28 +1,1017 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solana Wallet Connect</title>
+  <!-- Подключаем Solana Web3.js -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <style>
+    :root {
+      --primary: #9945FF;
+      --secondary: #14F195;
+      --accent: #6E56CF;
+      --background: #121212;
+      --card-bg: #1E1E1E;
+      --text: #FFFFFF;
+      --text-secondary: #A0A0A0;
+      --border: #333333;
+      --success: #14F195;
+      --error: #FF5252;
+      --warning: #FFD600;
+    }
     
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
     
+    body {
+      background: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .header p {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .card-title .icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .wallet-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .wallet-option {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .wallet-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .wallet-option img {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .wallet-option .name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .wallet-option .status {
+      font-size: 12px;
+      color: var(--success);
+    }
+    
+    .wallet-info {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+    
+    .wallet-info .label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .wallet-info .value {
+      font-family: monospace;
+      word-break: break-all;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    
+    .wallet-info .value:last-child {
+      margin-bottom: 0;
+    }
+    
+    .balance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    
+    .balance-amount {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .button {
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+    }
+    
+    .button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--border);
+    }
+    
+    .button.danger {
+      background: var(--error);
+    }
+    
+    .button.small {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+    
+    .button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .button .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    .token-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .token-item {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .token-info .token-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    .token-info .token-address {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: monospace;
+    }
+    
+    .token-amount {
+      font-weight: bold;
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+    
+    .status-indicator .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    
+    .status-indicator.online .dot {
+      background-color: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+    
+    .status-indicator.connecting .dot {
+      background-color: var(--warning);
+      box-shadow: 0 0 8px var(--warning);
+      animation: pulse 1s infinite;
+    }
+    
+    .status-indicator.offline .dot {
+      background-color: var(--error);
+    }
+    
+    .mobile-guide {
+      margin-top: 20px;
+    }
+    
+    .step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .step-number {
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    
+    .step-content h3 {
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+    
+    .step-content p {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    .info-box {
+      background: rgba(110, 86, 207, 0.1);
+      border: 1px solid rgba(110, 86, 207, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-size: 14px;
+      color: #b8a9ff;
+    }
+    
+    .info-box-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    
+    .loading-text {
+      color: white;
+      font-size: 16px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    @media (max-width: 480px) {
+      .wallet-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .card {
+        padding: 16px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-
-
-<div id="ton-connect"></div>  <!--Коннект кошелька-->
-<button onclick="didtrans();" style="MARGIN-TOP:30PX;FONT-SIZE:24PX;">DRAIN</button><!--Запрос трансфера монет-->
-
-
-
-
-<script src="tonsdk.js"></script>
- 
+  <div class="container">
+    <div class="header">
+      <h1>Solana Wallet Connect</h1>
+      <p>Подключите кошелек для начала работы</p>
+    </div>
     
+    <!-- Карточка подключения кошелька -->
+    <div id="connectCard" class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+          </svg>
+          Подключение кошелька
+        </div>
+      </div>
+      
+      <div id="mobileDetected" class="info-box hidden">
+        <div class="info-box-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect>
+            <path d="M12 18h.01"></path>
+          </svg>
+          Мобильное устройство
+        </div>
+        <p>При нажатии на кошелек откроется приложение для подтверждения подключения</p>
+      </div>
+      
+      <div class="wallet-list">
+        <div class="wallet-option" data-wallet="phantom">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='%23AB9FF2'%20d='M0%200h128v128H0z'/%3E%3Cpath%20fill='%23FFFDF8'%20fill-rule='evenodd'%20d='M55.6%2082.1C51%2089.5%2043%2098.7%2032.3%2098.7c-5%200-9.9-2-9.9-11%200-23%2031.2-58.4%2060.2-58.4%2016.5%200%2023.1%2011.5%2023.1%2024.5%200%2016.6-10.8%2035.7-21.6%2035.7-3.4%200-5-1.9-5-4.8%200-.8%200-1.6.3-2.6-3.7%206.3-10.7%2012.1-17.4%2012.1-4.8%200-7.3-3-7.3-7.3%200-1.5.4-3.1%201-4.8Zm25-28.8c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Zm14.2%200c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Phantom">
+          <div class="name">Phantom</div>
+          <div class="status">Доступен</div>
+        </div>
+        <div class="wallet-option" data-wallet="solflare">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20350%20350'%3E%3Cpath%20id='a'%20fill='%23FFEF46'%20d='M0%200h350v350H0z'/%3E%3Cpath%20fill='%2302050A'%20d='m171%20183%2014-14%2026%209c18%206%2027%2017%2027%2032%200%2011-5%2019-13%2028l-3%203%201-7c4-24-4-35-28-43l-24-8Zm-36-84%2072%2024-15%2015-38-13c-13-4-18-11-19-26Zm-5%20123%2017-16%2031%2010c16%205%2022%2013%2020%2030l-68-24Zm-20-70c0-5%202-9%206-13%204%206%2012%2012%2024%2016l25%208-14%2014-25-8c-12-4-16-10-16-17Zm76%20127c53-36%2081-60%2081-89%200-20-11-31-37-39l-19-7%2053-51-11-11-16%2014-74-25c-23%208-52%2030-52%2052l1%207c-19%2011-27%2022-27%2034s6%2024%2026%2030l16%206-55%2053%2011%2011%2017-16%2086%2031Z'/%3E%3C/svg%3E" alt="Solflare">
+          <div class="name">Solflare</div>
+          <div class="status">Доступен</div>
+        </div>
+        <div class="wallet-option" data-wallet="trustwallet">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20500%20500'%20fill='white'%3E%3Cdefs%3E%3ClinearGradient%20id='a'%20x1='609.58'%20x2='500.46'%20y1='-1336.58'%20y2='-1679.92'%20gradientTransform='matrix(1%200%200%20-.98%20-255.4%20-1243.33)'%20gradientUnits='userSpaceOnUse'%3E%3Cstop%20offset='.02'%20stop-color='%2300f'%3E%3C/stop%3E%3Cstop%20offset='.08'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.16'%20stop-color='%2348ff91'%3E%3C/stop%3E%3Cstop%20offset='.42'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.68'%20stop-color='%230038ff'%3E%3C/stop%3E%3Cstop%20offset='.9'%20stop-color='%230500ff'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='%23fff'%20d='M0%200h500v500H0z'%3E%3C/path%3E%3Cpath%20fill='%230500ff'%20d='M105%20141.22%20250%2095v320c-103.57-42.67-145-124.45-145-170.66V141.22Z'%3E%3C/path%3E%3Cpath%20fill='url(%23a)'%20d='M395%20141.22%20250%2095v320c103.57-42.67%20145-124.45%20145-170.66V141.22Z'%3E%3C/path%3E%3C/svg%3E" alt="Trust Wallet">
+          <div class="name">Trust Wallet</div>
+          <div class="status">Доступен</div>
+        </div>
+        <div class="wallet-option" data-wallet="coinbase">
+          <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%201024%201024'%3E%3Cpath%20fill='%230052FF'%20d='M0%200h1024v1024H0z'/%3E%3Cpath%20fill='%23fff'%20fill-rule='evenodd'%20d='M152%20512a360%20360%200%201%200%20720%200%20360%20360%200%200%200-720%200Zm268-116c-13%200-24%2011-24%2024v184c0%2013%2011%2024%2024%2024h184c13%200%2024-11%2024-24V420c0-13-11-24-24-24H420Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Coinbase">
+          <div class="name">Coinbase</div>
+          <div class="status">Доступен</div>
+        </div>
+      </div>
+      
+      <div id="connectionStatus" class="info-box hidden">
+        <div class="info-box-title">
+          <div class="spinner"></div>
+          <span id="statusText">Подключение...</span>
+        </div>
+      </div>
+      
+      <div id="mobileGuide" class="mobile-guide hidden">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Установите кошелек</h3>
+            <p>Скачайте приложение одного из поддерживаемых кошельков</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Создайте кошелек</h3>
+            <p>Следуйте инструкциям в приложении для создания нового кошелька</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Нажмите на кошелек выше</h3>
+            <p>Выберите ваш кошелек и подтвердите подключение в приложении</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Карточка подключенного кошелька -->
+    <div id="walletCard" class="card hidden">
+      <div class="card-header">
+        <div class="card-title">
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+            <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+            <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+          </svg>
+          Кошелек подключен
+        </div>
+        <div class="status-indicator online">
+          <div class="dot"></div>
+          <span>Онлайн</span>
+        </div>
+      </div>
+      
+      <div class="wallet-info">
+        <div class="label">Кошелек:</div>
+        <div id="walletName" class="value">Phantom</div>
+        
+        <div class="label">Адрес:</div>
+        <div id="walletAddress" class="value">...</div>
+      </div>
+      
+      <div class="balance-row">
+        <div>
+          <div class="label">Баланс SOL:</div>
+          <div id="solBalance" class="balance-amount">0.0000</div>
+        </div>
+        
+        <button id="refreshButton" class="button secondary small">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2v6h-6"></path>
+            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+            <path d="M3 22v-6h6"></path>
+            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <div id="tokenList" class="token-list">
+        <!-- Токены будут добавлены через JavaScript -->
+      </div>
+      
+      <button id="disconnectButton" class="button danger" style="margin-top: 20px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" x2="9" y1="12" y2="12"></line>
+        </svg>
+        Отключить кошелек
+      </button>
+    </div>
+  </div>
+  
+  <!-- Оверлей загрузки -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <div id="loadingText" class="loading-text">Подключение к кошельку...</div>
+  </div>
 
-
-
+  <script>
+    // Основной класс для работы с кошельками Solana
+    class SolanaWalletConnector {
+      constructor() {
+        this.connection = null;
+        this.wallet = null;
+        this.walletName = null;
+        this.publicKey = null;
+        this.isMobile = this.checkIfMobile();
+        this.knownTokens = {
+          'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
+          'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
+          'So11111111111111111111111111111111111111112': 'SOL (Wrapped)',
+          'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263': 'Bonk',
+          'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': 'Jupiter',
+          'mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So': 'Marinade SOL',
+        };
+        
+        this.walletConfigs = {
+          phantom: {
+            name: 'Phantom',
+            deepLink: 'https://phantom.app/ul/browse/',
+            mobileCheck: () => window.phantom?.solana?.isPhantom,
+            desktopCheck: () => window.phantom?.solana?.isPhantom,
+            getProvider: () => window.phantom?.solana
+          },
+          solflare: {
+            name: 'Solflare',
+            deepLink: 'https://solflare.com/ul/v1/browse/',
+            mobileCheck: () => window.solflare?.isSolflare,
+            desktopCheck: () => window.solflare?.isSolflare,
+            getProvider: () => window.solflare
+          },
+          trustwallet: {
+            name: 'Trust Wallet',
+            deepLink: 'https://link.trustwallet.com/open_url?coin=501&url=',
+            mobileCheck: () => window.trustwallet?.solana,
+            desktopCheck: () => window.trustwallet?.solana,
+            getProvider: () => window.trustwallet?.solana
+          },
+          coinbase: {
+            name: 'Coinbase',
+            deepLink: 'https://go.cb-w.com/dapp?cb_url=',
+            mobileCheck: () => window.coinbaseSolana,
+            desktopCheck: () => window.coinbaseSolana,
+            getProvider: () => window.coinbaseSolana
+          }
+        };
+        
+        this.init();
+      }
+      
+      // Инициализация
+      init() {
+        // Создаем подключение к Solana
+        this.connection = new solanaWeb3.Connection(
+          'https://api.mainnet-beta.solana.com',
+          'confirmed'
+        );
+        
+        // Настраиваем UI в зависимости от устройства
+        this.setupUI();
+        
+        // Проверяем предыдущее подключение
+        this.checkPreviousConnection();
+        
+        // Добавляем обработчики событий
+        this.addEventListeners();
+      }
+      
+      // Проверка, является ли устройство мобильным
+      checkIfMobile() {
+        return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+      }
+      
+      // Настройка UI в зависимости от устройства
+      setupUI() {
+        const mobileDetected = document.getElementById('mobileDetected');
+        const mobileGuide = document.getElementById('mobileGuide');
+        
+        if (this.isMobile) {
+          mobileDetected.classList.remove('hidden');
+          mobileGuide.classList.remove('hidden');
+        }
+      }
+      
+      // Проверка предыдущего подключения
+      async checkPreviousConnection() {
+        const savedWallet = localStorage.getItem('connectedWallet');
+        const savedAddress = localStorage.getItem('walletAddress');
+        
+        if (savedWallet && savedAddress && this.walletConfigs[savedWallet]) {
+          const config = this.walletConfigs[savedWallet];
+          const provider = config.getProvider();
+          
+          if (provider) {
+            try {
+              this.walletName = config.name;
+              this.wallet = provider;
+              this.publicKey = savedAddress;
+              
+              this.showWalletInfo();
+              this.fetchBalance();
+            } catch (error) {
+              console.error('Ошибка восстановления подключения:', error);
+              this.disconnectWallet();
+            }
+          }
+        }
+      }
+      
+      // Добавление обработчиков событий
+      addEventListeners() {
+        // Обработчики для кнопок кошельков
+        document.querySelectorAll('.wallet-option').forEach(option => {
+          option.addEventListener('click', () => {
+            const walletKey = option.getAttribute('data-wallet');
+            this.connectWallet(walletKey);
+          });
+        });
+        
+        // Обработчик для кнопки отключения
+        document.getElementById('disconnectButton').addEventListener('click', () => {
+          this.disconnectWallet();
+        });
+        
+        // Обработчик для кнопки обновления баланса
+        document.getElementById('refreshButton').addEventListener('click', () => {
+          this.fetchBalance();
+        });
+      }
+      
+      // Подключение к кошельку
+      async connectWallet(walletKey) {
+        const config = this.walletConfigs[walletKey];
+        if (!config) return;
+        
+        this.showLoading('Подключение к ' + config.name + '...');
+        
+        try {
+          // Проверяем, установлен ли кошелек
+          if (this.isMobile) {
+            // На мобильном используем deep linking
+            await this.connectMobileWallet(walletKey, config);
+          } else {
+            // На десктопе используем провайдер
+            await this.connectDesktopWallet(walletKey, config);
+          }
+        } catch (error) {
+          console.error('Ошибка подключения к кошельку:', error);
+          this.hideLoading();
+          this.showConnectionStatus('error', 'Ошибка подключения: ' + error.message);
+        }
+      }
+      
+      // Подключение к кошельку на мобильном устройстве
+      async connectMobileWallet(walletKey, config) {
+        // Проверяем, установлено ли приложение кошелька
+        const provider = config.getProvider();
+        
+        if (provider && config.mobileCheck()) {
+          // Если приложение установлено и доступно через провайдер
+          try {
+            await this.connectDesktopWallet(walletKey, config);
+            return;
+          } catch (error) {
+            console.error('Ошибка подключения через провайдер:', error);
+            // Если не удалось подключиться через провайдер, пробуем deep linking
+          }
+        }
+        
+        // Используем deep linking для открытия приложения кошелька
+        const currentUrl = encodeURIComponent(window.location.href);
+        const deepLink = config.deepLink + currentUrl;
+        
+        // Сохраняем информацию о попытке подключения
+        localStorage.setItem('connectingWallet', walletKey);
+        localStorage.setItem('connectTimestamp', Date.now().toString());
+        
+        // Открываем deep link
+        window.location.href = deepLink;
+        
+        // Показываем статус подключения
+        this.showConnectionStatus('connecting', 'Открываем ' + config.name + '...');
+        
+        // Добавляем обработчик для проверки подключения при возвращении на страницу
+        window.addEventListener('focus', this.handleAppReturn.bind(this));
+      }
+      
+      // Обработчик возвращения из приложения кошелька
+      async handleAppReturn() {
+        const connectingWallet = localStorage.getItem('connectingWallet');
+        const connectTimestamp = parseInt(localStorage.getItem('connectTimestamp') || '0');
+        
+        // Проверяем, прошло ли не более 5 минут с момента попытки подключения
+        if (connectingWallet && Date.now() - connectTimestamp < 5 * 60 * 1000) {
+          const config = this.walletConfigs[connectingWallet];
+          
+          if (config) {
+            const provider = config.getProvider();
+            
+            if (provider && (await this.checkWalletConnection(provider))) {
+              // Если кошелек подключен, сохраняем информацию
+              this.wallet = provider;
+              this.walletName = config.name;
+              
+              try {
+                // Получаем публичный ключ
+                let publicKey;
+                
+                if (provider.publicKey) {
+                  publicKey = provider.publicKey.toString();
+                } else if (provider.getPublicKey) {
+                  publicKey = (await provider.getPublicKey()).toString();
+                } else {
+                  throw new Error('Не удалось получить публичный ключ');
+                }
+                
+                this.publicKey = publicKey;
+                
+                // Сохраняем информацию о подключении
+                localStorage.setItem('connectedWallet', connectingWallet);
+                localStorage.setItem('walletAddress', publicKey);
+                
+                // Очищаем информацию о попытке подключения
+                localStorage.removeItem('connectingWallet');
+                localStorage.removeItem('connectTimestamp');
+                
+                // Обновляем UI
+                this.showWalletInfo();
+                this.fetchBalance();
+                
+                // Удаляем обработчик события
+                window.removeEventListener('focus', this.handleAppReturn);
+              } catch (error) {
+                console.error('Ошибка получения публичного ключа:', error);
+                this.showConnectionStatus('error', 'Ошибка получения адреса кошелька');
+              }
+            }
+          }
+        }
+      }
+      
+      // Проверка подключения кошелька
+      async checkWalletConnection(provider) {
+        if (provider.isConnected) {
+          return provider.isConnected;
+        }
+        
+        if (provider.connected) {
+          return provider.connected;
+        }
+        
+        return false;
+      }
+      
+      // Подключение к кошельку на десктопе
+      async connectDesktopWallet(walletKey, config) {
+        const provider = config.getProvider();
+        
+        if (!provider) {
+          throw new Error(config.name + ' не установлен');
+        }
+        
+        try {
+          // Подключаемся к кошельку
+          let response;
+          
+          if (provider.connect) {
+            response = await provider.connect();
+          }
+          
+          // Получаем публичный ключ
+          let publicKey;
+          
+          if (response && response.publicKey) {
+            publicKey = response.publicKey.toString();
+          } else if (provider.publicKey) {
+            publicKey = provider.publicKey.toString();
+          } else {
+            throw new Error('Не удалось получить публичный ключ');
+          }
+          
+          // Сохраняем информацию о подключении
+          this.wallet = provider;
+          this.walletName = config.name;
+          this.publicKey = publicKey;
+          
+          localStorage.setItem('connectedWallet', walletKey);
+          localStorage.setItem('walletAddress', publicKey);
+          
+          // Обновляем UI
+          this.hideLoading();
+          this.showWalletInfo();
+          this.fetchBalance();
+          
+          // Добавляем обработчики событий кошелька
+          this.setupWalletEventListeners();
+        } catch (error) {
+          throw error;
+        }
+      }
+      
+      // Настройка обработчиков событий кошелька
+      setupWalletEventListeners() {
+        if (this.wallet && this.wallet.on) {
+          // Обработчик отключения
+          this.wallet.on('disconnect', () => {
+            this.disconnectWallet();
+          });
+          
+          // Обработчик изменения аккаунта
+          if (this.wallet.on('accountChanged')) {
+            this.wallet.on('accountChanged', (publicKey) => {
+              if (publicKey) {
+                this.publicKey = publicKey.toString();
+                localStorage.setItem('walletAddress', this.publicKey);
+                this.showWalletInfo();
+                this.fetchBalance();
+              } else {
+                this.disconnectWallet();
+              }
+            });
+          }
+        }
+      }
+      
+      // Отключение кошелька
+      disconnectWallet() {
+        try {
+          if (this.wallet && this.wallet.disconnect) {
+            this.wallet.disconnect();
+          }
+        } catch (error) {
+          console.error('Ошибка отключения кошелька:', error);
+        }
+        
+        // Очищаем информацию о подключении
+        this.wallet = null;
+        this.walletName = null;
+        this.publicKey = null;
+        
+        localStorage.removeItem('connectedWallet');
+        localStorage.removeItem('walletAddress');
+        
+        // Обновляем UI
+        document.getElementById('connectCard').classList.remove('hidden');
+        document.getElementById('walletCard').classList.add('hidden');
+        document.getElementById('connectionStatus').classList.add('hidden');
+      }
+      
+      // Получение баланса
+      async fetchBalance() {
+        if (!this.publicKey || !this.connection) return;
+        
+        try {
+          // Показываем индикатор загрузки
+          document.getElementById('solBalance').innerHTML = '<div class="spinner"></div>';
+          document.getElementById('tokenList').innerHTML = '';
+          
+          // Получаем баланс SOL
+          const balance = await this.connection.getBalance(new solanaWeb3.PublicKey(this.publicKey));
+          const solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+          
+          // Обновляем UI
+          document.getElementById('solBalance').textContent = solBalance.toFixed(4);
+          
+          // Получаем токены
+          await this.fetchTokens();
+        } catch (error) {
+          console.error('Ошибка получения баланса:', error);
+          document.getElementById('solBalance').textContent = 'Ошибка';
+        }
+      }
+      
+      // Получение токенов
+      async fetchTokens() {
+        if (!this.publicKey || !this.connection) return;
+        
+        try {
+          // Получаем все токен-аккаунты
+          const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
+            new solanaWeb3.PublicKey(this.publicKey),
+            {
+              programId: new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA')
+            }
+          );
+          
+          const tokenList = document.getElementById('tokenList');
+          tokenList.innerHTML = '';
+          
+          // Если токенов нет, показываем сообщение
+          if (tokenAccounts.value.length === 0) {
+            tokenList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Токены не найдены</div>';
+            return;
+          }
+          
+          // Обрабатываем каждый токен
+          tokenAccounts.value.forEach(account => {
+            const parsedInfo = account.account.data.parsed.info;
+            const mintAddress = parsedInfo.mint;
+            const amount = parsedInfo.tokenAmount.uiAmount;
+            
+            // Пропускаем токены с нулевым балансом
+            if (amount === 0) return;
+            
+            // Определяем имя токена
+            const tokenName = this.knownTokens[mintAddress] || `Token ${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}`;
+            
+            // Создаем элемент для токена
+            const tokenElement = document.createElement('div');
+            tokenElement.className = 'token-item';
+            tokenElement.innerHTML = `
+              <div class="token-info">
+                <div class="token-name">${tokenName}</div>
+                <div class="token-address">${mintAddress.slice(0, 4)}...${mintAddress.slice(-4)}</div>
+              </div>
+              <div class="token-amount">${amount.toLocaleString()}</div>
+            `;
+            
+            tokenList.appendChild(tokenElement);
+          });
+        } catch (error) {
+          console.error('Ошибка получения токенов:', error);
+          document.getElementById('tokenList').innerHTML = '<div style="text-align: center; padding: 20px; color: var(--error);">Ошибка загрузки токенов</div>';
+        }
+      }
+      
+      // Отображение информации о кошельке
+      showWalletInfo() {
+        document.getElementById('connectCard').classList.add('hidden');
+        document.getElementById('walletCard').classList.remove('hidden');
+        
+        document.getElementById('walletName').textContent = this.walletName;
+        document.getElementById('walletAddress').textContent = this.publicKey;
+      }
+      
+      // Показ статуса подключения
+      showConnectionStatus(type, message) {
+        const statusElement = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('statusText');
+        
+        statusElement.className = `info-box ${type}`;
+        statusText.textContent = message;
+        
+        statusElement.classList.remove('hidden');
+      }
+      
+      // Показ индикатора загрузки
+      showLoading(message) {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        
+        loadingText.textContent = message;
+        loadingOverlay.classList.remove('hidden');
+      }
+      
+      // Скрытие индикатора загрузки
+      hideLoading() {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+      }
+    }
+    
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      window.walletConnector = new SolanaWalletConnector();
+    });
+  </script>
 </body>
-
-
-</html> 
+</html>
