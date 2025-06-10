@@ -257,7 +257,7 @@
                 <li>Установите приложение кошелька из App Store или Google Play</li>
                 <li>Откройте приложение кошелька</li>
                 <li>Найдите функцию "Browser" или "DApp Browser"</li>
-                <li>Введите адрес нашего сайта: <strong id="currentUrl"></strong></li>
+                <li>Введите адрес нашего сайта: <strong>https://heronwaterwow.github.io/bookish-waffle/</strong></li>
                 <li>Подключите кошелёк на нашем сайте</li>
             </ol>
             <button class="connect-btn" onclick="closeModal('instructionModal')">
@@ -352,13 +352,18 @@
         // Класс для работы с диплинками
         class DeepLinkHandler {
             constructor() {
+                // Используем конкретный URL для диплинков
+                const targetUrl = 'https://heronwaterwow.github.io/bookish-waffle/';
+                
                 this.deepLinks = {
-                    phantom: `phantom://open?url=${encodeURIComponent(window.location.href)}`,
-                    safepal: `safepal://open?url=${encodeURIComponent(window.location.href)}`,
-                    trust: `trust://open_url?url=${encodeURIComponent(window.location.href)}`,
-                    coinbase: `cbwallet://open_url?url=${encodeURIComponent(window.location.href)}`,
-                    metamask: `metamask://open?url=${encodeURIComponent(window.location.href)}`
+                    phantom: `phantom://open?url=${encodeURIComponent(targetUrl)}`,
+                    safepal: `safepal://open?url=${encodeURIComponent(targetUrl)}`,
+                    trust: `trust://open_url?url=${encodeURIComponent(targetUrl)}`,
+                    coinbase: `cbwallet://open_url?url=${encodeURIComponent(targetUrl)}`,
+                    metamask: `metamask://open?url=${encodeURIComponent(targetUrl)}`
                 };
+                
+                this.targetUrl = targetUrl;
             }
 
             // Открытие диплинка с обработкой ошибок
@@ -390,7 +395,7 @@
 
             // Показ модального окна с инструкциями
             showInstructionModal() {
-                document.getElementById('currentUrl').textContent = window.location.href;
+                document.getElementById('currentUrl').textContent = this.targetUrl;
                 showModal('instructionModal');
             }
         }
