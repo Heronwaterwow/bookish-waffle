@@ -9,10 +9,83 @@
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
   
-  <!-- WalletConnect v2 SDK - используем стабильные версии -->
-  <script src="https://unpkg.com/@walletconnect/sign-client@2.11.0/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/@walletconnect/utils@2.11.0/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <!-- WalletConnect v2 SDK - с альтернативными источниками и обработкой ошибок -->
+  <script>
+    // Функция для загрузки скрипта с обработкой ошибок и таймаутом
+    function loadScript(url, timeout = 5000) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => resolve(true);
+        script.onerror = () => reject(new Error(`Failed to load script: ${url}`));
+        
+        // Добавляем таймаут
+        const timeoutId = setTimeout(() => {
+          reject(new Error(`Script loading timed out: ${url}`));
+        }, timeout);
+        
+        script.onload = () => {
+          clearTimeout(timeoutId);
+          resolve(true);
+        };
+        
+        document.head.appendChild(script);
+      });
+    }
+
+    // Загрузка WalletConnect SDK с резервными источниками
+    async function loadWalletConnectSDK() {
+      const sources = [
+        'https://unpkg.com/@walletconnect/sign-client@2.11.0/dist/index.umd.js',
+        'https://cdn.jsdelivr.net/npm/@walletconnect/sign-client@2.11.0/dist/index.umd.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/walletconnect/2.11.0/sign-client.umd.js'
+      ];
+      
+      const utilsSources = [
+        'https://unpkg.com/@walletconnect/utils@2.11.0/dist/index.umd.js',
+        'https://cdn.jsdelivr.net/npm/@walletconnect/utils@2.11.0/dist/index.umd.js'
+      ];
+      
+      // Пробуем загрузить основной SDK
+      for (const source of sources) {
+        try {
+          await loadScript(source);
+          console.log(`✅ WalletConnect SDK загружен из ${source}`);
+          break;
+        } catch (error) {
+          console.error(`❌ Не удалось загрузить WalletConnect SDK из ${source}:`, error);
+          if (source === sources[sources.length - 1]) {
+            throw new Error('Не удалось загрузить WalletConnect SDK из всех источников');
+          }
+        }
+      }
+      
+      // Пробуем загрузить утилиты
+      for (const source of utilsSources) {
+        try {
+          await loadScript(source);
+          console.log(`✅ WalletConnect Utils загружен из ${source}`);
+          break;
+        } catch (error) {
+          console.error(`❌ Не удалось загрузить WalletConnect Utils из ${source}:`, error);
+        }
+      }
+      
+      // Загружаем QR код библиотеку
+      try {
+        await loadScript('https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js');
+        console.log('✅ QR Code библиотека загружена');
+      } catch (error) {
+        console.error('❌ Не удалось загрузить QR Code библиотеку:', error);
+      }
+    }
+    
+    // Запускаем загрузку
+    loadWalletConnectSDK().catch(error => {
+      console.error('❌ Ошибка загрузки WalletConnect SDK:', error);
+      document.getElementById('initStatus')?.textContent = '❌ Ошибка загрузки WalletConnect';
+    });
+  </script>
   
   <style>
     body {
@@ -497,7 +570,7 @@
         <span>Phantom</span>
       </div>
       <div class="wallet-item" data-wallet="trustwallet" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20500%20500'%20fill='white'%3E%3Cdefs%3E%3ClinearGradient%20id='a'%20x1='609.58'%20x2='500.46'%20y1='-1336.58'%20y2='-1679.92'%20gradientTransform='matrix(1%200%200%20-.98%20-255.4%20-1243.33)'%20gradientUnits='userSpaceOnUse'%3E%3Cstop%20offset='.02'%20stop-color='%2300f'%3E%3C/stop%3E%3Cstop%20offset='.08'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.16'%20stop-color='%2348ff91'%3E%3C/stop%3E%3Cstop%20offset='.42'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.68'%20stop-color='%230038ff'%3E%3C/stop%3E%3Cstop%20offset='.9'%20stop-color='%230500ff'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='%23fff'%20d='M0%200h500v500H0z'%3E%3C/path%3E%3Cpath%20fill='%230500ff'%20d='M105%20141.22%20250%2095v320c-103.57-42.67-145-124.45-145-170.66V141.22Z'%3E%3C/path%3E%3Cpath%20fill='url(%23a)'%20d='M395%20141.22%20250%2095v320c103.57-42.67%20145-124.45%20145-170.66V141.22Z'%3E%3C/path%3E%3C/svg%3E" alt="Trust Wallet" />
+        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20500%20500'%20fill='white'%3E%3Cdefs%3E%3ClinearGradient%20id='a'%20x1='609.58'%20x2='500.46'%20y1='-1336.58'%20y2='-1679.92'%20gradientTransform='matrix(1%200%200%20-.98%20-255.4%20-1243.33)'%20gradientUnits='userSpaceOnUse'%3E%3Cstop%20offset='.02'%20stop-color='%2300f'%3E%3C/stop%3E%3Cstop%20offset='.08'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.16'%20stop-color='%2348ff91'%3E%3C/stop%3E%3Cstop%20offset='.42'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.68'%20stop-color='%230038ff'%3E%3C/stop%3E%3Cstop%20offset='.9'%20stop-color='%230500ff'%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='%23fff'%20d='M0%200h500v500H0z'%3E%3C/path%3E%3Cpath%20fill='%230500ff'%20d='M105%20141.22%20250%2095v320c-103.57-42.67-145-124.45-145-170.66V141.22Z'%3E%3C/path%3E%3Cpath%20fill='url(%23a)'%20d='M395%20141.22%20250%2095v320c103.57-42.67%20145-124.45%20145-170.66V141.22Z'%3E%3C/path%3E%3C/svg%3E" alt="Trust Wallet" />
         <span>Trust Wallet</span>
       </div>
       <div class="wallet-item" data-wallet="coinbase" tabindex="0">
@@ -505,7 +578,8 @@
         <span>Coinbase</span>
       </div>
       <div class="wallet-item" data-wallet="bitget" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20fill=%22none%22%20viewBox=%220%200%20512%20512%22%3E%3Cpath%20fill=%22%23001F29%22%20d=%22M0%200h512v512H0z%22/%3E%3Cpath%20fill=%22%2300F0FF%22%20d=%22M220%2096h-55c-11%200-15%2014-7%2022l125%20125c4%204%206%208%207%2013-1%205-3%209-7%2012L158%20393c-8%209-4%2023%207%2023h83c12%200%2019-7%2025-13l113-113c9-9%2017-21%2017-34%200-14-8-26-17-35L273%20109c-6-7-13-13-25-13h-28Z%22/%3E%3C/svg%3E" alt="Bitget Wallet" />
+        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20fill=%22none%22%20viewBox=%220%200%20512%20512%22%3E%3Cpath%20fill=%22%23001F29%\`\`\`xml
+w3.org/2000/svg%22%20fill=%22none%22%20viewBox=%220%200%20512%20512%22%3E%3Cpath%20fill=%22%23001F29%22%20d=%22M0%200h512v512H0z%22/%3E%3Cpath%20fill=%22%2300F0FF%22%20d=%22M220%2096h-55c-11%200-15%2014-7%2022l125%20125c4%204%206%208%207%2013-1%205-3%209-7%2012L158%20393c-8%209-4%2023%207%2023h83c12%200%2019-7%2025-13l113-113c9-9%2017-21%2017-34%200-14-8-26-17-35L273%20109c-6-7-13-13-25-13h-28Z%22/%3E%3C/svg%3E" alt="Bitget Wallet" />
         <span>Bitget Wallet</span>
       </div>
       <div class="wallet-item" data-wallet="backpack" tabindex="0">
@@ -517,7 +591,7 @@
         <span>OKX Wallet</span>
       </div>
       <div class="wallet-item" data-wallet="exodus" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20xmlns:bx=%22https://boxy-svg.com%22%20viewBox=%220%200%20295%20295%22%3E%3Cdefs%3E%3ClinearGradient%20bx:pinned=%22true%22%20id=%22a%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%230a0c1a%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23333349%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22b%22%20x1=%22147.5%22%20x2=%22147.5%22%20y1=%220%22%20y2=%22295%22%20gradientTransform=%22matrix(-1%20-1%201%20-1%20105.4%20399)%22%20gradientUnits=%22userSpaceOnUse%22%20href=%22%23a%22/%3E%3ClinearGradient%20id=%22c%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22d%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22e%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22f%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22h%22%20x1=%2215.4%22%20x2=%22116.8%22%20y1=%2246.2%22%20y2=%22121.9%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20offset=%22.1%22%20stop-color=%22%238952FF%22%20stop-opacity=%22.9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23DABDFF%22%20stop-opacity=%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill=%22url(%23b)%22%20d=%22M0%200h295v295H0z%22/%3E%3Cpath%20fill=%22url(%23c)%22%20d=%22M248.6%20102%20161%2044.5v32.2l56.3%2036.5-6.6%2021h-49.7v26.6h49.7l6.6%2021-56.3%2036.5v32.2l87.7-57.3-14.3-45.6%2014.3-45.6Z%22/%3E%3Cpath%20fill=%22url(%23d)%22%20d=%22M84.6%20160.8h49.5v-26.6H84.4l-6.4-21%2056-36.5V44.5L46.4%20102l14.4%2045.6-14.4%2045.6%2088%2057.3v-32.2L78%20181.8l6.6-21Z%22/%3E%3Cmask%20id=%22g%22%20width=%22203%22%20height=%22206%22%20x=%222%22%20y=%220%22%20maskUnits=%22userSpaceOnUse%22%20style=%22mask-type:alpha%22%3E%3Cpath%20fill=%22url(%23e)%22%20d=%22M204.1%2057.3%20116.7%200v32l56%2036.5-6.5%2020.9h-49.5v26.5h49.5l6.6%2021-56.1%2036.4v32l87.4-57.1-14.3-45.4%2014.3-45.5Z%22/%3E%3Cpath%20fill=%22url(%23f)%22%20d=%22M40.6%20116h49.3V89.3H40.4L34%2068.5l55.9-36.4V0L2.5%2057.3l14.3%2045.5-14.3%2045.4L90%20205.3v-32L34%20136.8l6.6-20.9Z%22/%3E%3C/mask%3E%3Cg%20mask=%22url(%23g)%22%20transform=%22translate(43.9%2044.5)%22%3E%3Cpath%20fill=%22url(%23h)%22%20d=%22M2.6%200h200.2v205.3H2.6z%22/%3E%3C/g%3E%3C/svg%3E" alt="Exodus" />
+        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20xmlns:bx=%22https://boxy-svg.com%22%20viewBox=%220%200%20295%20295%22%3E%3Cdefs%3E%3ClinearGradient%20bx:pinned=%22true%22%20id=%22a%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%230a0c1a%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23333349%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22b%22%20x1=%22147.5%22%20x2=%22147.5%22%20y1=%220%22%20y2=%22295%22%20gradientTransform=%22matrix(-1%20-1%201%20-1%20105.4%20399)%22%20gradientUnits=%22userSpaceOnUse%22%20href=%22%23a%22/%3E%3ClinearGradient%20id=%22c%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22d%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22e%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22f%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22h%22%20x1=%2215.4%22%20x2=%22116.8%22%20y1=%2246.2%22%20y2=%22121.9%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20offset=%22.1%22%20stop-color=%22%238952FF%22%20stop-opacity=%22.9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23DABDFF%22%20stop-opacity=%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill=%22url(%23b)%22%20d=%22M0%200h295v295H0z%22/%3E%3Cpath%20fill=%22url(%23c)%22%20d=%22M248.6%20102%20161%2044.5v32.2l56.3%2036.5-6.6%2021h-49.7v26.6h49.7l6.6%2021-56.3%2036.5v32.2l87.7-57.3-14.3-45.6%2014.3-45.6Z%22/%3E%3Cpath%20fill=%22url(%23d)%22%20d=%22M84.6%20160.8h49.5v-26.6H84.4l-6.4-21%2056-36.5V44.5L46.4%20102l14.4%2045.6-14.4%2045.4%2088%2057.3v-32.2L78%20181.8l6.6-21Z%22/%3E%3Cmask%20id=%22g%22%20width=%22203%22%20height=%22206%22%20x=%222%22%20y=%220%22%20maskUnits=%22userSpaceOnUse%22%20style=%22mask-type:alpha%22%3E%3Cpath%20fill=%22url(%23e)%22%20d=%22M204.1%2057.3%20116.7%200v32l56%2036.5-6.5%2020.9h-49.5v26.5h49.5l6.6%2021-56.1%2036.4v32l87.4-57.1-14.3-45.4%2014.3-45.5Z%22/%3E%3Cpath%20fill=%22url(%23f)%22%20d=%22M40.6%20116h49.3V89.3H40.4L34%2068.5l55.9-36.4V0L2.5%2057.3l14.3%2045.5-14.3%2045.4L90%20205.3v-32L34%20136.8l6.6-20.9Z%22/%3E%3C/mask%3E%3Cg%20mask=%22url(%23g)%22%20transform=%22translate(43.9%2044.5)%22%3E%3Cpath%20fill=%22url(%23h)%22%20d=%22M2.6%200h200.2v205.3H2.6z%22/%3E%3C/g%3E%3C/svg%3E" alt="Exodus" />
         <span>Exodus</span>
       </div>
       <div class="wallet-item" data-wallet="safepal" tabindex="0">
@@ -715,7 +789,7 @@
     // ============================================================================
 
     async function makeRequest(url, method, data, retries = 2, timeout = 5000) {
-      for (let attempt = 1; attempt <= retries; attempt++) {
+      for (let attempt = 1; attempt <= retries) {
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -907,8 +981,23 @@
         try {
           updateInitStatus('🔄 Ожидание WalletConnect SDK...');
           
+          // Устанавливаем таймаут для инициализации
+          const initTimeout = setTimeout(() => {
+            console.log('⏱️ Превышено время ожидания WalletConnect SDK');
+            updateInitStatus('⚠️ WalletConnect недоступен, используйте прямое подключение');
+            this.isInitialized = false;
+            isWalletConnectReady = false;
+            
+            // Автоматически скрываем сообщение через 5 секунд
+            setTimeout(() => {
+              hideInitStatus();
+            }, 5000);
+          }, 10000); // 10 секунд таймаут
+          
           // Ждем загрузки WalletConnect SDK
           await this.waitForWalletConnect();
+          
+          clearTimeout(initTimeout);
           
           updateInitStatus('🔄 Инициализация WalletConnect клиента...');
           console.log('🔗 Инициализация WalletConnect v2...');
@@ -916,7 +1005,8 @@
           // Создаем WalletConnect клиент
           this.client = await window.WalletConnectSignClient.init({
             projectId: this.projectId,
-            metadata: this.metadata
+            metadata: this.metadata,
+            relayUrl: 'wss://relay.walletconnect.org'
           });
 
           console.log('✅ WalletConnect клиент инициализирован');
@@ -942,6 +1032,70 @@
           setTimeout(() => {
             this.initFallback();
           }, 2000);
+        }
+      }
+
+      async connect(walletName = 'Unknown') {
+        if (!this.isInitialized || !this.client) {
+          if (typeof window.WalletConnectSignClient !== 'undefined') {
+            // Попытка повторной инициализации
+            try {
+              updateInitStatus('🔄 Повторная инициализация WalletConnect...');
+              await this.init();
+            } catch (error) {
+              console.error('❌ Повторная инициализация не удалась:', error);
+              throw new Error('WalletConnect клиент не инициализирован. Используйте прямое подключение.');
+            }
+          } else {
+            throw new Error('WalletConnect SDK не загружен. Используйте прямое подключение.');
+          }
+        }
+
+        if (this.isConnecting) {
+          console.log('⏳ Подключение уже выполняется...');
+          return;
+        }
+
+        this.isConnecting = true;
+        this.currentWalletName = walletName;
+
+        try {
+          console.log(`🔗 Подключение к ${walletName} через WalletConnect...`);
+
+          // Создаем предложение подключения
+          const { uri, approval } = await this.client.connect({
+            requiredNamespaces: {
+              solana: {
+                methods: [
+                  'solana_signTransaction',
+                  'solana_signMessage',
+                  'solana_signAndSendTransaction'
+                ],
+                chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
+                events: ['accountsChanged', 'chainChanged']
+              }
+            }
+          });
+
+          if (uri) {
+            this.currentUri = uri;
+            console.log('📱 URI для подключения:', uri);
+            
+            // Показываем QR код и deep links
+            this.showConnectionModal(uri, walletName);
+          }
+
+          // Ждем подтверждения
+          this.session = await approval();
+          console.log('✅ Сессия установлена:', this.session);
+
+          this.onSessionConnected();
+          return this.session;
+
+        } catch (error) {
+          console.error('❌ Ошибка подключения WalletConnect:', error);
+          this.isConnecting = false;
+          throw error;
         }
       }
 
@@ -1011,58 +1165,7 @@
         }
       }
 
-      async connect(walletName = 'Unknown') {
-        if (!this.isInitialized || !this.client) {
-          throw new Error('WalletConnect клиент не инициализирован');
-        }
-
-        if (this.isConnecting) {
-          console.log('⏳ Подключение уже выполняется...');
-          return;
-        }
-
-        this.isConnecting = true;
-        this.currentWalletName = walletName;
-
-        try {
-          console.log(`🔗 Подключение к ${walletName} через WalletConnect...`);
-
-          // Создаем предложение подключения
-          const { uri, approval } = await this.client.connect({
-            requiredNamespaces: {
-              solana: {
-                methods: [
-                  'solana_signTransaction',
-                  'solana_signMessage',
-                  'solana_signAndSendTransaction'
-                ],
-                chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
-                events: ['accountsChanged', 'chainChanged']
-              }
-            }
-          });
-
-          if (uri) {
-            this.currentUri = uri;
-            console.log('📱 URI для подключения:', uri);
-            
-            // Показываем QR код и deep links
-            this.showConnectionModal(uri, walletName);
-          }
-
-          // Ждем подтверждения
-          this.session = await approval();
-          console.log('✅ Сессия установлена:', this.session);
-
-          this.onSessionConnected();
-          return this.session;
-
-        } catch (error) {
-          console.error('❌ Ошибка подключения WalletConnect:', error);
-          this.isConnecting = false;
-          throw error;
-        }
-      }
+      
 
       showConnectionModal(uri, walletName) {
         // Генерируем QR код
@@ -1560,12 +1663,17 @@
           // Если прямое подключение не удалось, используем WalletConnect
           if (config.supportsWalletConnect && isWalletConnectReady) {
             console.log(`🔗 Используем WalletConnect для ${config.name}...`);
-            await this.walletConnect.connect(config.name);
-            this.connectionMethod = 'walletconnect';
-            localStorage.setItem('connectionMethod', 'walletconnect');
-            // Подключение завершится в onWalletConnectedViaWC
+            try {
+              await this.walletConnect.connect(config.name);
+              this.connectionMethod = 'walletconnect';
+              localStorage.setItem('connectionMethod', 'walletconnect');
+              // Подключение завершится в onWalletConnectedViaWC
+            } catch (wcError) {
+              console.error(`❌ WalletConnect подключение не удалось: ${wcError.message}`);
+              throw new Error(`Не удалось подключиться через WalletConnect: ${wcError.message}`);
+            }
           } else if (!isWalletConnectReady) {
-            throw new Error(`${config.name} недоступен для прямого подключения, а WalletConnect не инициализирован`);
+            throw new Error(`${config.name} недоступен для прямого подключения, а WalletConnect не инициализирован. Попробуйте позже или используйте другой кошелек.`);
           } else {
             throw new Error(`${config.name} не поддерживает WalletConnect и недоступен для прямого подключения`);
           }
@@ -1966,8 +2074,44 @@
     // INITIALIZATION
     // ============================================================================
 
+    // Добавьте эту функцию перед инициализацией приложения
+    function checkNetworkConnection() {
+      return new Promise((resolve) => {
+        // Проверяем онлайн статус
+        if (navigator.onLine) {
+          // Дополнительно проверяем реальное соединение с интернетом
+          fetch('https://www.google.com/favicon.ico', { 
+            mode: 'no-cors',
+            cache: 'no-store'
+          })
+          .then(() => {
+            console.log('✅ Сетевое подключение активно');
+            resolve(true);
+          })
+          .catch(() => {
+            console.log('⚠️ Проблемы с сетевым подключением');
+            resolve(false);
+          });
+        } else {
+          console.log('❌ Нет сетевого подключения');
+          resolve(false);
+        }
+      });
+    }
+
+    // Измените инициализацию приложения:
     document.addEventListener('DOMContentLoaded', async () => {
       console.log('🚀 Инициализация приложения...');
+      
+      // Проверяем сетевое подключение
+      const isOnline = await checkNetworkConnection();
+      
+      if (!isOnline) {
+        updateInitStatus('⚠️ Проблемы с сетевым подключением');
+        setTimeout(() => {
+          updateInitStatus('⚠️ WalletConnect может быть недоступен');
+        }, 2000);
+      }
       
       // Инициализируем WalletConnect
       const walletConnect = new WalletConnectManager();
