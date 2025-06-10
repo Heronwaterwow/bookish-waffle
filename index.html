@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dApp - Deep Link Router</title>
+    <title>Phantom Deep Links - dApp</title>
     <style>
         * {
             margin: 0;
@@ -37,52 +37,10 @@
         .header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #ab9ff2, #667eea);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .navigation {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .nav-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .nav-link {
-            padding: 12px 24px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-
-        .nav-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .nav-link.active {
-            background: linear-gradient(45deg, #764ba2, #667eea);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.6);
         }
 
         .content {
@@ -91,140 +49,90 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            min-height: 400px;
+            margin-bottom: 30px;
         }
 
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .wallet-section {
+        .deep-link-section {
             background: #f8f9fa;
             border-radius: 15px;
             padding: 30px;
             margin: 30px 0;
         }
 
-        .wallet-grid {
+        .deep-link-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
 
-        .wallet-card {
+        .deep-link-card {
             background: white;
             border-radius: 15px;
-            padding: 20px;
-            text-align: center;
+            padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.2s;
             cursor: pointer;
+            border: 2px solid transparent;
         }
 
-        .wallet-card:hover {
+        .deep-link-card:hover {
             transform: translateY(-5px);
+            border-color: #ab9ff2;
         }
 
-        .wallet-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .phantom { background: #ab9ff2; }
-        .safepal { background: #1890ff; }
-        .trust { background: #3375bb; }
-        .coinbase { background: #0052ff; }
-        .metamask { background: #f6851b; }
-
-        .device-info {
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .device-info h3 {
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .info-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
+        .deep-link-card.browser {
             border-left: 4px solid #667eea;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
+        .deep-link-card.mobile {
+            border-left: 4px solid #ab9ff2;
         }
 
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: slideIn 0.3s;
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ab9ff2, #667eea);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-weight: bold;
-            cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 15px;
+            margin-right: 15px;
         }
 
-        .close:hover {
-            color: #000;
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .card-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .deep-link-url {
+            background: #f1f3f4;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin: 10px 0;
+            border-left: 3px solid #ab9ff2;
         }
 
         .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #ab9ff2, #667eea);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -232,7 +140,9 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
-            margin: 10px 5px;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn:hover {
@@ -241,6 +151,17 @@
 
         .btn-secondary {
             background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .device-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
         }
 
         .alert {
@@ -267,6 +188,76 @@
             color: #155724;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: slideIn 0.3s;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 15px;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .copy-btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -276,13 +267,12 @@
                 font-size: 2rem;
             }
             
-            .nav-links {
-                flex-direction: column;
-                align-items: center;
-            }
-            
             .content {
                 padding: 20px;
+            }
+
+            .deep-link-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -299,697 +289,433 @@
             z-index: 999;
             display: none;
         }
-
-        .debug-toggle {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 999;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🔗 dApp Deep Link Router</h1>
-            <p>Правильная обработка диплинков и навигации по сайту</p>
-        </div>
-
-        <!-- Navigation -->
-        <div class="navigation">
-            <div class="nav-links">
-                <a href="#home" class="nav-link active" data-page="home">🏠 Главная</a>
-                <a href="#wallet" class="nav-link" data-page="wallet">💼 Кошельки</a>
-                <a href="#dapp" class="nav-link" data-page="dapp">⚡ dApp</a>
-                <a href="#info" class="nav-link" data-page="info">ℹ️ Информация</a>
-                <a href="#settings" class="nav-link" data-page="settings">⚙️ Настройки</a>
+            <h1>👻 Phantom Deep Links</h1>
+            <p>Правильные дип-линки для подключения Phantom кошелька</p>
+            <div class="alert alert-info">
+                <strong>Ваш сайт:</strong> https://heronwaterwow.github.io/bookish-waffle/#
             </div>
         </div>
 
-        <!-- Content -->
+        <!-- Device Info -->
         <div class="content">
-            <!-- Home Page -->
-            <div id="home" class="page active">
-                <h2>Добро пожаловать в dApp</h2>
-                <p>Этот сайт демонстрирует правильную обработку диплинков и навигации.</p>
+            <h2>Информация об устройстве</h2>
+            <div class="device-info">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>Устройство:</strong>
+                        <div id="device-type">Определяется...</div>
+                    </div>
+                    <div>
+                        <strong>Браузер:</strong>
+                        <div id="browser-type">Определяется...</div>
+                    </div>
+                    <div>
+                        <strong>Phantom:</strong>
+                        <div id="phantom-status">Проверяется...</div>
+                    </div>
+                    <div>
+                        <strong>Рекомендация:</strong>
+                        <div id="recommendation">Определяется...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deep Links Section -->
+        <div class="content">
+            <h2>Дип-линки для Phantom</h2>
+            
+            <div class="deep-link-section">
+                <h3>🌐 Браузерные дип-линки</h3>
+                <p>Для использования в веб-браузерах (десктоп и мобильные браузеры)</p>
                 
-                <div class="alert alert-info">
-                    <strong>Информация:</strong> Диплинки теперь правильно обрабатываются и не перенаправляют пользователей в кошелек без необходимости.
-                </div>
+                <div class="deep-link-grid">
+                    <!-- Основное подключение -->
+                    <div class="deep-link-card browser" onclick="testBrowserDeepLink('connect')">
+                        <div class="card-header">
+                            <div class="card-icon">🔗</div>
+                            <div class="card-title">Подключение кошелька</div>
+                        </div>
+                        <div class="card-description">
+                            Основная ссылка для подключения Phantom кошелька к вашему dApp
+                        </div>
+                        <div class="deep-link-url" id="browser-connect-url">
+                            https://app.phantom.app/dapp/heronwaterwow.github.io/bookish-waffle/connect
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('browser-connect-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testBrowserDeepLink('connect')">🚀 Тестировать</button>
+                    </div>
 
-                <div class="device-info">
-                    <h3>Информация об устройстве</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Устройство:</strong>
-                            <div id="device-type">Определяется...</div>
+                    <!-- Отправка токенов -->
+                    <div class="deep-link-card browser" onclick="testBrowserDeepLink('send')">
+                        <div class="card-header">
+                            <div class="card-icon">💸</div>
+                            <div class="card-title">Отправка токенов</div>
                         </div>
-                        <div class="info-item">
-                            <strong>Браузер:</strong>
-                            <div id="browser-type">Определяется...</div>
+                        <div class="card-description">
+                            Прямая ссылка на страницу отправки токенов в Phantom
                         </div>
-                        <div class="info-item">
-                            <strong>Кошелек:</strong>
-                            <div id="wallet-browser">Определяется...</div>
+                        <div class="deep-link-url" id="browser-send-url">
+                            https://app.phantom.app/dapp/heronwaterwow.github.io/bookish-waffle/send-token?tokenAddress=SOL&amount=0.1
                         </div>
-                        <div class="info-item">
-                            <strong>URL:</strong>
-                            <div id="current-url">Определяется...</div>
+                        <button class="btn" onclick="copyToClipboard('browser-send-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testBrowserDeepLink('send')">🚀 Тестировать</button>
+                    </div>
+
+                    <!-- Просмотр NFT -->
+                    <div class="deep-link-card browser" onclick="testBrowserDeepLink('nft')">
+                        <div class="card-header">
+                            <div class="card-icon">🖼️</div>
+                            <div class="card-title">Просмотр NFT</div>
                         </div>
+                        <div class="card-description">
+                            Ссылка для просмотра NFT коллекций в Phantom
+                        </div>
+                        <div class="deep-link-url" id="browser-nft-url">
+                            https://app.phantom.app/dapp/heronwaterwow.github.io/bookish-waffle/nft-gallery?collection=all
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('browser-nft-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testBrowserDeepLink('nft')">🚀 Тестировать</button>
                     </div>
                 </div>
-
-                <button class="btn" onclick="testDeepLink()">🔗 Тест диплинка</button>
-                <button class="btn btn-secondary" onclick="showDeviceInfo()">📱 Показать детали устройства</button>
             </div>
 
-            <!-- Wallet Page -->
-            <div id="wallet" class="page">
-                <h2>Подключение кошелька</h2>
-                <p>Выберите кошелек для подключения к dApp:</p>
+            <div class="deep-link-section">
+                <h3>📱 Мобильные дип-линки</h3>
+                <p>Для прямого открытия мобильного приложения Phantom</p>
+                
+                <div class="deep-link-grid">
+                    <!-- Мобильное подключение -->
+                    <div class="deep-link-card mobile" onclick="testMobileDeepLink('connect')">
+                        <div class="card-header">
+                            <div class="card-icon">📲</div>
+                            <div class="card-title">Подключение (мобильное)</div>
+                        </div>
+                        <div class="card-description">
+                            Запрос подключения через мобильное приложение Phantom
+                        </div>
+                        <div class="deep-link-url" id="mobile-connect-url">
+                            phantom://connection/request?app_url=https://heronwaterwow.github.io/bookish-waffle&redirect_link=https://heronwaterwow.github.io/bookish-waffle/#connected
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('mobile-connect-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testMobileDeepLink('connect')">🚀 Тестировать</button>
+                    </div>
 
-                <div class="wallet-section">
-                    <h3>Доступные кошельки</h3>
-                    <div class="wallet-grid">
-                        <div class="wallet-card" onclick="handleWalletConnection('phantom')">
-                            <div class="wallet-icon phantom">P</div>
-                            <h4>Phantom</h4>
-                            <p>Solana кошелек</p>
+                    <!-- Мобильная транзакция -->
+                    <div class="deep-link-card mobile" onclick="testMobileDeepLink('transaction')">
+                        <div class="card-header">
+                            <div class="card-icon">💳</div>
+                            <div class="card-title">Транзакция (мобильная)</div>
                         </div>
-                        <div class="wallet-card" onclick="handleWalletConnection('safepal')">
-                            <div class="wallet-icon safepal">S</div>
-                            <h4>SafePal</h4>
-                            <p>Мульти-блокчейн</p>
+                        <div class="card-description">
+                            Запрос выполнения транзакции через мобильное приложение
                         </div>
-                        <div class="wallet-card" onclick="handleWalletConnection('trust')">
-                            <div class="wallet-icon trust">T</div>
-                            <h4>Trust Wallet</h4>
-                            <p>Мобильный кошелек</p>
+                        <div class="deep-link-url" id="mobile-transaction-url">
+                            phantom://transaction/send?app_url=https://heronwaterwow.github.io/bookish-waffle&redirect_link=https://heronwaterwow.github.io/bookish-waffle/#transaction-complete
                         </div>
-                        <div class="wallet-card" onclick="handleWalletConnection('coinbase')">
-                            <div class="wallet-icon coinbase">C</div>
-                            <h4>Coinbase Wallet</h4>
-                            <p>Самостоятельный кошелек</p>
+                        <button class="btn" onclick="copyToClipboard('mobile-transaction-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testMobileDeepLink('transaction')">🚀 Тестировать</button>
+                    </div>
+
+                    <!-- Открытие dApp -->
+                    <div class="deep-link-card mobile" onclick="testMobileDeepLink('browse')">
+                        <div class="card-header">
+                            <div class="card-icon">🌐</div>
+                            <div class="card-title">Открыть dApp</div>
                         </div>
-                        <div class="wallet-card" onclick="handleWalletConnection('metamask')">
-                            <div class="wallet-icon metamask">M</div>
-                            <h4>MetaMask</h4>
-                            <p>Ethereum кошелек</p>
+                        <div class="card-description">
+                            Открытие вашего dApp в браузере Phantom
                         </div>
+                        <div class="deep-link-url" id="mobile-browse-url">
+                            phantom://browse/open?url=https://heronwaterwow.github.io/bookish-waffle
+                        </div>
+                        <button class="btn" onclick="copyToClipboard('mobile-browse-url')">📋 Копировать</button>
+                        <button class="btn btn-success" onclick="testMobileDeepLink('browse')">🚀 Тестировать</button>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="alert alert-warning">
-                    <strong>Внимание:</strong> Подключение кошелька происходит только при явном действии пользователя.
-                </div>
+        <!-- Implementation Guide -->
+        <div class="content">
+            <h2>📚 Руководство по реализации</h2>
+            
+            <div class="alert alert-info">
+                <strong>Важно:</strong> Выбор типа дип-линка зависит от устройства пользователя и контекста использования.
             </div>
 
-            <!-- dApp Page -->
-            <div id="dapp" class="page">
-                <h2>dApp Функциональность</h2>
-                <p>Основные функции децентрализованного приложения:</p>
+            <h3>JavaScript код для автоматического выбора</h3>
+            <div class="code-block">
+<span style="color: #81c784;">// Функция для создания правильного дип-линка</span>
+<span style="color: #ffb74d;">function</span> <span style="color: #64b5f6;">createPhantomDeepLink</span>(<span style="color: #f8bbd9;">action</span>) {
+    <span style="color: #ffb74d;">const</span> <span style="color: #f8bbd9;">dAppUrl</span> = <span style="color: #a5d6a7;">'https://heronwaterwow.github.io/bookish-waffle'</span>;
+    <span style="color: #ffb74d;">const</span> <span style="color: #f8bbd9;">isMobile</span> = <span style="color: #64b5f6;">detectMobile</span>();
+    <span style="color: #ffb74d;">const</span> <span style="color: #f8bbd9;">isPhantomApp</span> = <span style="color: #64b5f6;">detectPhantomApp</span>();
 
-                <div class="wallet-section">
-                    <h3>Функции dApp</h3>
-                    <button class="btn" onclick="connectWallet()">🔗 Подключить кошелек</button>
-                    <button class="btn" onclick="checkBalance()">💰 Проверить баланс</button>
-                    <button class="btn" onclick="sendTransaction()">📤 Отправить транзакцию</button>
-                    <button class="btn" onclick="viewNFTs()">🖼️ Просмотр NFT</button>
-                </div>
+    <span style="color: #ffb74d;">if</span> (<span style="color: #f8bbd9;">isPhantomApp</span>) {
+        <span style="color: #81c784;">// Уже в Phantom, используем прямое подключение</span>
+        <span style="color: #ffb74d;">return</span> <span style="color: #64b5f6;">connectDirectly</span>();
+    }
 
-                <div id="dapp-status" class="alert alert-info">
-                    <strong>Статус:</strong> Готов к подключению кошелька
-                </div>
+    <span style="color: #ffb74d;">if</span> (<span style="color: #f8bbd9;">isMobile</span>) {
+        <span style="color: #81c784;">// Мобильное устройство - используем схему phantom://</span>
+        <span style="color: #ffb74d;">switch</span> (<span style="color: #f8bbd9;">action</span>) {
+            <span style="color: #ffb74d;">case</span> <span style="color: #a5d6a7;">'connect'</span>:
+                <span style="color: #ffb74d;">return</span> <span style="color: #a5d6a7;">`phantom://connection/request?app_url=${dAppUrl}&redirect_link=${dAppUrl}/#connected`</span>;
+            <span style="color: #ffb74d;">case</span> <span style="color: #a5d6a7;">'browse'</span>:
+                <span style="color: #ffb74d;">return</span> <span style="color: #a5d6a7;">`phantom://browse/open?url=${dAppUrl}`</span>;
+        }
+    } <span style="color: #ffb74d;">else</span> {
+        <span style="color: #81c784;">// Браузер - используем app.phantom.app</span>
+        <span style="color: #ffb74d;">const</span> <span style="color: #f8bbd9;">dAppAddress</span> = <span style="color: #a5d6a7;">'heronwaterwow.github.io/bookish-waffle'</span>;
+        <span style="color: #ffb74d;">return</span> <span style="color: #a5d6a7;">`https://app.phantom.app/dapp/${dAppAddress}/${action}`</span>;
+    }
+}
+                <button class="copy-btn" onclick="copyCodeBlock(this)">Копировать код</button>
             </div>
 
-            <!-- Info Page -->
-            <div id="info" class="page">
-                <h2>Информация о диплинках</h2>
-                <p>Подробная информация о том, как работают диплинки в этом приложении:</p>
+            <h3>Обнаружение устройства и Phantom</h3>
+            <div class="code-block">
+<span style="color: #81c784;">// Определение мобильного устройства</span>
+<span style="color: #ffb74d;">function</span> <span style="color: #64b5f6;">detectMobile</span>() {
+    <span style="color: #ffb74d;">return</span> <span style="color: #f8bbd9;">/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i</span>.<span style="color: #64b5f6;">test</span>(<span style="color: #f8bbd9;">navigator.userAgent</span>);
+}
 
-                <div class="wallet-section">
-                    <h3>Как работают диплинки</h3>
-                    <ol>
-                        <li><strong>Обнаружение устройства:</strong> Определяем тип устройства и браузер</li>
-                        <li><strong>Анализ контекста:</strong> Проверяем, нужно ли открывать кошелек</li>
-                        <li><strong>Правильная маршрутизация:</strong> Перенаправляем только при необходимости</li>
-                        <li><strong>Обработка ошибок:</strong> Показываем инструкции при неудаче</li>
-                    </ol>
+<span style="color: #81c784;">// Определение приложения Phantom</span>
+<span style="color: #ffb74d;">function</span> <span style="color: #64b5f6;">detectPhantomApp</span>() {
+    <span style="color: #ffb74d;">return</span> <span style="color: #f8bbd9;">window.phantom</span> && <span style="color: #f8bbd9;">window.phantom.solana</span>;
+}
 
-                    <h3>Поддерживаемые диплинки</h3>
-                    <ul>
-                        <li><code>phantom://</code> - Phantom кошелек</li>
-                        <li><code>trust://</code> - Trust Wallet</li>
-                        <li><code>safepal://</code> - SafePal кошелек</li>
-                        <li><code>cbwallet://</code> - Coinbase Wallet</li>
-                        <li><code>metamask://</code> - MetaMask</li>
-                    </ul>
-                </div>
+<span style="color: #81c784;">// Прямое подключение в Phantom</span>
+<span style="color: #ffb74d;">async function</span> <span style="color: #64b5f6;">connectDirectly</span>() {
+    <span style="color: #ffb74d;">try</span> {
+        <span style="color: #ffb74d;">const</span> <span style="color: #f8bbd9;">response</span> = <span style="color: #ffb74d;">await</span> <span style="color: #f8bbd9;">window.phantom.solana</span>.<span style="color: #64b5f6;">connect</span>();
+        <span style="color: #64b5f6;">console</span>.<span style="color: #64b5f6;">log</span>(<span style="color: #a5d6a7;">'Подключено к Phantom:'</span>, <span style="color: #f8bbd9;">response.publicKey.toString()</span>);
+    } <span style="color: #ffb74d;">catch</span> (<span style="color: #f8bbd9;">error</span>) {
+        <span style="color: #64b5f6;">console</span>.<span style="color: #64b5f6;">error</span>(<span style="color: #a5d6a7;">'Ошибка подключения:'</span>, <span style="color: #f8bbd9;">error</span>);
+    }
+}
+                <button class="copy-btn" onclick="copyCodeBlock(this)">Копировать код</button>
             </div>
+        </div>
 
-            <!-- Settings Page -->
-            <div id="settings" class="page">
-                <h2>Настройки</h2>
-                <p>Настройки приложения и диплинков:</p>
-
-                <div class="wallet-section">
-                    <h3>Настройки диплинков</h3>
-                    <label>
-                        <input type="checkbox" id="auto-redirect" checked> 
-                        Автоматическое перенаправление на мобильных устройствах
-                    </label><br><br>
-                    
-                    <label>
-                        <input type="checkbox" id="show-instructions" checked> 
-                        Показывать инструкции при неудачном диплинке
-                    </label><br><br>
-                    
-                    <label>
-                        <input type="checkbox" id="debug-mode"> 
-                        Режим отладки
-                    </label><br><br>
-
-                    <h3>Предпочтительный кошелек</h3>
-                    <select id="preferred-wallet">
-                        <option value="auto">Автоматический выбор</option>
-                        <option value="phantom">Phantom</option>
-                        <option value="trust">Trust Wallet</option>
-                        <option value="safepal">SafePal</option>
-                        <option value="coinbase">Coinbase Wallet</option>
-                        <option value="metamask">MetaMask</option>
-                    </select><br><br>
-
-                    <button class="btn" onclick="saveSettings()">💾 Сохранить настройки</button>
-                    <button class="btn btn-secondary" onclick="resetSettings()">🔄 Сбросить</button>
-                </div>
+        <!-- Test Results -->
+        <div class="content">
+            <h2>🧪 Результаты тестирования</h2>
+            <div id="test-results" class="alert alert-info">
+                Нажмите на любую карточку дип-линка выше для тестирования
             </div>
         </div>
     </div>
 
-    <!-- Modal for wallet connection -->
-    <div id="walletModal" class="modal">
+    <!-- Modal for detailed info -->
+    <div id="detailModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('walletModal')">&times;</span>
-            <h2>Подключение кошелька</h2>
-            <p id="wallet-modal-text">Выберите способ подключения:</p>
-            <div id="wallet-modal-buttons">
-                <!-- Кнопки будут добавлены динамически -->
+            <span class="close" onclick="closeModal('detailModal')">&times;</span>
+            <h2 id="modal-title">Детали дип-линка</h2>
+            <div id="modal-content">
+                <!-- Содержимое будет добавлено динамически -->
             </div>
         </div>
     </div>
 
     <!-- Debug Panel -->
-    <button class="debug-toggle" onclick="toggleDebug()">🐛</button>
     <div id="debug-panel">
         <h4>Debug Panel</h4>
         <div id="debug-content"></div>
     </div>
 
     <script>
-        // Конфигурация приложения
-        const APP_CONFIG = {
-            baseUrl: 'https://heronwaterwow.github.io/bookish-waffle/',
-            debugMode: false,
-            autoRedirect: true,
-            showInstructions: true,
-            preferredWallet: 'auto'
+        // Конфигурация для вашего сайта
+        const DAPP_CONFIG = {
+            url: 'https://heronwaterwow.github.io/bookish-waffle',
+            address: 'heronwaterwow.github.io/bookish-waffle',
+            name: 'Bookish Waffle dApp'
         };
 
-        // Конфигурация кошельков
-        const WALLET_CONFIG = {
-            phantom: {
-                name: "Phantom",
-                scheme: "phantom://",
-                universalLink: "https://phantom.app/ul/browse/",
-                userAgentPattern: /phantom/i,
-                downloadUrls: {
-                    ios: "https://apps.apple.com/app/phantom-solana-wallet/id1598432977",
-                    android: "https://play.google.com/store/apps/details?id=app.phantom"
-                }
-            },
-            trust: {
-                name: "Trust Wallet",
-                scheme: "trust://",
-                universalLink: "https://link.trustwallet.com/open_url?url=",
-                userAgentPattern: /trust/i,
-                downloadUrls: {
-                    ios: "https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409",
-                    android: "https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp"
-                }
-            },
-            safepal: {
-                name: "SafePal",
-                scheme: "safepal://",
-                universalLink: "https://link.safepal.io/dapp?url=",
-                userAgentPattern: /safepal/i,
-                downloadUrls: {
-                    ios: "https://apps.apple.com/app/safepal-wallet/id1548297139",
-                    android: "https://play.google.com/store/apps/details?id=io.safepal.wallet"
-                }
-            },
-            coinbase: {
-                name: "Coinbase Wallet",
-                scheme: "cbwallet://",
-                universalLink: "https://go.cb-w.com/dapp?cb_url=",
-                userAgentPattern: /coinbasewallet|coinbase/i,
-                downloadUrls: {
-                    ios: "https://apps.apple.com/app/coinbase-wallet-nfts-crypto/id1278383455",
-                    android: "https://play.google.com/store/apps/details?id=org.toshi"
-                }
-            },
-            metamask: {
-                name: "MetaMask",
-                scheme: "metamask://",
-                universalLink: "https://metamask.app.link/dapp/",
-                userAgentPattern: /metamask/i,
-                downloadUrls: {
-                    ios: "https://apps.apple.com/app/metamask/id1438144202",
-                    android: "https://play.google.com/store/apps/details?id=io.metamask"
-                }
-            }
-        };
-
-        // Класс для определения устройства
-        class DeviceDetector {
+        // Класс для работы с Phantom дип-линками
+        class PhantomDeepLinks {
             constructor() {
-                this.userAgent = navigator.userAgent.toLowerCase();
-            }
-
-            isMobile() {
-                return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(this.userAgent);
-            }
-
-            isIOS() {
-                return /iphone|ipad|ipod/i.test(this.userAgent);
-            }
-
-            isAndroid() {
-                return /android/i.test(this.userAgent);
-            }
-
-            getBrowser() {
-                if (/safari/i.test(this.userAgent) && !/chrome|chromium|edg/i.test(this.userAgent)) return 'Safari';
-                if (/chrome/i.test(this.userAgent) && !/edg/i.test(this.userAgent)) return 'Chrome';
-                if (/firefox/i.test(this.userAgent)) return 'Firefox';
-                if (/edg/i.test(this.userAgent)) return 'Edge';
-                if (/yabrowser/i.test(this.userAgent)) return 'Яндекс.Браузер';
-                if (/opera/i.test(this.userAgent)) return 'Opera';
-                return 'Неизвестный браузер';
-            }
-
-            getWalletBrowser() {
-                for (const [key, wallet] of Object.entries(WALLET_CONFIG)) {
-                    if (wallet.userAgentPattern.test(this.userAgent)) {
-                        return key;
-                    }
-                }
-                return null;
-            }
-
-            getDeviceType() {
-                if (this.isIOS()) return 'iOS';
-                if (this.isAndroid()) return 'Android';
-                if (this.isMobile()) return 'Мобильное устройство';
-                return 'Десктоп';
-            }
-        }
-
-        // Класс для обработки диплинков
-        class DeepLinkRouter {
-            constructor() {
-                this.deviceDetector = new DeviceDetector();
-                this.currentPage = 'home';
                 this.init();
             }
 
             init() {
-                this.handleInitialRoute();
-                this.setupEventListeners();
                 this.updateDeviceInfo();
-                this.loadSettings();
+                this.checkPhantomAvailability();
+                this.generateAllDeepLinks();
             }
 
-            handleInitialRoute() {
-                const hash = window.location.hash.slice(1);
-                const urlParams = new URLSearchParams(window.location.search);
-                
-                debug(`Начальный роутинг: hash=${hash}, search=${window.location.search}`);
-
-                // Проверяем, есть ли параметры для диплинка
-                const walletParam = urlParams.get('wallet');
-                const actionParam = urlParams.get('action');
-
-                if (walletParam && actionParam === 'connect') {
-                    debug(`Обнаружен параметр кошелька: ${walletParam}`);
-                    this.handleWalletDeepLink(walletParam);
-                    return;
-                }
-
-                // Обычная навигация по страницам
-                if (hash && this.isValidPage(hash)) {
-                    this.navigateToPage(hash);
-                } else {
-                    this.navigateToPage('home');
-                }
+            // Определение устройства
+            detectMobile() {
+                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
 
-            handleWalletDeepLink(walletType) {
-                debug(`Обработка диплинка кошелька: ${walletType}`);
-                
-                // Переходим на страницу кошельков
-                this.navigateToPage('wallet');
-                
-                // Показываем информацию о подключении
-                setTimeout(() => {
-                    this.showWalletConnectionInfo(walletType);
-                }, 500);
+            detectPhantomApp() {
+                return typeof window.phantom !== 'undefined' && window.phantom.solana;
             }
 
-            showWalletConnectionInfo(walletType) {
-                const wallet = WALLET_CONFIG[walletType];
-                if (!wallet) return;
-
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success';
-                alertDiv.innerHTML = `
-                    <strong>Диплинк обработан!</strong> 
-                    Запрос на подключение кошелька ${wallet.name}. 
-                    <button class="btn" onclick="deepLinkRouter.connectWallet('${walletType}')">
-                        Подключить ${wallet.name}
-                    </button>
-                `;
-
-                const walletPage = document.getElementById('wallet');
-                walletPage.insertBefore(alertDiv, walletPage.firstChild);
-
-                // Удаляем уведомление через 10 секунд
-                setTimeout(() => {
-                    if (alertDiv.parentNode) {
-                        alertDiv.parentNode.removeChild(alertDiv);
-                    }
-                }, 10000);
+            getBrowser() {
+                const userAgent = navigator.userAgent.toLowerCase();
+                if (userAgent.includes('safari') && !userAgent.includes('chrome')) return 'Safari';
+                if (userAgent.includes('chrome')) return 'Chrome';
+                if (userAgent.includes('firefox')) return 'Firefox';
+                if (userAgent.includes('edge')) return 'Edge';
+                return 'Неизвестный браузер';
             }
 
-            isValidPage(page) {
-                return ['home', 'wallet', 'dapp', 'info', 'settings'].includes(page);
-            }
-
-            navigateToPage(page) {
-                debug(`Навигация на страницу: ${page}`);
-                
-                // Скрываем все страницы
-                document.querySelectorAll('.page').forEach(p => {
-                    p.classList.remove('active');
-                });
-
-                // Показываем нужную страницу
-                const targetPage = document.getElementById(page);
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                    this.currentPage = page;
-                }
-
-                // Обновляем навигацию
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.dataset.page === page) {
-                        link.classList.add('active');
-                    }
-                });
-
-                // Обновляем URL без перезагрузки
-                history.pushState({page}, '', `#${page}`);
-            }
-
-            setupEventListeners() {
-                // Обработка кликов по навигации
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const page = link.dataset.page;
-                        this.navigateToPage(page);
-                    });
-                });
-
-                // Обработка кнопки "назад" браузера
-                window.addEventListener('popstate', (e) => {
-                    const page = e.state?.page || 'home';
-                    this.navigateToPage(page);
-                });
-            }
-
+            // Обновление информации об устройстве
             updateDeviceInfo() {
-                document.getElementById('device-type').textContent = this.deviceDetector.getDeviceType();
-                document.getElementById('browser-type').textContent = this.deviceDetector.getBrowser();
+                const isMobile = this.detectMobile();
+                const isPhantom = this.detectPhantomApp();
+                const browser = this.getBrowser();
+
+                document.getElementById('device-type').textContent = isMobile ? 'Мобильное устройство' : 'Десктоп';
+                document.getElementById('browser-type').textContent = browser;
+                document.getElementById('phantom-status').textContent = isPhantom ? 'Установлен и доступен' : 'Не обнаружен';
                 
-                const walletBrowser = this.deviceDetector.getWalletBrowser();
-                document.getElementById('wallet-browser').textContent = walletBrowser ? 
-                    `${WALLET_CONFIG[walletBrowser].name} браузер` : 'Обычный браузер';
-                
-                document.getElementById('current-url').textContent = window.location.href;
+                let recommendation = '';
+                if (isPhantom) {
+                    recommendation = 'Прямое подключение';
+                } else if (isMobile) {
+                    recommendation = 'Мобильные дип-линки (phantom://)';
+                } else {
+                    recommendation = 'Браузерные дип-линки (app.phantom.app)';
+                }
+                document.getElementById('recommendation').textContent = recommendation;
             }
 
-            connectWallet(walletType) {
-                debug(`Подключение кошелька: ${walletType}`);
-                
-                const wallet = WALLET_CONFIG[walletType];
-                if (!wallet) {
-                    debug(`Неизвестный кошелек: ${walletType}`);
-                    return;
+            // Проверка доступности Phantom
+            checkPhantomAvailability() {
+                if (this.detectPhantomApp()) {
+                    this.showAlert('success', 'Phantom кошелек обнаружен и готов к использованию!');
+                } else {
+                    this.showAlert('warning', 'Phantom кошелек не обнаружен. Дип-линки будут перенаправлять на установку.');
                 }
-
-                // Проверяем, находимся ли мы уже в кошельковом браузере
-                const currentWalletBrowser = this.deviceDetector.getWalletBrowser();
-                
-                if (currentWalletBrowser === walletType) {
-                    debug(`Уже в браузере ${wallet.name}, подключаемся напрямую`);
-                    this.connectWalletDirectly(walletType);
-                    return;
-                }
-
-                // Если на мобильном устройстве и не в кошельковом браузере
-                if (this.deviceDetector.isMobile() && !currentWalletBrowser && APP_CONFIG.autoRedirect) {
-                    debug(`Мобильное устройство, открываем ${wallet.name}`);
-                    this.openWalletApp(walletType);
-                    return;
-                }
-
-                // В остальных случаях показываем модальное окно
-                this.showWalletModal(walletType);
             }
 
-            connectWalletDirectly(walletType) {
-                debug(`Прямое подключение к ${walletType}`);
-                
-                // Здесь должна быть реальная логика подключения к кошельку
-                // Для демонстрации просто показываем успешное подключение
-                
-                const statusDiv = document.getElementById('dapp-status');
-                if (statusDiv) {
-                    statusDiv.className = 'alert alert-success';
-                    statusDiv.innerHTML = `<strong>Успешно!</strong> Кошелек ${WALLET_CONFIG[walletType].name} подключен.`;
-                }
+            // Генерация всех дип-линков
+            generateAllDeepLinks() {
+                // Браузерные дип-линки
+                const browserConnectUrl = `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/connect`;
+                const browserSendUrl = `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/send-token?tokenAddress=SOL&amount=0.1`;
+                const browserNftUrl = `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/nft-gallery?collection=all`;
 
-                alert(`Кошелек ${WALLET_CONFIG[walletType].name} успешно подключен!`);
+                // Мобильные дип-линки
+                const mobileConnectUrl = `phantom://connection/request?app_url=${encodeURIComponent(DAPP_CONFIG.url)}&redirect_link=${encodeURIComponent(DAPP_CONFIG.url + '/#connected')}`;
+                const mobileTransactionUrl = `phantom://transaction/send?app_url=${encodeURIComponent(DAPP_CONFIG.url)}&redirect_link=${encodeURIComponent(DAPP_CONFIG.url + '/#transaction-complete')}`;
+                const mobileBrowseUrl = `phantom://browse/open?url=${encodeURIComponent(DAPP_CONFIG.url)}`;
+
+                // Обновляем URL в карточках
+                document.getElementById('browser-connect-url').textContent = browserConnectUrl;
+                document.getElementById('browser-send-url').textContent = browserSendUrl;
+                document.getElementById('browser-nft-url').textContent = browserNftUrl;
+                document.getElementById('mobile-connect-url').textContent = mobileConnectUrl;
+                document.getElementById('mobile-transaction-url').textContent = mobileTransactionUrl;
+                document.getElementById('mobile-browse-url').textContent = mobileBrowseUrl;
             }
 
-            openWalletApp(walletType) {
-                const wallet = WALLET_CONFIG[walletType];
-                const targetUrl = `${APP_CONFIG.baseUrl}?wallet=${walletType}&action=connect`;
-                
-                debug(`Открываем приложение ${wallet.name} с URL: ${targetUrl}`);
+            // Создание правильного дип-линка
+            createDeepLink(action, params = {}) {
+                const isMobile = this.detectMobile();
+                const isPhantom = this.detectPhantomApp();
 
-                // Пробуем схему приложения
-                const deepLink = `${wallet.scheme}open?url=${encodeURIComponent(targetUrl)}`;
-                
-                // Устанавливаем таймаут для показа инструкций
-                const timeout = setTimeout(() => {
-                    if (APP_CONFIG.showInstructions) {
-                        this.showInstallInstructions(walletType);
+                if (isPhantom) {
+                    // Прямое подключение в Phantom
+                    return this.connectDirectly();
+                }
+
+                if (isMobile) {
+                    // Мобильные дип-линки
+                    switch (action) {
+                        case 'connect':
+                            return `phantom://connection/request?app_url=${encodeURIComponent(DAPP_CONFIG.url)}&redirect_link=${encodeURIComponent(DAPP_CONFIG.url + '/#connected')}`;
+                        case 'transaction':
+                            return `phantom://transaction/send?app_url=${encodeURIComponent(DAPP_CONFIG.url)}&redirect_link=${encodeURIComponent(DAPP_CONFIG.url + '/#transaction-complete')}`;
+                        case 'browse':
+                            return `phantom://browse/open?url=${encodeURIComponent(DAPP_CONFIG.url)}`;
                     }
-                }, 2500);
-
-                // Обработчик успешного перехода
-                const handleVisibilityChange = () => {
-                    if (document.hidden) {
-                        clearTimeout(timeout);
-                        document.removeEventListener('visibilitychange', handleVisibilityChange);
-                        debug(`Успешный переход в ${wallet.name}`);
+                } else {
+                    // Браузерные дип-линки
+                    switch (action) {
+                        case 'connect':
+                            return `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/connect`;
+                        case 'send':
+                            return `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/send-token?tokenAddress=${params.token || 'SOL'}&amount=${params.amount || '0.1'}`;
+                        case 'nft':
+                            return `https://app.phantom.app/dapp/${DAPP_CONFIG.address}/nft-gallery?collection=${params.collection || 'all'}`;
                     }
-                };
+                }
+            }
 
-                document.addEventListener('visibilitychange', handleVisibilityChange);
-
-                // Пытаемся открыть приложение
+            // Прямое подключение к Phantom
+            async connectDirectly() {
                 try {
-                    window.location.href = deepLink;
+                    const response = await window.phantom.solana.connect();
+                    this.showAlert('success', `Успешно подключено к Phantom! Публичный ключ: ${response.publicKey.toString().slice(0, 8)}...`);
+                    return response;
                 } catch (error) {
-                    debug(`Ошибка открытия диплинка: ${error.message}`);
-                    clearTimeout(timeout);
-                    this.showInstallInstructions(walletType);
+                    this.showAlert('warning', `Ошибка подключения: ${error.message}`);
+                    throw error;
                 }
             }
 
-            showWalletModal(walletType) {
-                const wallet = WALLET_CONFIG[walletType];
-                const modal = document.getElementById('walletModal');
-                const modalText = document.getElementById('wallet-modal-text');
-                const modalButtons = document.getElementById('wallet-modal-buttons');
-
-                modalText.textContent = `Подключение к ${wallet.name}`;
+            // Тестирование дип-линка
+            testDeepLink(url, type) {
+                this.log(`Тестирование ${type} дип-линка: ${url}`);
                 
-                modalButtons.innerHTML = `
-                    <button class="btn" onclick="deepLinkRouter.connectWalletDirectly('${walletType}')">
-                        🔗 Подключить напрямую
-                    </button>
-                    <button class="btn" onclick="deepLinkRouter.openWalletApp('${walletType}')">
-                        📱 Открыть приложение
-                    </button>
-                    <button class="btn btn-secondary" onclick="closeModal('walletModal')">
-                        ❌ Отмена
-                    </button>
-                `;
+                try {
+                    // Устанавливаем таймаут для обнаружения неудачного перехода
+                    const timeout = setTimeout(() => {
+                        this.showAlert('warning', 'Дип-линк не сработал. Возможно, Phantom не установлен.');
+                    }, 3000);
 
-                modal.style.display = 'block';
-            }
+                    // Обработчик успешного перехода
+                    const handleVisibilityChange = () => {
+                        if (document.hidden) {
+                            clearTimeout(timeout);
+                            document.removeEventListener('visibilitychange', handleVisibilityChange);
+                            this.showAlert('success', 'Дип-линк успешно сработал!');
+                        }
+                    };
 
-            showInstallInstructions(walletType) {
-                const wallet = WALLET_CONFIG[walletType];
-                const deviceType = this.deviceDetector.getDeviceType();
-                
-                let downloadUrl = '';
-                if (this.deviceDetector.isIOS()) {
-                    downloadUrl = wallet.downloadUrls.ios;
-                } else if (this.deviceDetector.isAndroid()) {
-                    downloadUrl = wallet.downloadUrls.android;
-                }
+                    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-                const instructions = `
-                    Приложение ${wallet.name} не установлено или недоступно.
-                    
-                    Инструкции:
-                    1. Установите ${wallet.name} из App Store или Google Play
-                    2. Откройте приложение и создайте кошелек
-                    3. Вернитесь на этот сайт и попробуйте снова
-                    
-                    ${downloadUrl ? `Скачать: ${downloadUrl}` : ''}
-                `;
+                    // Открываем дип-линк
+                    window.location.href = url;
 
-                alert(instructions);
-            }
-
-            loadSettings() {
-                const settings = localStorage.getItem('dapp-settings');
-                if (settings) {
-                    const parsed = JSON.parse(settings);
-                    Object.assign(APP_CONFIG, parsed);
-                    this.updateSettingsUI();
+                } catch (error) {
+                    this.log(`Ошибка при тестировании дип-линка: ${error.message}`);
+                    this.showAlert('warning', `Ошибка: ${error.message}`);
                 }
             }
 
-            saveSettings() {
-                APP_CONFIG.autoRedirect = document.getElementById('auto-redirect').checked;
-                APP_CONFIG.showInstructions = document.getElementById('show-instructions').checked;
-                APP_CONFIG.debugMode = document.getElementById('debug-mode').checked;
-                APP_CONFIG.preferredWallet = document.getElementById('preferred-wallet').value;
+            // Показ уведомления
+            showAlert(type, message) {
+                const testResults = document.getElementById('test-results');
+                testResults.className = `alert alert-${type}`;
+                testResults.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            }
 
-                localStorage.setItem('dapp-settings', JSON.stringify(APP_CONFIG));
+            // Логирование
+            log(message) {
+                console.log(`[PhantomDeepLinks] ${message}`);
                 
-                alert('Настройки сохранены!');
-                debug('Настройки сохранены', APP_CONFIG);
-            }
-
-            updateSettingsUI() {
-                document.getElementById('auto-redirect').checked = APP_CONFIG.autoRedirect;
-                document.getElementById('show-instructions').checked = APP_CONFIG.showInstructions;
-                document.getElementById('debug-mode').checked = APP_CONFIG.debugMode;
-                document.getElementById('preferred-wallet').value = APP_CONFIG.preferredWallet;
-            }
-        }
-
-        // Глобальные функции
-        function handleWalletConnection(walletType) {
-            deepLinkRouter.connectWallet(walletType);
-        }
-
-        function testDeepLink() {
-            const testUrl = `${APP_CONFIG.baseUrl}?wallet=phantom&action=connect`;
-            debug(`Тестируем диплинк: ${testUrl}`);
-            window.open(testUrl, '_blank');
-        }
-
-        function showDeviceInfo() {
-            const info = {
-                userAgent: navigator.userAgent,
-                device: deepLinkRouter.deviceDetector.getDeviceType(),
-                browser: deepLinkRouter.deviceDetector.getBrowser(),
-                wallet: deepLinkRouter.deviceDetector.getWalletBrowser(),
-                mobile: deepLinkRouter.deviceDetector.isMobile(),
-                ios: deepLinkRouter.deviceDetector.isIOS(),
-                android: deepLinkRouter.deviceDetector.isAndroid()
-            };
-            
-            alert(JSON.stringify(info, null, 2));
-        }
-
-        function connectWallet() {
-            deepLinkRouter.navigateToPage('wallet');
-        }
-
-        function checkBalance() {
-            alert('Функция проверки баланса (демо)');
-        }
-
-        function sendTransaction() {
-            alert('Функция отправки транзакции (демо)');
-        }
-
-        function viewNFTs() {
-            alert('Функция просмотра NFT (демо)');
-        }
-
-        function saveSettings() {
-            deepLinkRouter.saveSettings();
-        }
-
-        function resetSettings() {
-            localStorage.removeItem('dapp-settings');
-            location.reload();
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        function toggleDebug() {
-            const panel = document.getElementById('debug-panel');
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function debug(message, data = null) {
-            const timestamp = new Date().toLocaleTimeString();
-            const logMessage = `[${timestamp}] ${message}`;
-            
-            console.log(logMessage, data);
-            
-            if (APP_CONFIG.debugMode) {
                 const debugContent = document.getElementById('debug-content');
                 const logEntry = document.createElement('div');
-                logEntry.textContent = logMessage;
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
                 logEntry.style.marginBottom = '5px';
                 logEntry.style.fontSize = '11px';
                 
                 debugContent.appendChild(logEntry);
                 
                 // Ограничиваем количество сообщений
-                while (debugContent.children.length > 20) {
+                while (debugContent.children.length > 10) {
                     debugContent.removeChild(debugContent.firstChild);
                 }
                 
@@ -997,12 +723,52 @@
             }
         }
 
-        // Инициализация приложения
-        let deepLinkRouter;
+        // Глобальные функции
+        function testBrowserDeepLink(action) {
+            const url = phantomDeepLinks.createDeepLink(action);
+            phantomDeepLinks.testDeepLink(url, 'браузерный');
+        }
+
+        function testMobileDeepLink(action) {
+            const url = phantomDeepLinks.createDeepLink(action);
+            phantomDeepLinks.testDeepLink(url, 'мобильный');
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                phantomDeepLinks.showAlert('success', 'Дип-линк скопирован в буфер обмена!');
+            }).catch(err => {
+                phantomDeepLinks.showAlert('warning', 'Не удалось скопировать в буфер обмена');
+            });
+        }
+
+        function copyCodeBlock(button) {
+            const codeBlock = button.parentElement;
+            const text = codeBlock.textContent.replace('Копировать код', '').trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Скопировано!';
+                setTimeout(() => {
+                    button.textContent = 'Копировать код';
+                }, 2000);
+            });
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Инициализация
+        let phantomDeepLinks;
 
         document.addEventListener('DOMContentLoaded', function() {
-            debug('Инициализация Deep Link Router');
-            deepLinkRouter = new DeepLinkRouter();
+            phantomDeepLinks = new PhantomDeepLinks();
+            
+            // Показываем debug panel
+            document.getElementById('debug-panel').style.display = 'block';
         });
 
         // Обработка кликов вне модальных окон
