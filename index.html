@@ -1,124 +1,317 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Подключение кошельков</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .wallet-form { margin-top: 20px; display: none; }
-        .wallet-form input { width: 100%; padding: 10px; margin-bottom: 10px; }
-        .wallet-form button { padding: 10px; background: #4a90e2; color: white; border: none; cursor: pointer; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Подключение к Solana кошелькам</title>
+  
+  <!-- Библиотека для определения устройства -->
+  <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
+  
+  <!-- Solana Web3.js для десктопного подключения -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: white;
+    }
+
+    #connectWalletBtn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: #4a90e2;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #connectWalletBtn:hover {
+      background-color: #357abd;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    .connect-wallet {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 20px;
+      width: 350px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 1001;
+      color: #333;
+    }
+
+    .connect-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .connect-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      color: #333;
+    }
+
+    .wallet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .wallet-option {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .wallet-option:hover {
+      background: #e0e0e0;
+    }
+
+    .wallet-option img {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      border-radius: 12px;
+    }
+
+    .wallet-option span {
+      flex-grow: 1;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .mobile-instructions {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      color: #0066cc;
+    }
+
+    @media (max-width: 394px) {
+      .connect-wallet {
+        width: 100vw;
+        padding: 15px;
+        border-radius: 15px 15px 0 0;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Подключение криптокошельков</h1>
-    <button onclick="connectWallet('phantom')">Подключить Phantom</button>
-    <button onclick="connectWallet('solflare')">Подключить Solflare</button>
-    <button onclick="connectWallet('trust')">Подключить Trust Wallet</button>
-    <button onclick="connectWallet('coinbase')">Подключить Coinbase Wallet</button>
-    <button onclick="connectWallet('safepal')">Подключить SafePal</button>
-    <button onclick="connectWallet('backpack')">Подключить Backpack</button>
-    <button onclick="connectWallet('okx')">Подключить OKX Wallet</button>
-    <button onclick="connectWallet('exodus')">Подключить Exodus</button>
-    <button onclick="showCustomWalletForm()">Подключить мой кошелек</button>
+  <!-- Кнопка для открытия модального окна -->
+  <button id="connectWalletBtn">Подключить кошелек</button>
 
-    <div class="wallet-form" id="customWalletForm">
-        <input type="text" id="walletInput" placeholder="Введите приватный ключ или мнемоническую фразу">
-        <button onclick="connectCustomWallet()">Подключить</button>
+  <!-- Оверлей модального окна -->
+  <div id="modalOverlay" class="modal-overlay hidden"></div>
+
+  <!-- Модальное окно выбора кошелька -->
+  <div id="connectWalletModal" class="connect-wallet hidden">
+    <div class="connect-header">
+      <span></span>
+      <h2>Выберите кошелек</h2>
+      <button class="close-btn" title="Закрыть">×</button>
+    </div>
+    
+    <div id="mobileInstructions" class="mobile-instructions hidden">
+      <strong>📱 Инструкции для мобильных устройств:</strong><br>
+      1. Убедитесь, что приложение кошелька установлено<br>
+      2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
     </div>
 
-    <script>
-        const wallets = {
-            phantom: {
-                deeplink: 'phantom://',
-                universal: 'https://phantom.app/',
-                appStore: 'https://apps.apple.com/app/phantom-crypto-wallet/id1598432977',
-                playStore: 'https://play.google.com/store/apps/details?id=app.phantom'
-            },
-            solflare: {
-                deeplink: 'solflare://',
-                universal: 'https://solflare.com/',
-                appStore: 'https://apps.apple.com/app/solflare/id1568374995',
-                playStore: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
-            },
-            trust: {
-                deeplink: 'trust://',
-                universal: 'https://link.trustwallet.com/',
-                appStore: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409',
-                playStore: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
-            },
-            coinbase: {
-                deeplink: 'cbwallet://',
-                universal: 'https://go.cb-w.com/',
-                appStore: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455',
-                playStore: 'https://play.google.com/store/apps/details?id=org.toshi'
-            },
-            safepal: {
-                deeplink: 'safepal://',
-                universal: 'https://www.safepal.io/',
-                appStore: 'https://apps.apple.com/app/safepal-wallet/id1548297139',
-                playStore: 'https://play.google.com/store/apps/details?id=io.safepal.wallet'
-            },
-            backpack: {
-                deeplink: 'backpack://',
-                universal: 'https://backpack.app/',
-                appStore: 'https://apps.apple.com/app/backpack/id1234567890',
-                playStore: 'https://play.google.com/store/apps/details?id=com.backpack'
-            },
-            okx: {
-                deeplink: 'okx://',
-                universal: 'https://www.okx.com/',
-                appStore: 'https://apps.apple.com/app/okx/id1327268470',
-                playStore: 'https://play.google.com/store/apps/details?id=com.okinc.okex'
-            },
-            exodus: {
-                deeplink: 'exodus://',
-                universal: 'https://www.exodus.com/',
-                appStore: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820',
-                playStore: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus'
-            }
-        };
+    <div class="wallet-list">
+      <div class="wallet-option" data-wallet="phantom">
+        <img src="https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png" alt="Phantom" />
+        <span>Phantom</span>
+      </div>
+      <div class="wallet-option" data-wallet="solflare">
+        <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
+        <span>Solflare</span>
+      </div>
+      <div class="wallet-option" data-wallet="trust">
+        <img src="https://trustwallet.com/assets/images/favicon.png" alt="Trust Wallet" />
+        <span>Trust Wallet</span>
+      </div>
+      <div class="wallet-option" data-wallet="coinbase">
+        <img src="https://wallet.coinbase.com/assets/images/favicon.ico" alt="Coinbase Wallet" />
+        <span>Coinbase Wallet</span>
+      </div>
+      <div class="wallet-option" data-wallet="safepal">
+        <img src="https://www.safepal.io/favicon.ico" alt="SafePal" />
+        <span>SafePal</span>
+      </div>
+      <div class="wallet-option" data-wallet="backpack">
+        <img src="https://backpack.app/favicon.ico" alt="Backpack" />
+        <span>Backpack</span>
+      </div>
+      <div class="wallet-option" data-wallet="okx">
+        <img src="https://www.okx.com/favicon.ico" alt="OKX Wallet" />
+        <span>OKX Wallet</span>
+      </div>
+      <div class="wallet-option" data-wallet="exodus">
+        <img src="https://www.exodus.com/favicon.ico" alt="Exodus" />
+        <span>Exodus</span>
+      </div>
+    </div>
+  </div>
 
-        function connectWallet(walletName) {
-            const wallet = wallets[walletName];
-            if (!wallet) {
-                alert('Кошелек не поддерживается!');
-                return;
-            }
-
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const isAndroid = /Android/.test(navigator.userAgent);
-
-            window.location.href = wallet.deeplink;
-
-            setTimeout(() => {
-                if (document.hidden) return;
-
-                if (isIOS) {
-                    window.location.href = wallet.appStore;
-                } else if (isAndroid) {
-                    window.location.href = wallet.playStore;
-                } else {
-                    window.location.href = wallet.universal;
-                }
-            }, 1000);
+  <script>
+    // Конфигурация кошельков
+    const WALLET_CONFIG = {
+      phantom: {
+        name: 'Phantom',
+        mobile: {
+          scheme: 'phantom://browse/',
+          universal: 'https://phantom.app/ul/browse/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=app.phantom',
+            ios: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
+          }
+        },
+        desktop: {
+          extensionUrl: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa'
+        },
+        checkInstalled: () => !!window.phantom?.solana?.isPhantom
+      },
+      solflare: {
+        name: 'Solflare',
+        mobile: {
+          scheme: 'solflare://ul/v1/browse/',
+          universal: 'https://solflare.com/ul/v1/browse/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=com.solflare.mobile',
+            ios: 'https://apps.apple.com/app/solflare/id1580902717'
+          }
+        },
+        desktop: {
+          extensionUrl: 'https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic'
+        },
+        checkInstalled: () => !!window.solflare?.isSolflare
+      },
+      trust: {
+        name: 'Trust Wallet',
+        mobile: {
+          scheme: 'trust://',
+          universal: 'https://link.trustwallet.com/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp',
+            ios: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
+          }
         }
-
-        function showCustomWalletForm() {
-            document.getElementById('customWalletForm').style.display = 'block';
+      },
+      coinbase: {
+        name: 'Coinbase Wallet',
+        mobile: {
+          scheme: 'cbwallet://',
+          universal: 'https://go.cb-w.com/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=org.toshi',
+            ios: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455'
+          }
         }
-
-        function connectCustomWallet() {
-            const walletInput = document.getElementById('walletInput').value;
-            if (!walletInput) {
-                alert('Пожалуйста, введите данные кошелька!');
-                return;
-            }
-
-            alert('Подключение пользовательского кошелька...');
-            console.log('Пользовательский кошелек:', walletInput);
+      },
+      safepal: {
+        name: 'SafePal',
+        mobile: {
+          scheme: 'safepal://',
+          universal: 'https://www.safepal.io/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=io.safepal.wallet',
+            ios: 'https://apps.apple.com/app/safepal-wallet/id1548297139'
+          }
         }
-    </script>
-</body>
-</html>
+      },
+      backpack: {
+        name: 'Backpack',
+        mobile: {
+          scheme: 'backpack://',
+          universal: 'https://backpack.app/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=com.backpack',
+            ios: 'https://apps.apple.com/app/backpack/id1234567890'
+          }
+        }
+      },
+      okx: {
+        name: 'OKX Wallet',
+        mobile: {
+          scheme: 'okx://',
+          universal: 'https://www.okx.com/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=com.okinc.okex',
+            ios: 'https://apps.apple.com/app/okx/id1327268470'
+          }
+        }
+      },
+      exodus: {
+        name: 'Exodus',
+        mobile: {
+          scheme: 'exodus://',
+          universal: 'https://www.exodus.com/',
+          store: {
+            android: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus',
+            ios: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
+          }
+        }
+      }
+    };
+
+    // Определение устройства
+    function detectDevice() {
+      const md = new MobileDetect(window.navigator.userAgent);
+      const isMobile = md.mobile() !== null;
+      const os = md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop';
+      return { isMobile, os };
+    }
+
+    // Проверка установки кошельков на десктопе
+    function checkInstalledWallets() {
+      Object.keys(WALLET_CONFIG).forEach(walletKey => {
+        const wallet = WALLET_CONFIG[walletKey];
+        if (wallet.checkInstalled) {
+          const statusElement = document.getElementById(`${walletKey}Status
