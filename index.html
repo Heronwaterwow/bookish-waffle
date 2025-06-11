@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Подключение к кошелькам (мобильная версия)</title>
+  <title>Подключение к Solana кошелькам</title>
   
   <!-- Библиотека для определения устройства -->
   <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
@@ -212,151 +212,187 @@
       phantom: {
         name: 'Phantom',
         mobile: {
-          scheme: 'phantom://ul/v1/browse/',
-          universal: 'https://phantom.app/ul/v1/browse/',
-          requiresRef: true,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=app.phantom',
-            ios: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
+          android: { 
+            scheme: 'phantom://ul/v1/', 
+            universal: 'https://phantom.app/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=app.phantom'
+          },
+          ios: { 
+            scheme: 'phantom://ul/v1/', 
+            universal: 'https://phantom.app/ul/v1/',
+            store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
           }
         }
       },
       solflare: {
         name: 'Solflare',
         mobile: {
-          scheme: 'solflare://ul/v1/browse/',
-          universal: 'https://solflare.com/ul/v1/browse/',
-          requiresRef: true,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=com.solflare.mobile',
-            ios: 'https://apps.apple.com/app/solflare/id1580902717'
+          android: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
+          },
+          ios: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://apps.apple.com/app/solflare/id1580902717'
           }
         }
       },
       trust: {
         name: 'Trust Wallet',
         mobile: {
-          scheme: 'trust://open_url?url=',
-          universal: 'https://link.trustwallet.com/open_url?url=',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp',
-            ios: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
+          android: { 
+            scheme: 'trust://open_url?browser=', 
+            universal: 'https://link.trustwallet.com/open_url?browser=',
+            store: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
+          },
+          ios: { 
+            scheme: 'trust://open_url?browser=', 
+            universal: 'https://link.trustwallet.com/open_url?browser=',
+            store: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
           }
         }
       },
       coinbase: {
         name: 'Coinbase Wallet',
         mobile: {
-          scheme: 'cbwallet://',
-          universal: 'https://go.cb-w.com/',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=org.toshi',
-            ios: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455'
+          android: { 
+            scheme: 'cbwallet://dapp?uri=', 
+            universal: 'https://go.cb-w.com/dapp?cb_url=',
+            store: 'https://play.google.com/store/apps/details?id=org.toshi'
+          },
+          ios: { 
+            scheme: 'cbwallet://dapp?uri=', 
+            universal: 'https://go.cb-w.com/dapp?cb_url=',
+            store: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455'
           }
         }
       },
       safepal: {
         name: 'SafePal',
         mobile: {
-          scheme: 'safepal://',
-          universal: 'https://www.safepal.com/download',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=io.safepal.wallet',
-            ios: 'https://apps.apple.com/app/safepal-wallet/id1548297139'
+          android: { 
+            scheme: 'safepal://dapp?uri=', 
+            universal: 'https://www.safepal.com/download',
+            store: 'https://play.google.com/store/apps/details?id=io.safepal.wallet'
+          },
+          ios: { 
+            scheme: 'safepal://dapp?uri=', 
+            universal: 'https://www.safepal.com/download',
+            store: 'https://apps.apple.com/app/safepal-wallet/id1548297139'
           }
         }
       },
       backpack: {
         name: 'Backpack',
         mobile: {
-          scheme: 'backpack://',
-          universal: 'https://backpack.app/',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=app.backpack',
-            ios: 'https://apps.apple.com/app/backpack-wallet/id6444008133'
+          android: { 
+            scheme: 'backpack://v1/', 
+            universal: 'https://backpack.app/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=app.backpack' // Может отсутствовать
+          },
+          ios: { 
+            scheme: 'backpack://v1/', 
+            universal: 'https://backpack.app/ul/v1/',
+            store: 'https://apps.apple.com/app/backpack-wallet/id6444008133'
           }
         }
       },
       okx: {
         name: 'OKX Wallet',
         mobile: {
-          scheme: 'okx://wallet/',
-          universal: 'https://www.okx.com/download',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=com.okinc.okex',
-            ios: 'https://apps.apple.com/app/okx/id1327268470'
+          android: { 
+            scheme: 'okx://wallet/dapp/details?dappUrl=', 
+            universal: 'https://www.okx.com/web3',
+            store: 'https://play.google.com/store/apps/details?id=com.okinc.okex'
+          },
+          ios: { 
+            scheme: 'okx://wallet/dapp/details?dappUrl=', 
+            universal: 'https://www.okx.com/web3',
+            store: 'https://apps.apple.com/app/okx/id1327268470'
           }
         }
       },
       exodus: {
         name: 'Exodus',
         mobile: {
-          scheme: 'exodus://',
-          universal: 'https://www.exodus.com/mobile',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus',
-            ios: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
+          android: { 
+            scheme: 'exodus://open?url=', 
+            universal: 'https://www.exodus.com/mobile',
+            store: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus'
+          },
+          ios: { 
+            scheme: 'exodus://open?url=', 
+            universal: 'https://www.exodus.com/mobile',
+            store: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
           }
         }
       },
       bitget: {
         name: 'Bitget Wallet',
         mobile: {
-          scheme: 'bitkeep://bkconnect?action=dapp&url=',
-          universal: 'https://bkcode.vip?action=dapp&url=',
-          requiresRef: false,
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=com.bitkeep.app',
-            ios: 'https://apps.apple.com/app/bitkeep-crypto-defi-wallet/id1395301115'
+          android: { 
+            scheme: 'bitkeep://bkconnect?action=dapp&url=', 
+            universal: 'https://bkcode.vip?action=dapp&url=',
+            store: 'https://play.google.com/store/apps/details?id=com.bitkeep.app'
+          },
+          ios: { 
+            scheme: 'bitkeep://bkconnect?action=dapp&url=', 
+            universal: 'https://bkcode.vip?action=dapp&url=',
+            store: 'https://apps.apple.com/app/bitkeep-crypto-defi-wallet/id1395301115'
           }
         }
       }
     };
 
     // Определение устройства
-    function detectDevice() {
-      const md = new MobileDetect(window.navigator.userAgent);
-      const isMobile = md.mobile() !== null;
-      const os = md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop';
-      return { isMobile, os };
-    }
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = {
+      isMobile: md.mobile() !== null,
+      os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
+    };
 
-    // Открытие глубоких ссылок для мобильных устройств
-    function openWalletDeepLink(walletKey) {
+    // Функция для создания ссылок для кошельков
+    function createWalletLink(walletKey) {
       const wallet = WALLET_CONFIG[walletKey];
-      if (!wallet) return;
-      
-      const { isMobile, os } = detectDevice();
-      if (!isMobile) {
-        alert('Этот сайт предназначен только для мобильных устройств.');
-        return;
-      }
+      if (!wallet || !device.isMobile) return null;
       
       const currentUrl = encodeURIComponent(window.location.href);
-      const mobileConfig = wallet.mobile;
-      const refUrl = currentUrl;
-      const deepLink = mobileConfig.scheme + currentUrl + (mobileConfig.requiresRef ? '?ref=' + refUrl : '');
-      const universalLink = mobileConfig.universal + currentUrl + (mobileConfig.requiresRef ? '?ref=' + refUrl : '');
-      const storeLink = mobileConfig.store[os];
+      const platform = device.os;
+      const mobileConfig = wallet.mobile[platform];
+      
+      return {
+        deepLink: `${mobileConfig.scheme}${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}`,
+        storeLink: mobileConfig.store
+      };
+    }
+
+    // Функция для открытия браузера кошелька
+    function openWallet(walletKey) {
+      const links = createWalletLink(walletKey);
+      if (!links) {
+        alert('Эта функция доступна только на мобильных устройствах.');
+        return;
+      }
 
       // Попытка открыть глубокую ссылку
-      window.location.href = deepLink;
-      
+      const deepLinkAnchor = document.createElement('a');
+      deepLinkAnchor.href = links.deepLink;
+      deepLinkAnchor.click();
+
       // Резервный переход по универсальной ссылке через 1.5 секунды
       setTimeout(() => {
         if (!document.hidden) {
-          window.location.href = universalLink;
-          // Через 2 секунды предлагаем установить приложение
+          const universalLinkAnchor = document.createElement('a');
+          universalLinkAnchor.href = links.universalLink;
+          universalLinkAnchor.click();
+          // Если универсальная ссылка не сработала, предлагаем установить приложение
           setTimeout(() => {
             if (!document.hidden) {
-              if (confirm(`${wallet.name} не установлен. Перейти в магазин приложений?`)) {
-                window.location.href = storeLink;
+              if (confirm(`${WALLET_CONFIG[walletKey].name} не установлен. Перейти в магазин приложений?`)) {
+                window.location.href = links.storeLink;
               }
             }
           }, 2000);
@@ -373,7 +409,7 @@
     function openModal() {
       connectWalletModal.classList.remove('hidden');
       modalOverlay.classList.remove('hidden');
-      document.getElementById('mobileInstructions').classList.toggle('hidden', !detectDevice().isMobile);
+      document.getElementById('mobileInstructions').classList.toggle('hidden', !device.isMobile);
     }
 
     function closeModal() {
@@ -389,8 +425,8 @@
     document.querySelectorAll('.wallet-option').forEach(option => {
       option.addEventListener('click', () => {
         const walletKey = option.getAttribute('data-wallet');
-        openWalletDeepLink(walletKey);
-        closeModal();
+        openWallet(walletKey);
+        setTimeout(closeModal, 1500); // Закрытие модального окна после попытки открытия
       });
     });
   </script>
