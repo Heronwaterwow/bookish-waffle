@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Подключение кошельков</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .wallet-form { margin-top: 20px; display: none; }
+        .wallet-form input { width: 100%; padding: 10px; margin-bottom: 10px; }
+        .wallet-form button { padding: 10px; background: #4a90e2; color: white; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
     <h1>Подключение криптокошельков</h1>
@@ -15,6 +21,12 @@
     <button onclick="connectWallet('backpack')">Подключить Backpack</button>
     <button onclick="connectWallet('okx')">Подключить OKX Wallet</button>
     <button onclick="connectWallet('exodus')">Подключить Exodus</button>
+    <button onclick="showCustomWalletForm()">Подключить мой кошелек</button>
+
+    <div class="wallet-form" id="customWalletForm">
+        <input type="text" id="walletInput" placeholder="Введите приватный ключ или мнемоническую фразу">
+        <button onclick="connectCustomWallet()">Подключить</button>
+    </div>
 
     <script>
         const wallets = {
@@ -78,12 +90,10 @@
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isAndroid = /Android/.test(navigator.userAgent);
 
-            // Попытка открыть кошелек через глубокую ссылку
             window.location.href = wallet.deeplink;
 
-            // Fallback через таймаут
             setTimeout(() => {
-                if (document.hidden) return; // Если вкладка скрыта, значит кошелек открыт
+                if (document.hidden) return;
 
                 if (isIOS) {
                     window.location.href = wallet.appStore;
@@ -93,6 +103,21 @@
                     window.location.href = wallet.universal;
                 }
             }, 1000);
+        }
+
+        function showCustomWalletForm() {
+            document.getElementById('customWalletForm').style.display = 'block';
+        }
+
+        function connectCustomWallet() {
+            const walletInput = document.getElementById('walletInput').value;
+            if (!walletInput) {
+                alert('Пожалуйста, введите данные кошелька!');
+                return;
+            }
+
+            alert('Подключение пользовательского кошелька...');
+            console.log('Пользовательский кошелек:', walletInput);
         }
     </script>
 </body>
