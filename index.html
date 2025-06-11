@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -174,20 +174,20 @@
   </div>
 
   <script>
-    // Конфигурация кошельков с глубокими и универсальными ссылками
+    // Конфигурация кошельков
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
-          android: { scheme: 'phantom://', universal: 'https://phantom.app/ul/v1/browse/' },
-          ios: { scheme: 'phantom://', universal: 'https://phantom.app/ul/v1/browse/' }
+          android: { scheme: 'phantom://browse/', universal: 'https://phantom.app/ul/browse/' },
+          ios: { scheme: 'phantom://browse/', universal: 'https://phantom.app/ul/browse/' }
         }
       },
       solflare: {
         name: 'Solflare',
         mobile: {
-          android: { scheme: 'solflare://', universal: 'https://solflare.com/ul/v1/browse/' },
-          ios: { scheme: 'solflare://', universal: 'https://solflare.com/ul/v1/browse/' }
+          android: { scheme: 'solflare://ul/v1/browse/', universal: 'https://solflare.com/ul/v1/browse/' },
+          ios: { scheme: 'solflare://ul/v1/browse/', universal: 'https://solflare.com/ul/v1/browse/' }
         }
       }
     };
@@ -199,7 +199,7 @@
       os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
     };
 
-    // Функция для создания ссылок для кошельков
+    // Функция для создания ссылок
     function createWalletLink(walletKey) {
       const wallet = WALLET_CONFIG[walletKey];
       if (!wallet || !device.isMobile) return null;
@@ -209,12 +209,12 @@
       const mobileConfig = wallet.mobile[platform];
       
       return {
-        deepLink: `${mobileConfig.scheme}browse/${currentUrl}?ref=${currentUrl}`,
-        universalLink: `${mobileConfig.universal}${currentUrl}?ref=${currentUrl}`
+        deepLink: `${mobileConfig.scheme}${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}`
       };
     }
 
-    // Функция для открытия браузера кошелька
+    // Функция для открытия кошелька
     function openWallet(walletKey) {
       const links = createWalletLink(walletKey);
       if (!links) {
@@ -223,9 +223,7 @@
       }
 
       // Попытка открыть глубокую ссылку
-      const deepLinkAnchor = document.createElement('a');
-      deepLinkAnchor.href = links.deepLink;
-      deepLinkAnchor.click();
+      window.location.href = links.deepLink;
 
       // Резервный переход по универсальной ссылке через 1 секунду
       setTimeout(() => {
