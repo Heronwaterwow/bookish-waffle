@@ -293,12 +293,73 @@
     function waitForScripts(callback) {
       const checkScripts = () => {
         if (window['@solana/wallet-adapter-wallets'] && window['@solana/wallet-adapter-walletconnect']) {
+          console.log('Скрипты загружены, инициализация адаптеров');
           callback();
         } else {
+          console.log('Ожидание загрузки скриптов...');
           setTimeout(checkScripts, 100);
         }
       };
       checkScripts();
+    }
+
+    // Управление модальным окном
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const connectWalletModal = document.getElementById('connectWalletModal');
+    const closeBtn = document.querySelector('.close-btn');
+
+    function openModal() {
+      console.log('Кнопка нажата, открывается модальное окно');
+      const { isMobile } = device;
+      const walletList = document.querySelector('.wallet-list');
+      walletList.innerHTML = '';
+      Object.entries(WALLET_CONFIG).forEach(([key, config]) => {
+        console.log(`Добавление кошелька: ${key}`);
+        if (isMobile) {
+          if (config.mobile || key === 'walletconnect') {
+            const div = document.createElement('div');
+            div.className = 'wallet-option';
+            div.dataset.wallet = key;
+            div.innerHTML = `<img src="${config.icon}" alt="${config.name}" /><span>${config.name}</span>`;
+            walletList.appendChild(div);
+          }
+        } else {
+          const div = document.createElement('div');
+          div.className = 'wallet-option';
+          div.dataset.wallet = key;
+          div.innerHTML = `<img src="${config.icon}" alt="${config.name}" /><span>${config.name}</span>`;
+          walletList.appendChild(div);
+        }
+      });
+      connectWalletModal.classList.remove('hidden');
+      modalOverlay.classList.remove('hidden');
+      document.getElementById('mobileInstructions').classList.toggle('hidden', !isMobile);
+    }
+
+    function closeModal() {
+      console.log('Закрытие модального окна');
+      connectWalletModal.classList.add('hidden');
+      modalOverlay.classList.add('hidden');
+    }
+
+    // Проверка, найдена ли кнопка
+    if (!connectWalletBtn) {
+      console.error('Кнопка connectWalletBtn не найдена');
+    } else {
+      connectWalletBtn.addEventListener('click', openModal);
+    }
+
+    if (!closeBtn) {
+      console.error('Кнопка закрытия не найдена');
+    } else {
+      closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (!modalOverlay) {
+      console.error('Модальный оверлей не найден');
+    } else {
+      modalOverlay.addEventListener('click', closeModal);
     }
 
     // Инициализация адаптеров после загрузки скриптов
@@ -340,9 +401,11 @@
 
       // Функция для подключения через адаптер
       async function connectWithAdapter(walletKey) {
+        console.log(`Попытка подключения к кошельку: ${walletKey}`);
         const adapter = walletAdapters[walletKey];
         if (!adapter) {
           alert('Адаптер для этого кошелька не найден');
+          console.error(`Адаптер для ${walletKey} не найден`);
           return;
         }
         try {
@@ -357,8 +420,12 @@
 
       // Функция для открытия глубоких ссылок на мобильных устройствах
       function openWalletDeepLink(walletKey) {
+        console.log(`Открытие глубокой ссылки для кошелька: ${walletKey}`);
         const config = WALLET_CONFIG[walletKey];
-        if (!config.mobile) return;
+        if (!config.mobile) {
+          console.log(`Мобильная конфигурация для ${walletKey} отсутствует`);
+          return;
+        }
         
         const { os } = device;
         const currentUrl = encodeURIComponent('https://heronwaterwow.github.io/bookish-waffle/');
@@ -366,6 +433,10 @@
         const deepLink = `${mobileConfig.scheme}${currentUrl}`;
         const universalLink = `${mobileConfig.universal}${currentUrl}`;
         const storeLink = mobileConfig.store[os];
+
+        console.log(`Глубокая ссылка: ${deepLink}`);
+        console.log(`Универсальная ссылка: ${universalLink}`);
+        console.log(`Ссылка на магазин: ${storeLink}`);
 
         // Попытка открыть глубокую ссылку
         const deepLinkAnchor = document.createElement('a');
@@ -375,12 +446,14 @@
         // Резервный переход по универсальной ссылке через 1.5 секунды
         setTimeout(() => {
           if (!document.hidden) {
+            console.log('Переход по универсальной ссылке');
             const universalLinkAnchor = document.createElement('a');
             universalLinkAnchor.href = universalLink;
             universalLinkAnchor.click();
             // Через 2 секунды предлагаем установить приложение
             setTimeout(() => {
               if (!document.hidden) {
+                console.log('Предложение установить приложение');
                 if (confirm(`${config.name} не установлен. Перейти в магазин приложений?`)) {
                   window.location.href = storeLink;
                 }
@@ -390,53 +463,14 @@
         }, 1500);
       }
 
-      // Управление модальным окном
-      const connectWalletBtn = document.getElementById('connectWalletBtn');
-      const modalOverlay = document.getElementById('modalOverlay');
-      const connectWalletModal = document.getElementById('connectWalletModal');
-      const closeBtn = document.querySelector('.close-btn');
-
-      function openModal() {
-        const { isMobile } = device;
-        const walletList = document.querySelector('.wallet-list');
-        walletList.innerHTML = '';
-        Object.entries(WALLET_CONFIG).forEach(([key, config]) => {
-          if (isMobile) {
-            if (config.mobile || key === 'walletconnect') {
-              const div = document.createElement('div');
-              div.className = 'wallet-option';
-              div.dataset.wallet = key;
-              div.innerHTML = `<img src="${config.icon}" alt="${config.name}" /><span>${config.name}</span>`;
-              walletList.appendChild(div);
-            }
-          } else {
-            const div = document.createElement('div');
-            div.className = 'wallet-option';
-            div.dataset.wallet = key;
-            div.innerHTML = `<img src="${config.icon}" alt="${config.name}" /><span>${config.name}</span>`;
-            walletList.appendChild(div);
-          }
-        });
-        connectWalletModal.classList.remove('hidden');
-        modalOverlay.classList.remove('hidden');
-        document.getElementById('mobileInstructions').classList.toggle('hidden', !isMobile);
-      }
-
-      function closeModal() {
-        connectWalletModal.classList.add('hidden');
-        modalOverlay.classList.add('hidden');
-      }
-
-      connectWalletBtn.addEventListener('click', openModal);
-      closeBtn.addEventListener('click', closeModal);
-      modalOverlay.addEventListener('click', closeModal);
-
       // Обработка выбора кошелька
       document.addEventListener('click', (event) => {
         if (event.target.closest('.wallet-option')) {
+          console.log('Нажата опция кошелька');
           const option = event.target.closest('.wallet-option');
           const walletKey = option.getAttribute('data-wallet');
           const { isMobile } = device;
+          console.log(`Выбран кошелек: ${walletKey}, isMobile: ${isMobile}`);
           if (walletKey === 'walletconnect') {
             connectWithAdapter('walletconnect');
           } else if (isMobile && WALLET_CONFIG[walletKey].mobile) {
