@@ -133,6 +133,10 @@
       color: #dc3545;
     }
 
+    .wallet-status.mobile {
+      color: #4a90e2;
+    }
+
     @media (max-width: 394px) {
       .connect-wallet {
         width: 100vw;
@@ -218,12 +222,20 @@
       return { isMobile, os };
     }
 
-    // Проверка установки кошельков на десктопе
+    // Проверка установки кошельков
     function checkInstalledWallets() {
+      const { isMobile } = detectDevice();
       Object.keys(WALLET_CONFIG).forEach(walletKey => {
         const wallet = WALLET_CONFIG[walletKey];
         const statusElement = document.getElementById(`${walletKey}Status`);
-        if (statusElement) {
+        if (!statusElement) return;
+
+        if (isMobile) {
+          // На мобильных устройствах не проверяем установку
+          statusElement.textContent = 'Нажмите для подключения';
+          statusElement.className = 'wallet-status mobile';
+        } else {
+          // Проверка для десктопа
           const isInstalled = wallet.checkInstalled();
           statusElement.textContent = isInstalled ? 'Установлен' : 'Не установлен';
           statusElement.className = `wallet-status ${isInstalled ? 'installed' : 'not-installed'}`;
@@ -238,21 +250,32 @@
       
       const { isMobile, os } = detectDevice();
       if (!isMobile) return;
-      
+
       const currentUrl = encodeURIComponent(window.location.href);
-      const mobileConfig = wallet.mobile[os];
+      const mobileConfig = wallet.mobile;
       const deepLink = `${mobileConfig.scheme}${currentUrl}`;
       const universalLink = `${mobileConfig.universal}${currentUrl}`;
-      
+      const storeLink = mobileConfig.store[os];
+
       // Попытка открыть глубокую ссылку
+      const startTime = Date.now();
       window.location.href = deepLink;
-      
-      // Резервный переход по универсальной ссылке через 1 секунду
+
+      // Проверка, осталась ли страница активной через 2 секунды
       setTimeout(() => {
-        if (!document.hidden) {
+        if (!document.hidden && Date.now() - startTime > 1500) {
+          // Если глубокая ссылка не сработала, пробуем универсальную
           window.location.href = universalLink;
+          // Через 2 секунды предлагаем установить приложение
+          setTimeout(() => {
+            if (!document.hidden) {
+              if (confirm(`${wallet.name} не установлен. Перейти в магазин приложений?`)) {
+                window.location.href = storeLink;
+              }
+            }
+          }, 2000);
         }
-      }, 1000);
+      }, 2000);
     }
 
     // Подключение к кошельку на десктопе
@@ -285,7 +308,7 @@
     function openModal() {
       connectWalletModal.classList.remove('hidden');
       modalOverlay.classList.remove('hidden');
-      checkInstalledWallets(); // Проверяем установленные кошельки при открытии
+      checkInstalledWallets(); // Проверяем кошельки при открытии
     }
 
     function closeModal() {
@@ -311,7 +334,7 @@
       });
     });
 
-    // Проверка установленных кошельков при загрузке страницы
+    // Проверка кошельков при загрузке страницы
     document.addEventListener('DOMContentLoaded', checkInstalledWallets);
   </script>
 </body>
