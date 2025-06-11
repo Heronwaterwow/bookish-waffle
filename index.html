@@ -184,7 +184,7 @@
         <span>Coinbase Wallet</span>
       </div>
       <div class="wallet-option" data-wallet="safepal">
-        <img src="https://www.safepal.io/favicon.ico" alt="SafePal" />
+        <img src="https://www.safepal.com/favicon.ico" alt="SafePal" />
         <span>SafePal</span>
       </div>
       <div class="wallet-option" data-wallet="backpack">
@@ -200,7 +200,7 @@
         <span>Exodus</span>
       </div>
       <div class="wallet-option" data-wallet="bitget">
-        <img src="https://www.bitget.com/favicon.ico" alt="Bitget Wallet" />
+        <img src="https://web3.bitget.com/favicon.ico" alt="Bitget Wallet" />
         <span>Bitget Wallet</span>
       </div>
     </div>
@@ -212,8 +212,9 @@
       phantom: {
         name: 'Phantom',
         mobile: {
-          scheme: 'phantom://browse/',
-          universal: 'https://phantom.app/ul/browse/',
+          scheme: 'phantom://ul/v1/browse/',
+          universal: 'https://phantom.app/ul/v1/browse/',
+          requiresRef: true,
           store: {
             android: 'https://play.google.com/store/apps/details?id=app.phantom',
             ios: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
@@ -225,6 +226,7 @@
         mobile: {
           scheme: 'solflare://ul/v1/browse/',
           universal: 'https://solflare.com/ul/v1/browse/',
+          requiresRef: true,
           store: {
             android: 'https://play.google.com/store/apps/details?id=com.solflare.mobile',
             ios: 'https://apps.apple.com/app/solflare/id1580902717'
@@ -234,8 +236,9 @@
       trust: {
         name: 'Trust Wallet',
         mobile: {
-          scheme: 'trust://open_url?browser=',
-          universal: 'https://link.trustwallet.com/open_url?browser=',
+          scheme: 'trust://open_url?url=',
+          universal: 'https://link.trustwallet.com/open_url?url=',
+          requiresRef: false,
           store: {
             android: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp',
             ios: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
@@ -247,6 +250,7 @@
         mobile: {
           scheme: 'cbwallet://',
           universal: 'https://go.cb-w.com/',
+          requiresRef: false,
           store: {
             android: 'https://play.google.com/store/apps/details?id=org.toshi',
             ios: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455'
@@ -257,7 +261,8 @@
         name: 'SafePal',
         mobile: {
           scheme: 'safepal://',
-          universal: 'https://www.safepal.io/download',
+          universal: 'https://www.safepal.com/download',
+          requiresRef: false,
           store: {
             android: 'https://play.google.com/store/apps/details?id=io.safepal.wallet',
             ios: 'https://apps.apple.com/app/safepal-wallet/id1548297139'
@@ -269,9 +274,10 @@
         mobile: {
           scheme: 'backpack://',
           universal: 'https://backpack.app/',
+          requiresRef: false,
           store: {
-            android: 'https://play.google.com/store/apps/details?id=com.backpack',
-            ios: 'https://apps.apple.com/app/backpack/id6444008133'
+            android: 'https://play.google.com/store/apps/details?id=app.backpack',
+            ios: 'https://apps.apple.com/app/backpack-wallet/id6444008133'
           }
         }
       },
@@ -280,6 +286,7 @@
         mobile: {
           scheme: 'okx://wallet/',
           universal: 'https://www.okx.com/download',
+          requiresRef: false,
           store: {
             android: 'https://play.google.com/store/apps/details?id=com.okinc.okex',
             ios: 'https://apps.apple.com/app/okx/id1327268470'
@@ -291,6 +298,7 @@
         mobile: {
           scheme: 'exodus://',
           universal: 'https://www.exodus.com/mobile',
+          requiresRef: false,
           store: {
             android: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus',
             ios: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
@@ -300,11 +308,12 @@
       bitget: {
         name: 'Bitget Wallet',
         mobile: {
-          scheme: 'bitget://',
-          universal: 'https://www.bitget.com/wallet',
+          scheme: 'bitkeep://bkconnect?action=dapp&url=',
+          universal: 'https://bkcode.vip?action=dapp&url=',
+          requiresRef: false,
           store: {
-            android: 'https://play.google.com/store/apps/details?id=com.bitget.wallet',
-            ios: 'https://apps.apple.com/app/bitget-wallet/id1580953050'
+            android: 'https://play.google.com/store/apps/details?id=com.bitkeep.app',
+            ios: 'https://apps.apple.com/app/bitkeep-crypto-defi-wallet/id1395301115'
           }
         }
       }
@@ -331,8 +340,9 @@
       
       const currentUrl = encodeURIComponent(window.location.href);
       const mobileConfig = wallet.mobile;
-      const deepLink = `${mobileConfig.scheme}${currentUrl}`;
-      const universalLink = `${mobileConfig.universal}${currentUrl}`;
+      const refUrl = currentUrl;
+      const deepLink = mobileConfig.scheme + currentUrl + (mobileConfig.requiresRef ? '?ref=' + refUrl : '');
+      const universalLink = mobileConfig.universal + currentUrl + (mobileConfig.requiresRef ? '?ref=' + refUrl : '');
       const storeLink = mobileConfig.store[os];
 
       // Попытка открыть глубокую ссылку
@@ -363,6 +373,7 @@
     function openModal() {
       connectWalletModal.classList.remove('hidden');
       modalOverlay.classList.remove('hidden');
+      document.getElementById('mobileInstructions').classList.toggle('hidden', !detectDevice().isMobile);
     }
 
     function closeModal() {
