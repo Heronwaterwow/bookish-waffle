@@ -285,9 +285,10 @@
 
     // Определение устройства
     const device = {
-      isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-      os: /Android/i.test(navigator.userAgent) ? 'android' : /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'ios' : 'desktop'
+      isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile/i.test(navigator.userAgent),
+      os: /Android/i.test(navigator.userAgent) ? 'android' : /(iPhone|iPad|iPod)/i.test(navigator.userAgent) ? 'ios' : 'desktop'
     };
+    console.log('Устройство:', device);
 
     // Функция ожидания загрузки всех скриптов
     function waitForScripts(callback) {
@@ -348,18 +349,21 @@
       console.error('Кнопка connectWalletBtn не найдена');
     } else {
       connectWalletBtn.addEventListener('click', openModal);
+      connectWalletBtn.addEventListener('touchstart', openModal);
     }
 
     if (!closeBtn) {
       console.error('Кнопка закрытия не найдена');
     } else {
       closeBtn.addEventListener('click', closeModal);
+      closeBtn.addEventListener('touchstart', closeModal);
     }
 
     if (!modalOverlay) {
       console.error('Модальный оверлей не найден');
     } else {
       modalOverlay.addEventListener('click', closeModal);
+      modalOverlay.addEventListener('touchstart', closeModal);
     }
 
     // Инициализация адаптеров после загрузки скриптов
@@ -464,7 +468,7 @@
       }
 
       // Обработка выбора кошелька
-      document.addEventListener('click', (event) => {
+      function handleWalletSelection(event) {
         if (event.target.closest('.wallet-option')) {
           console.log('Нажата опция кошелька');
           const option = event.target.closest('.wallet-option');
@@ -480,7 +484,10 @@
           }
           closeModal();
         }
-      });
+      }
+
+      document.addEventListener('click', handleWalletSelection);
+      document.addEventListener('touchstart', handleWalletSelection);
     });
   </script>
 </body>
