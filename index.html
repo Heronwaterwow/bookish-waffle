@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,9 +7,6 @@
   
   <!-- Библиотека для определения устройства -->
   <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
-  
-  <!-- Solana Web3.js для десктопного подключения -->
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   
   <style>
     body {
@@ -120,21 +117,14 @@
       color: #333;
     }
 
-    .wallet-status {
-      font-size: 0.8rem;
-      margin-left: 10px;
-    }
-
-    .wallet-status.installed {
-      color: #28a745;
-    }
-
-    .wallet-status.not-installed {
-      color: #dc3545;
-    }
-
-    .wallet-status.mobile {
-      color: #4a90e2;
+    .mobile-instructions {
+      background: #e7f3ff;
+      border: 1px solid #b3d9ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      color: #0066cc;
     }
 
     @media (max-width: 394px) {
@@ -164,139 +154,112 @@
       <h2>Выберите кошелек</h2>
       <button class="close-btn" title="Закрыть">×</button>
     </div>
+    
+    <div id="mobileInstructions" class="mobile-instructions hidden">
+      <strong>📱 Инструкции для мобильных устройств:</strong><br>
+      1. Убедитесь, что приложение кошелька установлено<br>
+      2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
+    </div>
 
     <div class="wallet-list">
       <div class="wallet-option" data-wallet="phantom">
         <img src="https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png" alt="Phantom" />
         <span>Phantom</span>
-        <div class="wallet-status" id="phantomStatus">Проверка...</div>
       </div>
       <div class="wallet-option" data-wallet="solflare">
         <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
         <span>Solflare</span>
-        <div class="wallet-status" id="solflareStatus">Проверка...</div>
       </div>
     </div>
   </div>
 
   <script>
-    // Конфигурация кошельков
+    // Конфигурация кошельков с глубокими и универсальными ссылками
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
-          scheme: 'phantom://browse/',
-          universal: 'https://phantom.app/ul/browse/',
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=app.phantom',
-            ios: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
+          android: { 
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://play.google.com/store/apps/details?id=app.phantom'
+          },
+          ios: { 
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
           }
-        },
-        desktop: {
-          extensionUrl: 'https://chrome.google.com/webstore/detail/phantom/bfnaelmomeimhlpmgjnjophhpkkoljpa'
-        },
-        checkInstalled: () => !!window.phantom?.solana?.isPhantom
+        }
       },
       solflare: {
         name: 'Solflare',
         mobile: {
-          scheme: 'solflare://ul/v1/browse/',
-          universal: 'https://solflare.com/ul/v1/browse/',
-          store: {
-            android: 'https://play.google.com/store/apps/details?id=com.solflare.mobile',
-            ios: 'https://apps.apple.com/app/solflare/id1580902717'
+          android: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
+          },
+          ios: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://apps.apple.com/app/solflare/id1580902717'
           }
-        },
-        desktop: {
-          extensionUrl: 'https://chrome.google.com/webstore/detail/solflare-wallet/bhhhlbepdkbapadjdnnojkbgioiodbic'
-        },
-        checkInstalled: () => !!window.solflare?.isSolflare
+        }
       }
     };
 
     // Определение устройства
-    function detectDevice() {
-      const md = new MobileDetect(window.navigator.userAgent);
-      const isMobile = md.mobile() !== null;
-      const os = md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop';
-      return { isMobile, os };
-    }
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = {
+      isMobile: md.mobile() !== null,
+      os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
+    };
 
-    // Проверка установки кошельков
-    function checkInstalledWallets() {
-      const { isMobile } = detectDevice();
-      Object.keys(WALLET_CONFIG).forEach(walletKey => {
-        const wallet = WALLET_CONFIG[walletKey];
-        const statusElement = document.getElementById(`${walletKey}Status`);
-        if (!statusElement) return;
-
-        if (isMobile) {
-          // На мобильных устройствах не проверяем установку
-          statusElement.textContent = 'Нажмите для подключения';
-          statusElement.className = 'wallet-status mobile';
-        } else {
-          // Проверка для десктопа
-          const isInstalled = wallet.checkInstalled();
-          statusElement.textContent = isInstalled ? 'Установлен' : 'Не установлен';
-          statusElement.className = `wallet-status ${isInstalled ? 'installed' : 'not-installed'}`;
-        }
-      });
-    }
-
-    // Открытие глубоких ссылок для мобильных устройств
-    function openWalletDeepLink(walletKey) {
+    // Функция для создания ссылок для кошельков
+    function createWalletLink(walletKey) {
       const wallet = WALLET_CONFIG[walletKey];
-      if (!wallet) return;
+      if (!wallet || !device.isMobile) return null;
       
-      const { isMobile, os } = detectDevice();
-      if (!isMobile) return;
-
       const currentUrl = encodeURIComponent(window.location.href);
-      const mobileConfig = wallet.mobile;
-      const deepLink = `${mobileConfig.scheme}${currentUrl}`;
-      const universalLink = `${mobileConfig.universal}${currentUrl}`;
-      const storeLink = mobileConfig.store[os];
+      const platform = device.os;
+      const mobileConfig = wallet.mobile[platform];
+      
+      return {
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}?ref=${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}?ref=${currentUrl}`,
+        storeLink: mobileConfig.store
+      };
+    }
+
+    // Функция для открытия браузера кошелька
+    function openWallet(walletKey) {
+      const links = createWalletLink(walletKey);
+      if (!links) {
+        alert('Эта функция доступна только на мобильных устройствах.');
+        return;
+      }
 
       // Попытка открыть глубокую ссылку
-      const startTime = Date.now();
-      window.location.href = deepLink;
+      const deepLinkAnchor = document.createElement('a');
+      deepLinkAnchor.href = links.deepLink;
+      deepLinkAnchor.click();
 
-      // Проверка, осталась ли страница активной через 2 секунды
+      // Резервный переход по универсальной ссылке через 1.5 секунды
       setTimeout(() => {
-        if (!document.hidden && Date.now() - startTime > 1500) {
-          // Если глубокая ссылка не сработала, пробуем универсальную
-          window.location.href = universalLink;
-          // Через 2 секунды предлагаем установить приложение
+        if (!document.hidden) {
+          const universalLinkAnchor = document.createElement('a');
+          universalLinkAnchor.href = links.universalLink;
+          universalLinkAnchor.click();
+          // Если универсальная ссылка не сработала, предлагаем установить приложение
           setTimeout(() => {
             if (!document.hidden) {
-              if (confirm(`${wallet.name} не установлен. Перейти в магазин приложений?`)) {
-                window.location.href = storeLink;
+              if (confirm(`${WALLET_CONFIG[walletKey].name} не установлен. Перейти в магазин приложений?`)) {
+                window.location.href = links.storeLink;
               }
             }
           }, 2000);
         }
-      }, 2000);
-    }
-
-    // Подключение к кошельку на десктопе
-    async function connectWalletDesktop(walletKey) {
-      const wallet = WALLET_CONFIG[walletKey];
-      if (!wallet) return;
-      
-      const provider = walletKey === 'phantom' ? window.phantom?.solana : window.solflare;
-      if (!provider) {
-        alert(`Пожалуйста, установите ${wallet.name} расширение.`);
-        window.open(wallet.desktop.extensionUrl, '_blank');
-        return;
-      }
-      
-      try {
-        const response = await provider.connect();
-        console.log(`Подключено к ${wallet.name}:`, response.publicKey.toString());
-        // Здесь можно сохранить адрес кошелька и обновить UI
-      } catch (error) {
-        console.error(`Ошибка подключения к ${wallet.name}:`, error);
-      }
+      }, 1500);
     }
 
     // Управление модальным окном
@@ -308,7 +271,7 @@
     function openModal() {
       connectWalletModal.classList.remove('hidden');
       modalOverlay.classList.remove('hidden');
-      checkInstalledWallets(); // Проверяем кошельки при открытии
+      document.getElementById('mobileInstructions').classList.toggle('hidden', !device.isMobile);
     }
 
     function closeModal() {
@@ -324,18 +287,10 @@
     document.querySelectorAll('.wallet-option').forEach(option => {
       option.addEventListener('click', () => {
         const walletKey = option.getAttribute('data-wallet');
-        const { isMobile } = detectDevice();
-        if (isMobile) {
-          openWalletDeepLink(walletKey);
-        } else {
-          connectWalletDesktop(walletKey);
-        }
-        closeModal();
+        openWallet(walletKey);
+        setTimeout(closeModal, 1500); // Закрытие модального окна после попытки открытия
       });
     });
-
-    // Проверка кошельков при загрузке страницы
-    document.addEventListener('DOMContentLoaded', checkInstalledWallets);
   </script>
 </body>
 </html>
