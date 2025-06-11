@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Подключение к кошельку Solana</title>
+  <title>Подключение к Solana кошелькам</title>
   
   <!-- Библиотека для определения устройства -->
   <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.5/mobile-detect.min.js"></script>
@@ -142,12 +142,12 @@
 </head>
 <body>
   <!-- Кнопка для открытия модального окна -->
-  <button id="connectWalletBtn">Подключиться к кошельку</button>
+  <button id="connectWalletBtn">Подключить кошелек</button>
 
   <!-- Оверлей модального окна -->
   <div id="modalOverlay" class="modal-overlay hidden"></div>
 
-  <!-- Модальное окно подключения кошелька -->
+  <!-- Модальное окно выбора кошелька -->
   <div id="connectWalletModal" class="connect-wallet hidden">
     <div class="connect-header">
       <span></span>
@@ -156,7 +156,7 @@
     </div>
     
     <div id="mobileInstructions" class="mobile-instructions hidden">
-      <strong>📱 Инструкции для телефона:</strong><br>
+      <strong>📱 Инструкции для мобильных устройств:</strong><br>
       1. Убедитесь, что приложение кошелька установлено<br>
       2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
     </div>
@@ -174,20 +174,20 @@
   </div>
 
   <script>
-    // Конфигурация кошельков
+    // Конфигурация кошельков с глубокими и универсальными ссылками
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
-          android: { scheme: 'phantom://', universal: 'https://phantom.app/ul/browse/' },
-          ios: { scheme: 'phantom://', universal: 'https://phantom.app/ul/browse/' }
+          android: { scheme: 'phantom://', universal: 'https://phantom.app/ul/v1/browse/' },
+          ios: { scheme: 'phantom://', universal: 'https://phantom.app/ul/v1/browse/' }
         }
       },
       solflare: {
         name: 'Solflare',
         mobile: {
-          android: { scheme: 'solflare://', universal: 'https://solflare.com/ul/browse/' },
-          ios: { scheme: 'solflare://', universal: 'https://solflare.com/ul/browse/' }
+          android: { scheme: 'solflare://', universal: 'https://solflare.com/ul/v1/browse/' },
+          ios: { scheme: 'solflare://', universal: 'https://solflare.com/ul/v1/browse/' }
         }
       }
     };
@@ -199,7 +199,7 @@
       os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
     };
 
-    // Функция для создания ссылки на кошелек
+    // Функция для создания ссылок для кошельков
     function createWalletLink(walletKey) {
       const wallet = WALLET_CONFIG[walletKey];
       if (!wallet || !device.isMobile) return null;
@@ -209,22 +209,29 @@
       const mobileConfig = wallet.mobile[platform];
       
       return {
-        deepLink: `${mobileConfig.scheme}browse/${currentUrl}`,
-        universalLink: `${mobileConfig.universal}${currentUrl}`
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}?ref=${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}?ref=${currentUrl}`
       };
     }
 
-    // Функция для открытия кошелька
+    // Функция для открытия браузера кошелька
     function openWallet(walletKey) {
       const links = createWalletLink(walletKey);
-      if (!links) return;
+      if (!links) {
+        alert('Эта функция доступна только на мобильных устройствах.');
+        return;
+      }
 
-      // Сначала пытаемся открыть через deep link
-      window.location.href = links.deepLink;
+      // Попытка открыть глубокую ссылку
+      const deepLinkAnchor = document.createElement('a');
+      deepLinkAnchor.href = links.deepLink;
+      deepLinkAnchor.click();
 
-      // Через 1 секунду, если не сработало, используем universal link
+      // Резервный переход по универсальной ссылке через 1 секунду
       setTimeout(() => {
-        if (!document.hidden) window.location.href = links.universalLink;
+        if (!document.hidden) {
+          window.location.href = links.universalLink;
+        }
       }, 1000);
     }
 
@@ -253,13 +260,8 @@
     document.querySelectorAll('.wallet-option').forEach(option => {
       option.addEventListener('click', () => {
         const walletKey = option.getAttribute('data-wallet');
-        if (device.isMobile) {
-          openWallet(walletKey);
-          setTimeout(closeModal, 1500); // Закрываем модалку после попытки открытия
-        } else {
-          alert('Эта функция доступна только на мобильных устройствах.');
-          closeModal();
-        }
+        openWallet(walletKey);
+        setTimeout(closeModal, 1500); // Закрытие модального окна после попытки открытия
       });
     });
   </script>
