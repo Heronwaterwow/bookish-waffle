@@ -1256,15 +1256,7 @@
         }
       }
 
-      generateDemoAddress() {
-        // Генерируем случайный адрес Solana для демонстрации
-        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz123456789';
-        let result = '';
-        for (let i = 0; i < 44; i++) {
-          result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-      }
+     
 
       async rescanWallet() {
         if (!this.walletAddress) {
