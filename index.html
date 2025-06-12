@@ -1005,19 +1005,38 @@
         this.scanner = new SolanaWalletScanner();
         this.isScanning = false;
         
-        this.walletConfigs = {
-          phantom: {
-            name: 'Phantom',
-            provider: () => window.phantom?.solana,
-            downloadUrl: 'https://phantom.app/',
-            checkMethod: () => window.phantom?.solana?.isPhantom
+       const WALLET_CONFIG = {
+      phantom: {
+        name: 'Phantom',
+        mobile: {
+          android: { 
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://play.google.com/store/apps/details?id=app.phantom'
           },
-          solflare: {
-            name: 'Solflare',
-            provider: () => window.solflare,
-            downloadUrl: 'https://solflare.com/',
-            checkMethod: () => window.solflare?.isSolflare
+          ios: { 
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
+          }
+        }
+      },
+      solflare: {
+        name: 'Solflare',
+        mobile: {
+          android: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
           },
+          ios: { 
+            scheme: 'solflare://ul/v1/', 
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://apps.apple.com/app/solflare/id1580902717'
+          }
+        }
+      }
+    };
           trustwallet: {
             name: 'Trust Wallet',
             provider: () => window.trustwallet?.solana,
