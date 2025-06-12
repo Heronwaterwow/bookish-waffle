@@ -903,25 +903,43 @@
       }
     };
 
-    function isMobileDevice() {
-     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+
+     // Определение устройства
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = {
+      isMobile: md.mobile() !== null,
+      os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
+    };
+
+    // Функция для создания ссылок для кошельков
+    function createWalletLink(walletKey) {
+      const wallet = WALLET_CONFIG[walletKey];
+      if (!wallet || !device.isMobile) return null;
+      
+      const currentUrl = encodeURIComponent(window.location.href);
+      const platform = device.os;
+      const mobileConfig = wallet.mobile[platform];
+      
+      return {
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}?ref=${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}?ref=${currentUrl}`,
+        storeLink: mobileConfig.store
+      };
     }
 
-
-    // Get the mobile operating system
-    function getMobileOS() {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      
-      if (/android/i.test(userAgent)) {
-        return 'android';
-      }
-      
-      if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-        return 'ios';
-      }
-      
-      return 'unknown';
+    // Функция для открытия браузера кошелька
+    function openWallet(walletKey) {
+      const links = createWalletLink(walletKey);
+      if (!links) {
+        alert('Эта функция доступна только на мобильных устройствах.');
+        return;
     }
+
+      // Попытка открыть глубокую ссылку
+      const deepLinkAnchor = document.createElement('a');
+      deepLinkAnchor.href = links.deepLink;
+      deepLinkAnchor.click();
 
     // Handle deep linking to mobile wallet apps
     async function handleMobileWalletConnection(walletKey) {
@@ -1522,4 +1540,7 @@
     console.log('📱 Поддержка мобильных приложений Phantom и Solflare включена');
   </script>
 </body>
-</html>
+   </html>
+
+
+   
