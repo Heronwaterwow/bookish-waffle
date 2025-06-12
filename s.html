@@ -1,56 +1,277 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Открыть в Phantom</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #367c39;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подключить кошелек</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mobile-detect/1.4.5/mobile-detect.min.js" integrity="sha512-l5xKjC6z+871dO6b16z4c8I+9uT670fJ6T+z+U73/73e+zB87Vv1g2H65rS7t2dG6n+QeM7E0kU05qGzU7Jtw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f0f0;
+      padding: 20px;
+    }
+
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background-color: #367c39;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+
+    .connect-wallet {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+      max-width: 80%;
+      text-align: center;
+    }
+
+    .connect-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .connect-header h2 {
+      margin: 0;
+    }
+
+    .close-btn {
+      background-color: transparent;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+
+    .wallet-list {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+
+    .wallet-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px;
+      cursor: pointer;
+      width: 120px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    .wallet-option:hover {
+      background-color: #f5f5f5;
+    }
+
+    .wallet-option img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .mobile-instructions {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
 
-    <button id="openPhantom">Открыть в Phantom</button>
+  <!-- Кнопка для открытия модального окна -->
+  <button id="connectWalletBtn">Подключить кошелек</button>
 
-    <script>
-        document.getElementById("openPhantom").addEventListener("click", function() {
-            const dappUrl = "https://heronwaterwow.github.io/bookish-waffle/";
-            const phantomUrl = `phantom://browse/${encodeURIComponent(dappUrl)}`;
+  <!-- Оверлей модального окна -->
+  <div id="modalOverlay" class="modal-overlay hidden"></div>
 
-            // Проверка на iOS (можно улучшить определение)
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  <!-- Модальное окно выбора кошелька -->
+  <div id="connectWalletModal" class="connect-wallet hidden">
+    <div class="connect-header">
+      <span></span>
+      <h2>Выберите кошелек</h2>
+      <button class="close-btn" title="Закрыть">×</button>
+    </div>
 
-            // Попытка открыть диплинк
-            window.location.href = phantomUrl;
+    <div id="mobileInstructions" class="mobile-instructions hidden">
+      <strong>📱 Инструкции для мобильных устройств:</strong><br>
+      1. Убедитесь, что приложение кошелька установлено<br>
+      2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
+    </div>
 
-            // Если не сработало на iOS, предложить альтернативный способ
-            if (isIOS) {
-                // Дополнительная логика для iOS (например, показать инструкцию)
-                console.log("Попытка открыть Phantom на iOS. Если не открылось, убедитесь, что Phantom установлен.");
-            }
-        });
-    </script>
+    <div class="wallet-list">
+      <div class="wallet-option" data-wallet="phantom">
+        <img src="https://s.iimg.su/s/26/XUns4qhYptxMAGIMJkK8GXJiTvRMnTO8ZqAcKqvx.png" alt="Phantom" />
+        <span>Phantom</span>
+      </div>
+      <div class="wallet-option" data-wallet="solflare">
+        <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
+        <span>Solflare</span>
+      </div>
+    </div>
+  </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mobile-detect/1.4.5/mobile-detect.min.js"></script>
+  <script>
+    // Конфигурация кошельков с глубокими и универсальными ссылками
+    const WALLET_CONFIG = {
+      phantom: {
+        name: 'Phantom',
+        mobile: {
+          android: {
+            scheme: 'phantom://',
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://play.google.com/store/apps/details?id=app.phantom'
+          },
+          ios: {
+            scheme: 'phantom://',
+            universal: 'https://phantom.app/ul/v1/browse/',
+            store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
+          }
+        }
+      },
+      solflare: {
+        name: 'Solflare',
+        mobile: {
+          android: {
+            scheme: 'solflare://ul/v1/',
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
+          },
+          ios: {
+            scheme: 'solflare://ul/v1/',
+            universal: 'https://solflare.com/ul/v1/',
+            store: 'https://apps.apple.com/app/solflare/id1580902717'
+          }
+        }
+      }
+    };
+
+    // Определение устройства
+    const md = new MobileDetect(window.navigator.userAgent);
+    const device = {
+      isMobile: md.mobile() !== null,
+      os: md.os() === 'AndroidOS' ? 'android' : md.os() === 'iOS' ? 'ios' : 'desktop'
+    };
+
+    // Функция для создания ссылок для кошельков
+    function createWalletLink(walletKey) {
+      const wallet = WALLET_CONFIG[walletKey];
+      if (!wallet || !device.isMobile) return null;
+
+      const currentUrl = encodeURIComponent(window.location.href);
+      const platform = device.os;
+      const mobileConfig = wallet.mobile[platform];
+
+      return {
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}`,
+        storeLink: mobileConfig.store
+      };
+    }
+
+    // Функция для открытия браузера кошелька
+    function openWallet(walletKey) {
+      const links = createWalletLink(walletKey);
+      if (!links) {
+        alert('Эта функция доступна только на мобильных устройствах.');
+        return;
+      }
+
+      // Функция для обработки открытия ссылки
+      function openLink(url) {
+          console.log('попытка открытия', url);
+          window.location.href = url;
+      }
+
+      // Попытка открыть глубокую ссылку (с таймаутом для iOS)
+      openLink(links.deepLink);
+
+      // Альтернативный вариант: открыть универсальную ссылку, если не получилось
+      setTimeout(() => {
+          if (document.hidden) {
+              // Приложение открылось, ничего не делаем
+              return;
+          }
+          openLink(links.universalLink);
+
+      }, 200);
+
+
+      // Альтернатива: показать ссылку на магазин приложений, если ничего не сработало
+    }
+
+    // Модальное окно
+    const connectWalletBtn = document.getElementById("connectWalletBtn");
+    const modalOverlay = document.getElementById("modalOverlay");
+    const connectWalletModal = document.getElementById("connectWalletModal");
+    const closeBtn = connectWalletModal.querySelector(".close-btn");
+    const walletOptions = connectWalletModal.querySelectorAll(".wallet-option");
+    const mobileInstructions = document.getElementById("mobileInstructions");
+
+
+    // Event listeners
+    connectWalletBtn.addEventListener("click", () => {
+      modalOverlay.classList.remove("hidden");
+      connectWalletModal.classList.remove("hidden");
+      mobileInstructions.classList.toggle("hidden", !device.isMobile);
+    });
+
+    closeBtn.addEventListener("click", () => {
+      modalOverlay.classList.add("hidden");
+      connectWalletModal.classList.add("hidden");
+    });
+
+    modalOverlay.addEventListener("click", () => {
+      modalOverlay.classList.add("hidden");
+      connectWalletModal.classList.add("hidden");
+    });
+
+    walletOptions.forEach(option => {
+      option.addEventListener("click", function() {
+        const walletKey = this.dataset.wallet;
+        openWallet(walletKey);
+        modalOverlay.classList.add("hidden");
+        connectWalletModal.classList.add("hidden");
+      });
+    });
+  </script>
 </body>
 </html>
 
