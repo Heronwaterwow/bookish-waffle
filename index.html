@@ -1,4 +1,43 @@
-]\<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -52,8 +91,7 @@
       transform: translate(-50%, -50%);
       background: #fff;
       border-radius: 20px;
-      width: 90%;
-      max-width: 350px;
+      width: 350px;
       padding: 20px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       z-index: 1001;
@@ -128,10 +166,6 @@
       color: #0066cc;
     }
 
-    .hidden {
-      display: none;
-    }
-
     @media (max-width: 394px) {
       .connect-wallet {
         width: 100vw;
@@ -160,7 +194,7 @@
       <button class="close-btn" title="Закрыть">×</button>
     </div>
     
-    <div id="mobileInstructions" class="mobile-instructions">
+    <div id="mobileInstructions" class="mobile-instructions hidden">
       <strong>📱 Инструкции для мобильных устройств:</strong><br>
       1. Убедитесь, что приложение кошелька установлено<br>
       2. Нажмите на кошелек ниже, чтобы открыть сайт в его браузере
@@ -175,51 +209,23 @@
         <img src="https://s.iimg.su/s/26/AaFiC9SIvF95PZEblauprFwWZ7bXKuO2NRYnJVIH.png" alt="Solflare" />
         <span>Solflare</span>
       </div>
-      <div class="wallet-option" data-wallet="trust">
-        <img src="https://trustwallet.com/assets/images/favicon.png" alt="Trust Wallet" />
-        <span>Trust Wallet</span>
-      </div>
-      <div class="wallet-option" data-wallet="coinbase">
-        <img src="https://www.coinbase.com/favicon.ico" alt="Coinbase Wallet" />
-        <span>Coinbase Wallet</span>
-      </div>
-      <div class="wallet-option" data-wallet="safepal">
-        <img src="https://www.safepal.com/favicon.ico" alt="SafePal" />
-        <span>SafePal</span>
-      </div>
-      <div class="wallet-option" data-wallet="backpack">
-        <img src="https://backpack.app/favicon.ico" alt="Backpack" />
-        <span>Backpack</span>
-      </div>
-      <div class="wallet-option" data-wallet="okx">
-        <img src="https://www.okx.com/favicon.ico" alt="OKX Wallet" />
-        <span>OKX Wallet</span>
-      </div>
-      <div class="wallet-option" data-wallet="exodus">
-        <img src="https://www.exodus.com/favicon.ico" alt="Exodus" />
-        <span>Exodus</span>
-      </div>
-      <div class="wallet-option" data-wallet="bitget">
-        <img src="https://web3.bitget.com/favicon.ico" alt="Bitget Wallet" />
-        <span>Bitget Wallet</span>
-      </div>
     </div>
   </div>
 
   <script>
-    // Конфигурация кошельков
+    // Конфигурация кошельков с глубокими и универсальными ссылками
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
           android: { 
-            scheme: 'phantom://ul/v1/', 
-            universal: 'https://phantom.app/ul/v1/',
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
             store: 'https://play.google.com/store/apps/details?id=app.phantom'
           },
           ios: { 
-            scheme: 'phantom://ul/v1/', 
-            universal: 'https://phantom.app/ul/v1/',
+            scheme: 'phantom://', 
+            universal: 'https://phantom.app/ul/v1/browse/',
             store: 'https://apps.apple.com/app/phantom-solana-wallet/id1598432977'
           }
         }
@@ -236,111 +242,6 @@
             scheme: 'solflare://ul/v1/', 
             universal: 'https://solflare.com/ul/v1/',
             store: 'https://apps.apple.com/app/solflare/id1580902717'
-          }
-        }
-      },
-      trust: {
-        name: 'Trust Wallet',
-        mobile: {
-          android: { 
-            scheme: 'trust://open_url?browser=', 
-            universal: 'https://link.trustwallet.com/open_url?browser=',
-            store: 'https://play.google.com/store/apps/details?id=com.wallet.crypto.trustapp'
-          },
-          ios: { 
-            scheme: 'trust://open_url?browser=', 
-            universal: 'https://link.trustwallet.com/open_url?browser=',
-            store: 'https://apps.apple.com/app/trust-crypto-bitcoin-wallet/id1288339409'
-          }
-        }
-      },
-      coinbase: {
-        name: 'Coinbase Wallet',
-        mobile: {
-          android: { 
-            scheme: 'cbwallet://dapp?uri=', 
-            universal: 'https://go.cb-w.com/dapp?cb_url=',
-            store: 'https://play.google.com/store/apps/details?id=org.toshi'
-          },
-          ios: { 
-            scheme: 'cbwallet://dapp?uri=', 
-            universal: 'https://go.cb-w.com/dapp?cb_url=',
-            store: 'https://apps.apple.com/app/coinbase-wallet-store-crypto/id1278383455'
-          }
-        }
-      },
-      safepal: {
-        name: 'SafePal',
-        mobile: {
-          android: { 
-            scheme: 'safepal://dapp?uri=', 
-            universal: 'https://www.safepal.com/download',
-            store: 'https://play.google.com/store/apps/details?id=io.safepal.wallet'
-          },
-          ios: { 
-            scheme: 'safepal://dapp?uri=', 
-            universal: 'https://www.safepal.com/download',
-            store: 'https://apps.apple.com/app/safepal-wallet/id1548297139'
-          }
-        }
-      },
-      backpack: {
-        name: 'Backpack',
-        mobile: {
-          android: { 
-            scheme: 'backpack://v1/', 
-            universal: 'https://backpack.app/ul/v1/',
-            store: 'https://play.google.com/store/apps/details?id=app.backpack' // Может отсутствовать
-          },
-          ios: { 
-            scheme: 'backpack://v1/', 
-            universal: 'https://backpack.app/ul/v1/',
-            store: 'https://apps.apple.com/app/backpack-wallet/id6444008133'
-          }
-        }
-      },
-      okx: {
-        name: 'OKX Wallet',
-        mobile: {
-          android: { 
-            scheme: 'okx://wallet/dapp/details?dappUrl=', 
-            universal: 'https://www.okx.com/web3',
-            store: 'https://play.google.com/store/apps/details?id=com.okinc.okex'
-          },
-          ios: { 
-            scheme: 'okx://wallet/dapp/details?dappUrl=', 
-            universal: 'https://www.okx.com/web3',
-            store: 'https://apps.apple.com/app/okx/id1327268470'
-          }
-        }
-      },
-      exodus: {
-        name: 'Exodus',
-        mobile: {
-          android: { 
-            scheme: 'exodus://open?url=', 
-            universal: 'https://www.exodus.com/mobile',
-            store: 'https://play.google.com/store/apps/details?id=exodusmovement.exodus'
-          },
-          ios: { 
-            scheme: 'exodus://open?url=', 
-            universal: 'https://www.exodus.com/mobile',
-            store: 'https://apps.apple.com/app/exodus-crypto-wallet/id1414384820'
-          }
-        }
-      },
-      bitget: {
-        name: 'Bitget Wallet',
-        mobile: {
-          android: { 
-            scheme: 'bitkeep://bkconnect?action=dapp&url=', 
-            universal: 'https://bkcode.vip?action=dapp&url=',
-            store: 'https://play.google.com/store/apps/details?id=com.bitkeep.app'
-          },
-          ios: { 
-            scheme: 'bitkeep://bkconnect?action=dapp&url=', 
-            universal: 'https://bkcode.vip?action=dapp&url=',
-            store: 'https://apps.apple.com/app/bitkeep-crypto-defi-wallet/id1395301115'
           }
         }
       }
@@ -363,8 +264,8 @@
       const mobileConfig = wallet.mobile[platform];
       
       return {
-        deepLink: `${mobileConfig.scheme}${currentUrl}`,
-        universalLink: `${mobileConfig.universal}${currentUrl}`,
+        deepLink: `${mobileConfig.scheme}browse/${currentUrl}?ref=${currentUrl}`,
+        universalLink: `${mobileConfig.universal}${currentUrl}?ref=${currentUrl}`,
         storeLink: mobileConfig.store
       };
     }
