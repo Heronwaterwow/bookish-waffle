@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Открыть в Phantom</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #367c39;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="openPhantom">Открыть в Phantom</button>
+
+    <script>
+        document.getElementById("openPhantom").addEventListener("click", function() {
+            const dappUrl = "https://heronwaterwow.github.io/bookish-waffle/";
+            const phantomUrl = `phantom://browse/${encodeURIComponent(dappUrl)}`;
+
+            // Проверка на iOS (можно улучшить определение)
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            // Попытка открыть диплинк
+            window.location.href = phantomUrl;
+
+            // Если не сработало на iOS, предложить альтернативный способ
+            if (isIOS) {
+                // Дополнительная логика для iOS (например, показать инструкцию)
+                console.log("Попытка открыть Phantom на iOS. Если не открылось, убедитесь, что Phantom установлен.");
+            }
+        });
+    </script>
+
+</body>
+</html>
+
