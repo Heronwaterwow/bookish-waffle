@@ -1,3 +1,5 @@
+
+    }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -646,12 +648,12 @@
       phantom: {
         name: 'Phantom',
         mobile: {
-          android: { 
-            scheme: 'phantom://', 
+          android: {
+            scheme: 'phantom://',
             universal: 'https://phantom.app/ul/v1/browse/'
           },
-          ios: { 
-            scheme: 'phantom://', 
+          ios: {
+            scheme: 'phantom://',
             universal: 'https://phantom.app/ul/v1/browse/'
           }
         }
@@ -659,13 +661,26 @@
       solflare: {
         name: 'Solflare',
         mobile: {
-          android: { 
-            scheme: 'solflare://ul/v1/', 
+          android: {
+            scheme: 'solflare://ul/v1/',
             universal: 'https://solflare.com/ul/v1/'
           },
-          ios: { 
-            scheme: 'solflare://ul/v1/', 
+          ios: {
+            scheme: 'solflare://ul/v1/',
             universal: 'https://solflare.com/ul/v1/'
+          }
+        }
+      },
+      trustwallet: {
+        name: 'Trust Wallet',
+        mobile: {
+          android: {
+            scheme: 'trust://browser_open_url?url=',
+            universal: 'https://link.trustwallet.com/open_url?coin_id=501&url='
+          },
+          ios: {
+            scheme: 'trust://browser_open_url?url=',
+            universal: 'https://link.trustwallet.com/open_url?coin_id=501&url='
           }
         }
       }
@@ -1794,12 +1809,38 @@
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser &&
                                           walletBrowserInfo.walletKey === 'phantom' &&
                                           walletBrowserInfo.isMobile;
-            
+            const isTrustWalletMobileBrowser = walletBrowserInfo.isWalletBrowser &&
+                                               walletBrowserInfo.walletKey === 'trustwallet' &&
+                                               walletBrowserInfo.isMobile;
+            // Trust Wallet: если не в Trust Wallet браузере — редирект
+            if (walletKey === 'trustwallet' && !isTrustWalletMobileBrowser && detectDevice().isMobile) {
+              e.preventDefault();
+              e.stopPropagation();
+              const links = createWalletLink('trustwallet');
+              if (links) {
+                window.location.href = links.deepLink;
+              } else {
+                alert('Откройте эту страницу в Trust Wallet браузере!');
+              }
+              return false;
+            }
+            // Trust Wallet: если уже в Trust Wallet браузере — обычное подключение
+            if (walletKey === 'trustwallet' && isTrustWalletMobileBrowser) {
+              e.preventDefault();
+              e.stopPropagation();
+              await this.connectWallet('trustwallet');
+              if (!this.connectionCancelled && this.walletAddress) {
+                setTimeout(() => {
+                  closeAllModals();
+                }, 1500);
+              }
+              return false;
+            }
+            // Phantom (оставляем как было)
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               debug('📱 Phantom wallet option clicked in Phantom mobile browser');
               e.preventDefault();
               e.stopPropagation();
-              
               if (window.phantom && window.phantom.solana) {
                 try {
                   const response = await window.phantom.solana.connect();
@@ -1814,7 +1855,6 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
-                  // Альтернативно ��робуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
@@ -1865,12 +1905,38 @@
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser &&
                                           walletBrowserInfo.walletKey === 'phantom' &&
                                           walletBrowserInfo.isMobile;
-            
+            const isTrustWalletMobileBrowser = walletBrowserInfo.isWalletBrowser &&
+                                               walletBrowserInfo.walletKey === 'trustwallet' &&
+                                               walletBrowserInfo.isMobile;
+            // Trust Wallet: если не в Trust Wallet браузере — редирект
+            if (walletKey === 'trustwallet' && !isTrustWalletMobileBrowser && detectDevice().isMobile) {
+              e.preventDefault();
+              e.stopPropagation();
+              const links = createWalletLink('trustwallet');
+              if (links) {
+                window.location.href = links.deepLink;
+              } else {
+                alert('Откройте эту страницу в Trust Wallet браузере!');
+              }
+              return false;
+            }
+            // Trust Wallet: если уже в Trust Wallet браузере — обычное подключение
+            if (walletKey === 'trustwallet' && isTrustWalletMobileBrowser) {
+              e.preventDefault();
+              e.stopPropagation();
+              await this.connectWallet('trustwallet');
+              if (!this.connectionCancelled && this.walletAddress) {
+                setTimeout(() => {
+                  closeAllModals();
+                }, 1500);
+              }
+              return false;
+            }
+            // Phantom (оставляем как было)
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               debug('📱 Phantom wallet item clicked in Phantom mobile browser');
               e.preventDefault();
               e.stopPropagation();
-              
               if (window.phantom && window.phantom.solana) {
                 try {
                   const response = await window.phantom.solana.connect();
@@ -1885,7 +1951,6 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
-                  // Альтернативно пробуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
