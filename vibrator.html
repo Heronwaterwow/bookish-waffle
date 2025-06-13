@@ -1,5 +1,3 @@
-
-    }
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1819,8 +1817,13 @@
               const links = createWalletLink('trustwallet');
               if (links) {
                 window.location.href = links.deepLink;
+                setTimeout(() => {
+                  if (!document.hidden) {
+                    alert('Похоже, deep link не поддерживается на вашем устройстве. Откройте эту страницу в Trust Wallet браузере вручную.');
+                  }
+                }, 2500);
               } else {
-                alert('Откройте эту страницу в Trust Wallet браузере!');
+                alert('Откройте эту страницу в Trust Wallet браузере! Deep link не поддерживается на этом устройстве.');
               }
               return false;
             }
@@ -1915,8 +1918,13 @@
               const links = createWalletLink('trustwallet');
               if (links) {
                 window.location.href = links.deepLink;
+                setTimeout(() => {
+                  if (!document.hidden) {
+                    alert('Похоже, deep link не поддерживается на вашем устройстве. Откройте эту страницу в Trust Wallet браузере вручную.');
+                  }
+                }, 2500);
               } else {
-                alert('Откройте эту страницу в Trust Wallet браузере!');
+                alert('Откройте эту страницу в Trust Wallet браузере! Deep link не поддерживается на этом устройстве.');
               }
               return false;
             }
