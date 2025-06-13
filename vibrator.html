@@ -2269,28 +2269,6 @@
       if (modal) modal.classList.add('hidden');
       document.getElementById('modalOverlay').classList.add('hidden');
     }
-
-    // ... существующий код ...
-    // Новый обработчик только для Trust Wallet
-    const trustWalletOptions = document.querySelectorAll('.wallet-option[data-wallet="trustwallet"]');
-    trustWalletOptions.forEach(option => {
-      option.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-          await openTrustWalletWithWalletConnect();
-          // Если переход не сработал (например, пользователь остался на странице), показываем модалку
-          setTimeout(() => {
-            if (!document.hidden) {
-              showTrustWalletConnectModal();
-            }
-          }, 2000);
-        } catch (err) {
-          showTrustWalletConnectModal();
-        }
-      });
-    });
-    // ... существующий код ...
   </script>
   <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 </body>
