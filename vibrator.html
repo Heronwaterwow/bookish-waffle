@@ -1221,17 +1221,23 @@
           
           // Для мобильного браузера Phantom автоматически подключаемся без баннера
           if (walletBrowserInfo.walletKey === 'phantom' && walletBrowserInfo.isMobile) {
-            debug('📱 Detected Phantom mobile browser, auto-connecting...');
-            
-            // Добавляем задержку перед автоподключением, чтобы дать время Phantom инициализироваться
-            setTimeout(() => {
-              this.directPhantomMobileConnect().catch(err => {
-                debug('Auto-connect failed in Phantom mobile browser:', err);
-                
-                // Если автоподключение не удалось, показываем баннер
+            debug('📱 Detected Phantom mobile browser, waiting for Phantom object...');
+            let attempts = 0;
+            const maxAttempts = 10;
+            const interval = setInterval(() => {
+              attempts++;
+              if (window.phantom && window.phantom.solana) {
+                clearInterval(interval);
+                this.directPhantomMobileConnect().catch(err => {
+                  debug('Auto-connect failed in Phantom mobile browser:', err);
+                  showWalletBrowserBanner(walletBrowserInfo);
+                });
+              } else if (attempts >= maxAttempts) {
+                clearInterval(interval);
+                debug('❌ Phantom object not found after waiting');
                 showWalletBrowserBanner(walletBrowserInfo);
-              });
-            }, 1000); // Увеличиваем задержку до 1 секунды
+              }
+            }, 500);
           } else {
             // Для других браузеров показываем баннер
             showWalletBrowserBanner(walletBrowserInfo);
