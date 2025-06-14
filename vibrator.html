@@ -2169,8 +2169,8 @@
             showMathWalletModal();
           }
         } else if (device.isMobile) {
-          // Попытка диплинка
-          window.location.href = 'mathwallet://dapp?url=' + encodeURIComponent(window.location.href);
+          // Новый диплинк для открытия dApp в браузере MathWallet
+          window.location.href = 'mathwallet://mathwallet.org?action=link&value=' + encodeURIComponent(window.location.href);
           setTimeout(() => {
             showMathWalletModal();
           }, 2000);
